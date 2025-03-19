@@ -11,8 +11,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ current, total }) => {
   
   return (
     <div className="progress-container font-cairo" role="progressbar" aria-valuenow={current} aria-valuemin={0} aria-valuemax={total} dir="rtl">
-      <span className="progress-text">السؤال {current} من {total}</span>
-      <div className="progress-bar">
+      <span className="progress-text dark:text-slate-400">السؤال {current} من {total}</span>
+      <div className="progress-bar dark:bg-gray-700">
         <div className="progress-fill" style={{ width: `${progress}%` }}></div>
       </div>
     </div>

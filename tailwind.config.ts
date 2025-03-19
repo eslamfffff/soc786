@@ -128,6 +128,11 @@ export default {
 			},
 			transitionProperty: {
 				'size': 'height, width',
+			},
+			backgroundImage: {
+				'gradient-blue': 'linear-gradient(90deg, hsla(221, 45%, 73%, 1) 0%, hsla(220, 78%, 29%, 1) 100%)',
+				'gradient-warm': 'linear-gradient(90deg, hsla(39, 100%, 77%, 1) 0%, hsla(22, 90%, 57%, 1) 100%)',
+				'gradient-green': 'linear-gradient(90deg, hsla(139, 70%, 75%, 1) 0%, hsla(63, 90%, 76%, 1) 100%)',
 			}
 		}
 	},

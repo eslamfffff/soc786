@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +40,93 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-football {
+  background: linear-gradient(135deg, #2c5364, #203a43, #0f2027);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+.bg-gradient-pitch {
+  background: linear-gradient(135deg, #134e5e, #71b280);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.dark body {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.dark .quiz-card {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+.dark .quiz-option {
+  background-color: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.dark .option-letter {
+  background-color: #333;
+  color: #ccc;
+}
+
+.dark .quiz-option-active {
+  border-color: rgba(59, 130, 246, 0.3);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.dark .progress-bar {
+  background-color: #333;
+}
+
+.dark .quiz-option-correct {
+  background-color: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #4ade80;
+}
+
+.dark .quiz-option-incorrect {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.dark .bg-white,
+.dark .bg-slate-50 {
+  background-color: #1e1e1e;
+}
+
+.dark .text-slate-800 {
+  color: #e0e0e0;
+}
+
+.dark .text-slate-500,
+.dark .text-slate-600 {
+  color: #9ca3af;
+}
+
+.dark .border-slate-100 {
+  border-color: #333;
+}
+
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
 }
