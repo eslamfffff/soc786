@@ -7,8 +7,8 @@ interface ScoreDisplayProps {
 
 const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => {
   return (
-    <div className="score-display">
-      <span className="text-slate-500">Score:</span> <span className="text-primary font-semibold">{score}</span>
+    <div className="score-display" dir="rtl">
+      <span className="text-slate-500">النقاط:</span> <span className="text-primary font-semibold">{score}</span>
     </div>
   );
 };
