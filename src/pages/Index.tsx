@@ -20,14 +20,14 @@ const Index = () => {
 
   const getBackgroundClass = () => {
     return theme === 'dark' 
-      ? 'bg-gradient-football dark'
-      : 'bg-gradient-pitch';
+      ? 'bg-gradient-football dark football-bg-dark'
+      : 'bg-gradient-pitch football-bg-light';
   };
 
   if (!gameStarted) {
     return (
       <div className={`min-h-screen ${getBackgroundClass()} flex flex-col items-center justify-center p-4 transition-colors duration-500`}>
-        <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-lg max-w-md w-full p-8 text-center animate-scale-in dark:text-white dark:border dark:border-gray-700">
+        <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-lg max-w-md w-full p-8 text-center animate-scale-in dark:text-white dark:border dark:border-gray-700 backdrop-blur-sm bg-opacity-90 dark:bg-opacity-80">
           <h1 className="text-3xl font-bold mb-2 text-slate-800 dark:text-slate-100 font-cairo">اختبار كرة القدم</h1>
           <p className="text-slate-500 dark:text-slate-400 mb-6 font-cairo">اختبر معلوماتك في كرة القدم مع اختبارنا التفاعلي!</p>
           
