@@ -1,10 +1,13 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cairo:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -13,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -30,24 +33,17 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221.2 83.2% 53.3%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -79,14 +75,6 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -96,6 +84,111 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
+  }
+}
+
+@layer components {
+  .quiz-option {
+    @apply relative px-6 py-4 border rounded-lg bg-white shadow-sm hover:shadow-md 
+           transition-all duration-300 ease-out cursor-pointer select-none
+           hover:translate-y-[-2px] flex items-center transform-gpu;
+  }
+  
+  .quiz-option-active {
+    @apply border-primary/30 bg-primary/5;
+  }
+  
+  .quiz-option-correct {
+    @apply bg-quiz-correct border-green-500/30 text-green-800;
+  }
+  
+  .quiz-option-incorrect {
+    @apply bg-quiz-incorrect border-red-500/30 text-red-800;
+  }
+  
+  .quiz-container {
+    @apply max-w-4xl mx-auto px-4 md:px-6 pb-10 pt-6 flex flex-col min-h-[85vh];
+  }
+  
+  .quiz-card {
+    @apply bg-white shadow-lg rounded-2xl p-6 md:p-8 relative overflow-hidden
+           transition-all duration-500 ease-in-out border border-slate-100;
+  }
+
+  .option-letter {
+    @apply flex items-center justify-center w-8 h-8 rounded-full 
+           bg-slate-100 text-slate-600 font-medium mr-3 flex-shrink-0
+           transition-colors duration-300;
+  }
+  
+  .quiz-header {
+    @apply text-center mb-8;
+  }
+  
+  .quiz-question {
+    @apply text-xl md:text-2xl font-medium leading-tight text-slate-800 mb-6;
+  }
+  
+  .timer-container {
+    @apply w-full flex items-center justify-center mb-6;
+  }
+  
+  .timer-bar {
+    @apply h-2 bg-blue-100 rounded-full overflow-hidden w-full max-w-xs relative;
+  }
+  
+  .timer-progress {
+    @apply absolute top-0 left-0 h-full bg-quiz-timer rounded-full;
+  }
+  
+  .next-button {
+    @apply bg-primary text-white font-medium py-3 px-6 rounded-lg
+           transition-all duration-300 ease-out shadow-sm hover:shadow-md
+           hover:translate-y-[-2px] focus:outline-none focus:ring-2 focus:ring-primary/20
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0;
+  }
+  
+  .progress-container {
+    @apply flex items-center mb-6 px-1;
+  }
+  
+  .progress-text {
+    @apply text-sm text-slate-500;
+  }
+  
+  .progress-bar {
+    @apply flex-1 h-1.5 bg-slate-100 rounded-full mx-3 overflow-hidden;
+  }
+  
+  .progress-fill {
+    @apply h-full bg-primary/80 rounded-full transition-all duration-700 ease-out;
+  }
+  
+  .score-display {
+    @apply text-right text-sm font-medium text-slate-700;
+  }
+  
+  .game-over-container {
+    @apply text-center p-8 flex flex-col items-center;
+  }
+  
+  .result-heading {
+    @apply text-3xl font-bold mb-4 text-slate-800;
+  }
+  
+  .result-score {
+    @apply text-5xl font-bold mb-6 text-primary;
+  }
+  
+  .restart-button {
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-3 px-6 
+           rounded-lg transition-all duration-300 ease-out mt-4;
   }
 }
