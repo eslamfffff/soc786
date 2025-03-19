@@ -42,7 +42,10 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({
       className={cn(
         'quiz-option animate-fade-in',
         getOptionClass(),
-        disabled ? 'pointer-events-none' : ''
+        disabled ? 'pointer-events-none' : '',
+        isRevealed && !isCorrect ? 'opacity-50 scale-90' : '',
+        isRevealed && isCorrect ? 'scale-100' : '',
+        'hover:shadow-glow hover:scale-105 transition-all duration-300'
       )}
       onClick={disabled ? undefined : onClick}
       role="button"
@@ -57,7 +60,7 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({
       )}>
         {letter}
       </span>
-      <span className="option-text">{text}</span>
+      <span className="option-text font-cairo">{text}</span>
     </div>
   );
 };

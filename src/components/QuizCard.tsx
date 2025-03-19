@@ -114,7 +114,8 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
     <div className="quiz-container">
       <div className={cn(
         "quiz-card", 
-        isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
+        isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0",
+        "transition-all duration-500 ease-in-out"
       )}>
         <div className="quiz-header">
           <div className="flex justify-between mb-2">
@@ -128,7 +129,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
           />
         </div>
         
-        <h2 className="quiz-question">{question.question}</h2>
+        <h2 className="quiz-question font-cairo" dir="rtl">{question.question}</h2>
         
         <div className="space-y-3">
           {question.options.map((option, index) => (
@@ -150,9 +151,9 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
             <Button 
               onClick={handleNextQuestion}
               size="lg"
-              className="next-button"
+              className="next-button font-cairo"
             >
-              {currentQuestion + 1 >= questions.length ? "Finish Quiz" : "Next Question"}
+              {currentQuestion + 1 >= questions.length ? "إنهاء الإختبار" : "السؤال التالي"}
             </Button>
           </div>
         )}
