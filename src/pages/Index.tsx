@@ -42,6 +42,12 @@ export default function Index() {
           onBackToCategories={handleBackToCategories}
         />
       )}
+      
+      <div className="hidden md:block fixed bottom-0 left-0 right-0 bg-black/10 dark:bg-black/40 backdrop-blur-sm py-2 text-center">
+        <p className="text-sm text-slate-700 dark:text-slate-300">
+          Developed by Islam Farid Ahmed
+        </p>
+      </div>
     </div>
   );
 }

@@ -6,24 +6,27 @@ export interface Category {
   description: string;
   backgroundColor: string;
   darkBackgroundColor: string;
+  questionCount: number;
 }
 
 const categories: Category[] = [
   {
     id: "football",
     name: "كرة القدم",
-    icon: "🏟️",
+    icon: "⚽",
     description: "اختبر معلوماتك في كرة القدم!",
     backgroundColor: "football-bg-light",
-    darkBackgroundColor: "football-bg-dark"
+    darkBackgroundColor: "football-bg-dark",
+    questionCount: 25
   },
   {
     id: "islam",
     name: "الدراسات الإسلامية",
-    icon: "📖",
+    icon: "🕌",
     description: "اختبر معلوماتك في العلوم الإسلامية!",
     backgroundColor: "islam-bg-light",
-    darkBackgroundColor: "islam-bg-dark"
+    darkBackgroundColor: "islam-bg-dark",
+    questionCount: 10
   },
   {
     id: "science",
@@ -31,7 +34,8 @@ const categories: Category[] = [
     icon: "🔬",
     description: "اختبر معلوماتك العلمية!",
     backgroundColor: "science-bg-light",
-    darkBackgroundColor: "science-bg-dark"
+    darkBackgroundColor: "science-bg-dark",
+    questionCount: 10
   }
 ];
 

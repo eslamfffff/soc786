@@ -122,6 +122,60 @@
   }
 }
 
+/* Button and interactive elements enhancements */
+.touch-friendly {
+  min-width: 60px;
+  min-height: 60px;
+}
+
+/* Enhanced hover effects */
+.quiz-option:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.dark .quiz-option:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-color: rgba(79, 150, 255, 0.7);
+}
+
+/* Developer attribution */
+.developer-attribution {
+  font-size: 14px;
+  color: rgba(100, 116, 139, 0.8);
+  text-align: center;
+  padding: 12px 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 50;
+}
+
+.dark .developer-attribution {
+  color: rgba(148, 163, 184, 0.8);
+  background-color: rgba(15, 23, 42, 0.3);
+  border-color: rgba(51, 65, 85, 0.3);
+}
+
+/* Ensure text readability in all contexts */
+@media (prefers-contrast: more) {
+  .dark body,
+  .dark .quiz-question,
+  .dark .quiz-option {
+    color: white;
+  }
+  
+  body,
+  .quiz-question,
+  .quiz-option {
+    color: black;
+  }
+}
+
 /* Base dark mode overrides */
 .dark body {
   background-color: #121212;

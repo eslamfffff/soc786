@@ -9,7 +9,9 @@ import { calculateScore } from '@/utils/gameUtils';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Question } from '@/data/questions';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home } from 'lucide-react';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import categories from '@/data/categories';
 
 interface QuizCardProps {
   questions: Question[];
@@ -31,6 +33,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
   const [isAnimating, setIsAnimating] = useState(false);
 
   const question = questions[currentQuestion];
+  const category = categories.find(cat => cat.id === categoryId);
 
   const handleAnswerSelect = (index: number) => {
     if (selectedAnswer !== null || !isTimerActive) return;
@@ -97,6 +100,16 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
     return (
       <div className="quiz-container">
         <div className="quiz-card dark:bg-slate-800 dark:border-slate-700">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="absolute top-4 left-4 font-cairo flex items-center gap-2 text-base"
+            onClick={onBackToCategories}
+          >
+            <ArrowLeft size={16} />
+            <span dir="rtl">العودة للفئات</span>
+          </Button>
+          
           <GameOver 
             score={score} 
             totalQuestions={questions.length} 
@@ -104,6 +117,12 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
             onBackToCategories={onBackToCategories}
             categoryId={categoryId}
           />
+          
+          <footer className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
+            <p className="text-slate-600 dark:text-slate-400 text-sm">
+              Developed by Islam Farid Ahmed
+            </p>
+          </footer>
         </div>
       </div>
     );
@@ -116,17 +135,46 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
         isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0",
         "transition-all duration-500 ease-in-out"
       )}>
+        <div className="mb-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  onBackToCategories(); 
+                }}>
+                  <Home className="h-4 w-4 mr-2" />
+                  <span>الرئيسية</span>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  onBackToCategories(); 
+                }}>
+                  {category?.name}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>سؤال {currentQuestion + 1}/{questions.length}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+
         <Button 
-          variant="ghost" 
-          size="sm" 
-          className="absolute top-4 left-4 font-cairo flex items-center gap-2"
+          variant="outline" 
+          size="lg" 
+          className="absolute top-4 left-4 font-cairo flex items-center gap-2 text-base min-h-[60px] min-w-[60px]"
           onClick={onBackToCategories}
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={18} />
           <span dir="rtl">العودة للفئات</span>
         </Button>
         
-        <div className="quiz-header">
+        <div className="quiz-header mt-10">
           <div className="flex justify-between mb-2">
             <ProgressBar current={currentQuestion + 1} total={questions.length} />
             <ScoreDisplay score={score} />
@@ -138,9 +186,9 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
           />
         </div>
         
-        <h2 className="quiz-question font-cairo dark:text-slate-100" dir="rtl">{question.question}</h2>
+        <h2 className="quiz-question font-cairo dark:text-slate-100 text-2xl md:text-3xl mt-6" dir="rtl">{question.question}</h2>
         
-        <div className="space-y-3">
+        <div className="space-y-4 mt-8">
           {question.options.map((option, index) => (
             <AnswerOption
               key={index}
@@ -160,12 +208,18 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
             <Button 
               onClick={handleNextQuestion}
               size="lg"
-              className="next-button font-cairo"
+              className="next-button font-cairo text-lg py-6 min-h-[60px] min-w-[180px]"
             >
               {currentQuestion + 1 >= questions.length ? "إنهاء الإختبار" : "السؤال التالي"}
             </Button>
           </div>
         )}
+        
+        <footer className="mt-10 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
+          <p className="text-slate-600 dark:text-slate-400 text-sm">
+            Developed by Islam Farid Ahmed
+          </p>
+        </footer>
       </div>
     </div>
   );
