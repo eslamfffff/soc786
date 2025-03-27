@@ -1,65 +1,44 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import questions from '@/data/questions';
-import QuizCard from '@/components/QuizCard';
-import { getRandomQuestions } from '@/utils/gameUtils';
-import { useTheme } from '@/hooks/useTheme';
+import { useState } from "react";
+import { questions } from "@/data/questions";
+import QuizCard from "@/components/QuizCard";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
 
-const Index = () => {
-  const [gameStarted, setGameStarted] = useState(false);
-  const [selectedQuestions, setSelectedQuestions] = useState<typeof questions>([]);
+export default function Index() {
+  const [showQuiz, setShowQuiz] = useState(false);
   const { theme } = useTheme();
-  
-  const startGame = () => {
-    // Select 10 random questions
-    const randomQuestions = getRandomQuestions(questions, 10);
-    setSelectedQuestions(randomQuestions);
-    setGameStarted(true);
-  };
-
-  const getBackgroundClass = () => {
-    return theme === 'dark' 
-      ? 'bg-gradient-football dark football-bg-dark'
-      : 'bg-gradient-pitch football-bg-light';
-  };
-
-  if (!gameStarted) {
-    return (
-      <div className={`min-h-screen ${getBackgroundClass()} flex flex-col items-center justify-center p-4 transition-colors duration-500`}>
-        <div className="bg-white dark:bg-[#1e1e1e] rounded-2xl shadow-lg max-w-md w-full p-8 text-center animate-scale-in dark:text-white dark:border dark:border-gray-700 backdrop-blur-sm bg-opacity-90 dark:bg-opacity-80">
-          <h1 className="text-3xl font-bold mb-2 text-slate-800 dark:text-slate-100 font-cairo">اختبار كرة القدم</h1>
-          <p className="text-slate-500 dark:text-slate-400 mb-6 font-cairo">اختبر معلوماتك في كرة القدم مع اختبارنا التفاعلي!</p>
-          
-          <div className="space-y-6 mb-8">
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-right">
-              <h3 className="font-medium text-blue-700 dark:text-blue-300 mb-2 font-cairo">كيفية اللعب</h3>
-              <ul className="space-y-2 text-sm text-blue-700/80 dark:text-blue-300/80 font-cairo">
-                <li>• الإجابة على 10 أسئلة عن كرة القدم</li>
-                <li>• اكسب نقاط للإجابات الصحيحة</li>
-                <li>• الإجابات السريعة تحصل على نقاط إضافية</li>
-                <li>• حاول تحطيم أعلى النتائج!</li>
-              </ul>
-            </div>
-          </div>
-          
-          <Button 
-            onClick={startGame}
-            size="lg"
-            className="bg-primary hover:bg-primary/90 text-white px-8 py-6 w-full text-lg font-cairo"
-          >
-            ابدأ الاختبار
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className={`min-h-screen ${getBackgroundClass()} py-8 transition-colors duration-500`}>
-      <QuizCard questions={selectedQuestions} />
+    <div className={`min-h-screen ${theme === 'dark' ? 'football-bg-dark' : 'football-bg-light'} pb-10 transition-colors duration-300`}>
+      <ThemeToggle />
+      
+      {!showQuiz ? (
+        <div className="container max-w-4xl mx-auto px-4 md:px-6 pt-20 flex flex-col items-center justify-center min-h-[80vh]">
+          <div className="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-8 md:p-10 w-full max-w-lg backdrop-blur-sm border border-slate-100 dark:border-slate-700 animate-fade-in transition-colors">
+            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center font-cairo" dir="rtl">
+              اختبار كرة القدم
+            </h1>
+            <p className="text-slate-600 dark:text-slate-300 mb-8 text-center font-cairo" dir="rtl">
+              اختبر معلوماتك في كرة القدم مع هذا الاختبار المكون من {questions.length} سؤال!
+            </p>
+            
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowQuiz(true)}
+                className="bg-primary text-white font-medium py-3 px-8 rounded-lg
+                          transition-all duration-300 ease-out shadow-sm hover:shadow-md
+                          hover:translate-y-[-2px] focus:outline-none focus:ring-2 focus:ring-primary/20
+                          text-lg font-cairo"
+              >
+                ابدأ الاختبار
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <QuizCard questions={questions} />
+      )}
     </div>
   );
-};
-
-export default Index;
+}
