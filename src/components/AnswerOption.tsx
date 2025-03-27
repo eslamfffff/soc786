@@ -45,7 +45,7 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({
         disabled ? 'pointer-events-none' : '',
         isRevealed && !isCorrect ? 'opacity-50 scale-90' : '',
         isRevealed && isCorrect ? 'scale-100' : '',
-        'hover:shadow-glow hover:scale-105 transition-all duration-300'
+        'hover:shadow-glow hover:scale-105 hover:bg-quiz-hover transition-all duration-300'
       )}
       onClick={disabled ? undefined : onClick}
       role="button"
@@ -55,12 +55,12 @@ const AnswerOption: React.FC<AnswerOptionProps> = ({
       <span className={cn(
         'option-letter',
         isSelected && !isRevealed ? 'bg-primary/20 text-primary' : '',
-        isRevealed && isCorrect ? 'bg-green-100 text-green-700' : '',
-        isRevealed && isSelected && !isCorrect ? 'bg-red-100 text-red-700' : ''
+        isRevealed && isCorrect ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200' : '',
+        isRevealed && isSelected && !isCorrect ? 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200' : ''
       )}>
         {letter}
       </span>
-      <span className="option-text font-cairo">{text}</span>
+      <span className="option-text font-cairo text-slate-800 dark:text-slate-100">{text}</span>
     </div>
   );
 };
