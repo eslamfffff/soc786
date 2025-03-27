@@ -8,21 +8,18 @@ import GameOver from './GameOver';
 import { calculateScore } from '@/utils/gameUtils';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-interface Question {
-  id: number;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
+import { Question } from '@/data/questions';
+import { ArrowLeft } from 'lucide-react';
 
 interface QuizCardProps {
   questions: Question[];
+  categoryId: string;
+  onBackToCategories: () => void;
 }
 
 const QUESTION_TIME = 15; // seconds per question
 
-const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
+const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCategories }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isRevealed, setIsRevealed] = useState(false);
@@ -103,7 +100,9 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
           <GameOver 
             score={score} 
             totalQuestions={questions.length} 
-            onRestart={handleRestart} 
+            onRestart={handleRestart}
+            onBackToCategories={onBackToCategories}
+            categoryId={categoryId}
           />
         </div>
       </div>
@@ -113,10 +112,20 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
   return (
     <div className="quiz-container">
       <div className={cn(
-        "quiz-card dark:bg-slate-800 dark:border-slate-700", 
+        "quiz-card dark:bg-slate-800 dark:border-slate-700",
         isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0",
         "transition-all duration-500 ease-in-out"
       )}>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="absolute top-4 left-4 font-cairo flex items-center gap-2"
+          onClick={onBackToCategories}
+        >
+          <ArrowLeft size={16} />
+          <span dir="rtl">العودة للفئات</span>
+        </Button>
+        
         <div className="quiz-header">
           <div className="flex justify-between mb-2">
             <ProgressBar current={currentQuestion + 1} total={questions.length} />
