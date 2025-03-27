@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { questions } from "@/data/questions";
+import questions from "@/data/questions";
 import QuizCard from "@/components/QuizCard";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
