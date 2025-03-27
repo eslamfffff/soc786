@@ -16,7 +16,7 @@ export default function Index() {
       {!showQuiz ? (
         <div className="container max-w-4xl mx-auto px-4 md:px-6 pt-20 flex flex-col items-center justify-center min-h-[80vh]">
           <div className="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-8 md:p-10 w-full max-w-lg backdrop-blur-sm border border-slate-100 dark:border-slate-700 animate-fade-in transition-colors">
-            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center font-cairo" dir="rtl">
+            <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center font-cairo text-slate-800 dark:text-slate-100" dir="rtl">
               اختبار كرة القدم
             </h1>
             <p className="text-slate-600 dark:text-slate-300 mb-8 text-center font-cairo" dir="rtl">
@@ -29,7 +29,8 @@ export default function Index() {
                 className="bg-primary text-white font-medium py-3 px-8 rounded-lg
                           transition-all duration-300 ease-out shadow-sm hover:shadow-md
                           hover:translate-y-[-2px] focus:outline-none focus:ring-2 focus:ring-primary/20
-                          text-lg font-cairo"
+                          dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90
+                          dark:focus:ring-primary/30 text-lg font-cairo"
               >
                 ابدأ الاختبار
               </button>

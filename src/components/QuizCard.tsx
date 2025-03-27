@@ -99,7 +99,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
   if (isGameOver) {
     return (
       <div className="quiz-container">
-        <div className="quiz-card h-full">
+        <div className="quiz-card dark:bg-slate-800 dark:border-slate-700">
           <GameOver 
             score={score} 
             totalQuestions={questions.length} 
@@ -113,7 +113,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
   return (
     <div className="quiz-container">
       <div className={cn(
-        "quiz-card", 
+        "quiz-card dark:bg-slate-800 dark:border-slate-700", 
         isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0",
         "transition-all duration-500 ease-in-out"
       )}>
@@ -129,7 +129,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions }) => {
           />
         </div>
         
-        <h2 className="quiz-question font-cairo" dir="rtl">{question.question}</h2>
+        <h2 className="quiz-question font-cairo dark:text-slate-100" dir="rtl">{question.question}</h2>
         
         <div className="space-y-3">
           {question.options.map((option, index) => (
