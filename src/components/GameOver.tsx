@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import categories from '@/data/categories';
 import { Badge } from '@/components/ui/badge';
+import { saveLevelCompletion, isLevelUnlocked, getUnlockThreshold } from '@/utils/progressUtils';
+import { useToast } from '@/hooks/use-toast';
 
 interface GameOverProps {
   score: number;
@@ -22,13 +24,38 @@ const GameOver: React.FC<GameOverProps> = ({
   categoryId,
   levelId = 'beginner'
 }) => {
+  const { toast } = useToast();
   const percentage = Math.round((score / (totalQuestions * 100)) * 100);
   const category = categories.find(cat => cat.id === categoryId);
   const level = category?.levels.find(lvl => lvl.id === levelId);
   
-  // Determine if next level should be unlocked
-  const passThreshold = 70; // 70% to pass
+  // Determine threshold for next level
+  let nextLevelId: string | null = null;
+  if (levelId === 'beginner') nextLevelId = 'intermediate';
+  else if (levelId === 'intermediate') nextLevelId = 'advanced';
+  
+  // Get requirement for next level
+  const passThreshold = getUnlockThreshold(nextLevelId || '');  
   const passed = percentage >= passThreshold;
+  
+  // Save the result
+  React.useEffect(() => {
+    // Only save if it's a valid level and category
+    if (categoryId && levelId) {
+      saveLevelCompletion(categoryId, levelId, percentage);
+      
+      // Show toast notification for level unlock
+      if (passed && nextLevelId) {
+        const nextLevelName = nextLevelId === 'intermediate' ? 'المتوسط' : 'المتقدم';
+        
+        toast({
+          title: "🎉 مبروك!",
+          description: `لقد فتحت المستوى ${nextLevelName}!`,
+          variant: "default",
+        });
+      }
+    }
+  }, [categoryId, levelId, percentage, passed, nextLevelId]);
   
   let feedbackMessage = '';
   let feedbackClass = '';
@@ -111,7 +138,7 @@ const GameOver: React.FC<GameOverProps> = ({
           {feedbackMessage}
         </p>
         
-        {passed && levelId === 'beginner' && (
+        {passed && nextLevelId === 'intermediate' && (
           <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
             <p className="text-green-800 dark:text-green-200 font-cairo text-lg" dir="rtl">
               🎉 مبروك! لقد اجتزت هذا المستوى وتم فتح المستوى المتوسط!
@@ -119,7 +146,7 @@ const GameOver: React.FC<GameOverProps> = ({
           </div>
         )}
         
-        {passed && levelId === 'intermediate' && (
+        {passed && nextLevelId === 'advanced' && (
           <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
             <p className="text-green-800 dark:text-green-200 font-cairo text-lg" dir="rtl">
               🎉 مبروك! لقد اجتزت هذا المستوى وتم فتح المستوى المتقدم!
@@ -127,7 +154,7 @@ const GameOver: React.FC<GameOverProps> = ({
           </div>
         )}
         
-        {passed && levelId === 'advanced' && (
+        {passed && !nextLevelId && (
           <div className="mt-4 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
             <p className="text-green-800 dark:text-green-200 font-cairo text-lg" dir="rtl">
               🏆 مبروك! لقد اجتزت جميع المستويات بنجاح!

@@ -9,9 +9,10 @@ import { calculateScore } from '@/utils/gameUtils';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Question } from '@/data/questions';
-import { ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft, Home, AlertTriangle } from 'lucide-react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import categories from '@/data/categories';
+import { useToast } from '@/hooks/use-toast';
 
 interface QuizCardProps {
   questions: Question[];
@@ -19,22 +20,67 @@ interface QuizCardProps {
   onBackToCategories: () => void;
 }
 
-const QUESTION_TIME = 15; // seconds per question
-
 const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCategories }) => {
+  const { toast } = useToast();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isRevealed, setIsRevealed] = useState(false);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [showNextButton, setShowNextButton] = useState(false);
   const [isTimerActive, setIsTimerActive] = useState(true);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  // Get question time based on level
+  const getQuestionTime = (level?: string) => {
+    if (!level) return 15; // default
+    switch (level) {
+      case 'beginner': return 15;
+      case 'intermediate': return 12;
+      case 'advanced': return 10;
+      default: return 15;
+    }
+  };
+
+  useEffect(() => {
+    if (questions.length === 0) {
+      setIsLoading(true);
+      setHasError(false);
+      
+      // Simulate trying to load questions
+      const timer = setTimeout(() => {
+        if (questions.length === 0) {
+          setHasError(true);
+          toast({
+            title: "خطأ في تحميل الأسئلة",
+            description: "فشل في تحميل الأسئلة. يرجى المحاولة مرة أخرى.",
+            variant: "destructive",
+          });
+        } else {
+          setIsLoading(false);
+        }
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoading(false);
+      setHasError(false);
+      
+      // Set timer based on difficulty level
+      const questionTime = getQuestionTime(questions[0]?.level);
+      setTimeLeft(questionTime);
+    }
+  }, [questions]);
 
   const question = questions[currentQuestion];
   const category = categories.find(cat => cat.id === categoryId);
   const level = question?.level ? category?.levels.find(lvl => lvl.id === question.level) : null;
+  
+  // Calculate time per question based on level
+  const QUESTION_TIME = getQuestionTime(question?.level);
 
   const handleAnswerSelect = (index: number) => {
     if (selectedAnswer !== null || !isTimerActive) return;
@@ -56,6 +102,21 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
       setScore((prevScore) => prevScore + pointsEarned);
     }
     
+    // Show feedback toast for incorrect answers
+    if (!isCorrect) {
+      toast({
+        title: "إجابة خاطئة",
+        description: question.explanation || "الإجابة الصحيحة هي: " + question.options[question.correctAnswer],
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "إجابة صحيحة!",
+        description: question.explanation || "أحسنت!",
+        variant: "default",
+      });
+    }
+    
     // Reveal correct answer
     setIsRevealed(true);
     
@@ -70,6 +131,13 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
       setIsTimerActive(false);
       setIsRevealed(true);
       setShowNextButton(true);
+      
+      // Show time up message
+      toast({
+        title: "انتهى الوقت!",
+        description: "الإجابة الصحيحة هي: " + question.options[question.correctAnswer],
+        variant: "destructive",
+      });
     }
   };
 
@@ -85,7 +153,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
         setIsRevealed(false);
         setShowNextButton(false);
         setIsTimerActive(true);
-        setTimeLeft(QUESTION_TIME);
+        setTimeLeft(getQuestionTime(questions[currentQuestion + 1]?.level));
         setIsAnimating(false);
       }
     }, 500);
@@ -96,11 +164,15 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
     setSelectedAnswer(null);
     setIsRevealed(false);
     setScore(0);
-    setTimeLeft(QUESTION_TIME);
+    setTimeLeft(getQuestionTime(questions[0]?.level));
     setShowNextButton(false);
     setIsTimerActive(true);
     setIsGameOver(false);
     setIsAnimating(false);
+  };
+
+  const handleRetry = () => {
+    onBackToCategories();
   };
 
   const getLevelBadgeColor = () => {
@@ -139,9 +211,55 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
           
           <footer className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
             <p className="text-slate-600 dark:text-slate-400 text-sm">
-              Developed by Islam Farid Ahmed
+              Engineered by Islam Farid Ahmed
             </p>
           </footer>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="quiz-container">
+        <div className="quiz-card dark:bg-slate-800 dark:border-slate-700 flex flex-col items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mb-4"></div>
+          <p className="text-xl font-cairo text-slate-800 dark:text-slate-200" dir="rtl">
+            جاري تحميل الأسئلة...
+          </p>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mt-4 font-cairo flex items-center gap-2"
+            onClick={onBackToCategories}
+          >
+            <ArrowLeft size={16} />
+            <span dir="rtl">العودة للمستويات</span>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError || questions.length === 0) {
+    return (
+      <div className="quiz-container">
+        <div className="quiz-card dark:bg-slate-800 dark:border-slate-700 flex flex-col items-center justify-center min-h-[400px]">
+          <AlertTriangle className="h-16 w-16 text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold font-cairo text-slate-800 dark:text-slate-200 mb-2" dir="rtl">
+            خطأ في تحميل الأسئلة
+          </h2>
+          <p className="text-lg font-cairo text-slate-700 dark:text-slate-300 mb-6 text-center max-w-md" dir="rtl">
+            لم نتمكن من تحميل الأسئلة. يرجى المحاولة مرة أخرى.
+          </p>
+          <Button 
+            variant="default" 
+            size="lg" 
+            className="font-cairo"
+            onClick={handleRetry}
+          >
+            إعادة المحاولة
+          </Button>
         </div>
       </div>
     );
@@ -247,7 +365,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
         
         <footer className="mt-10 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
           <p className="text-slate-600 dark:text-slate-400 text-sm">
-            Developed by Islam Farid Ahmed
+            Engineered by Islam Farid Ahmed
           </p>
         </footer>
       </div>
