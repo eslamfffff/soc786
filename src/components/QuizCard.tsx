@@ -34,6 +34,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
 
   const question = questions[currentQuestion];
   const category = categories.find(cat => cat.id === categoryId);
+  const level = question?.level ? category?.levels.find(lvl => lvl.id === question.level) : null;
 
   const handleAnswerSelect = (index: number) => {
     if (selectedAnswer !== null || !isTimerActive) return;
@@ -41,9 +42,15 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
     setSelectedAnswer(index);
     setIsTimerActive(false);
     
-    // Calculate score based on remaining time
+    // Calculate score based on remaining time and level
     const isCorrect = index === question.correctAnswer;
-    const pointsEarned = calculateScore(isCorrect, timeLeft, QUESTION_TIME);
+    
+    // Base points by difficulty level
+    let basePoints = 100; // default
+    if (question.level === 'intermediate') basePoints = 150;
+    if (question.level === 'advanced') basePoints = 200;
+    
+    const pointsEarned = calculateScore(isCorrect, timeLeft, QUESTION_TIME, basePoints);
     
     if (pointsEarned > 0) {
       setScore((prevScore) => prevScore + pointsEarned);
@@ -96,6 +103,17 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
     setIsAnimating(false);
   };
 
+  const getLevelBadgeColor = () => {
+    if (!level) return "";
+    
+    switch(level.id) {
+      case 'beginner': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200';
+      case 'intermediate': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200';
+      case 'advanced': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200';
+      default: return '';
+    }
+  };
+
   if (isGameOver) {
     return (
       <div className="quiz-container">
@@ -107,7 +125,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
             onClick={onBackToCategories}
           >
             <ArrowLeft size={16} />
-            <span dir="rtl">العودة للفئات</span>
+            <span dir="rtl">العودة للمستويات</span>
           </Button>
           
           <GameOver 
@@ -116,6 +134,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
             onRestart={handleRestart}
             onBackToCategories={onBackToCategories}
             categoryId={categoryId}
+            levelId={question?.level}
           />
           
           <footer className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
@@ -144,7 +163,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
                   onBackToCategories(); 
                 }}>
                   <Home className="h-4 w-4 mr-2" />
-                  <span>الرئيسية</span>
+                  <span>المستويات</span>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -154,6 +173,17 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
                   onBackToCategories(); 
                 }}>
                   {category?.name}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  onBackToCategories(); 
+                }}>
+                  <span className={cn("px-2 py-0.5 rounded text-xs", getLevelBadgeColor())}>
+                    {level?.icon} {level?.name}
+                  </span>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -171,7 +201,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
           onClick={onBackToCategories}
         >
           <ArrowLeft size={18} />
-          <span dir="rtl">العودة للفئات</span>
+          <span dir="rtl">العودة للمستويات</span>
         </Button>
         
         <div className="quiz-header mt-10">

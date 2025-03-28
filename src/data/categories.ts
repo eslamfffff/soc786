@@ -6,7 +6,18 @@ export interface Category {
   description: string;
   backgroundColor: string;
   darkBackgroundColor: string;
+  levels: Level[];
+}
+
+export interface Level {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  darkColor: string;
   questionCount: number;
+  isLocked: boolean;
 }
 
 const categories: Category[] = [
@@ -17,7 +28,38 @@ const categories: Category[] = [
     description: "اختبر معلوماتك في كرة القدم!",
     backgroundColor: "football-bg-light",
     darkBackgroundColor: "football-bg-dark",
-    questionCount: 25
+    levels: [
+      {
+        id: "beginner",
+        name: "المبتدئ",
+        description: "أسئلة سهلة لمن بدأ للتو التعرف على كرة القدم",
+        icon: "🥉",
+        color: "bg-green-100 dark:bg-green-900/30",
+        darkColor: "dark:bg-green-900/30",
+        questionCount: 10,
+        isLocked: false
+      },
+      {
+        id: "intermediate",
+        name: "المتوسط",
+        description: "أسئلة متوسطة الصعوبة لمحبي كرة القدم",
+        icon: "🥈",
+        color: "bg-blue-100 dark:bg-blue-900/30",
+        darkColor: "dark:bg-blue-900/30",
+        questionCount: 10,
+        isLocked: true
+      },
+      {
+        id: "advanced",
+        name: "المتقدم",
+        description: "أسئلة صعبة لخبراء كرة القدم",
+        icon: "🥇",
+        color: "bg-red-100 dark:bg-red-900/30",
+        darkColor: "dark:bg-red-900/30",
+        questionCount: 5,
+        isLocked: true
+      }
+    ]
   },
   {
     id: "islam",
@@ -26,7 +68,38 @@ const categories: Category[] = [
     description: "اختبر معلوماتك في العلوم الإسلامية!",
     backgroundColor: "islam-bg-light",
     darkBackgroundColor: "islam-bg-dark",
-    questionCount: 10
+    levels: [
+      {
+        id: "beginner",
+        name: "المبتدئ",
+        description: "أسئلة سهلة في العلوم الإسلامية الأساسية",
+        icon: "🥉",
+        color: "bg-green-100 dark:bg-green-900/30",
+        darkColor: "dark:bg-green-900/30",
+        questionCount: 10,
+        isLocked: false
+      },
+      {
+        id: "intermediate",
+        name: "المتوسط",
+        description: "أسئلة متوسطة الصعوبة في العلوم الإسلامية",
+        icon: "🥈",
+        color: "bg-blue-100 dark:bg-blue-900/30",
+        darkColor: "dark:bg-blue-900/30",
+        questionCount: 0,
+        isLocked: true
+      },
+      {
+        id: "advanced",
+        name: "المتقدم",
+        description: "أسئلة متقدمة للمتخصصين في العلوم الإسلامية",
+        icon: "🥇",
+        color: "bg-red-100 dark:bg-red-900/30",
+        darkColor: "dark:bg-red-900/30",
+        questionCount: 0,
+        isLocked: true
+      }
+    ]
   },
   {
     id: "science",
@@ -35,7 +108,38 @@ const categories: Category[] = [
     description: "اختبر معلوماتك العلمية!",
     backgroundColor: "science-bg-light",
     darkBackgroundColor: "science-bg-dark",
-    questionCount: 10
+    levels: [
+      {
+        id: "beginner",
+        name: "المبتدئ",
+        description: "أسئلة علمية سهلة للمبتدئين",
+        icon: "🥉",
+        color: "bg-green-100 dark:bg-green-900/30",
+        darkColor: "dark:bg-green-900/30",
+        questionCount: 10,
+        isLocked: false
+      },
+      {
+        id: "intermediate",
+        name: "المتوسط",
+        description: "أسئلة علمية متوسطة الصعوبة",
+        icon: "🥈",
+        color: "bg-blue-100 dark:bg-blue-900/30",
+        darkColor: "dark:bg-blue-900/30",
+        questionCount: 0,
+        isLocked: true
+      },
+      {
+        id: "advanced",
+        name: "المتقدم",
+        description: "أسئلة علمية متقدمة للخبراء",
+        icon: "🥇",
+        color: "bg-red-100 dark:bg-red-900/30",
+        darkColor: "dark:bg-red-900/30",
+        questionCount: 0,
+        isLocked: true
+      }
+    ]
   }
 ];
 

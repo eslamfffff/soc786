@@ -1,23 +1,35 @@
 
 import { useState } from "react";
-import { getQuestionsByCategory } from "@/data/questions";
+import { getQuestionsByCategoryAndLevel } from "@/data/questions";
 import categories from "@/data/categories";
 import QuizCard from "@/components/QuizCard";
 import CategorySelection from "@/components/CategorySelection";
+import LevelSelection from "@/components/LevelSelection";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 
 export default function Index() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const { theme } = useTheme();
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
+    setSelectedLevel(null);
+  };
+
+  const handleLevelSelect = (categoryId: string, levelId: string) => {
+    setSelectedLevel(levelId);
   };
 
   const handleBackToCategories = () => {
     setSelectedCategory(null);
+    setSelectedLevel(null);
+  };
+
+  const handleBackToLevels = () => {
+    setSelectedLevel(null);
   };
 
   const getBackgroundClass = () => {
@@ -29,17 +41,32 @@ export default function Index() {
     return theme === 'dark' ? category.darkBackgroundColor : category.backgroundColor;
   };
 
+  const getCurrentCategory = () => {
+    if (!selectedCategory) return null;
+    return categories.find(cat => cat.id === selectedCategory) || null;
+  };
+
   return (
     <div className={`min-h-screen ${getBackgroundClass()} pb-10 transition-colors duration-300`}>
       <ThemeToggle />
       
-      {!selectedCategory ? (
+      {!selectedCategory && (
         <CategorySelection onCategorySelect={handleCategorySelect} />
-      ) : (
-        <QuizCard 
-          questions={getQuestionsByCategory(selectedCategory)} 
-          categoryId={selectedCategory}
+      )}
+
+      {selectedCategory && !selectedLevel && getCurrentCategory() && (
+        <LevelSelection 
+          category={getCurrentCategory()!}
+          onLevelSelect={handleLevelSelect}
           onBackToCategories={handleBackToCategories}
+        />
+      )}
+      
+      {selectedCategory && selectedLevel && (
+        <QuizCard 
+          questions={getQuestionsByCategoryAndLevel(selectedCategory, selectedLevel)} 
+          categoryId={selectedCategory}
+          onBackToCategories={handleBackToLevels}
         />
       )}
       
@@ -50,4 +77,4 @@ export default function Index() {
       </div>
     </div>
   );
-}
+};
