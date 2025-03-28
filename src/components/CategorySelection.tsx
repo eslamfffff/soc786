@@ -5,6 +5,7 @@ import categories, { Category } from '@/data/categories';
 import { cn } from '@/lib/utils';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Home } from 'lucide-react';
+import { getQuestionsByCategory } from '@/data/questions';
 
 interface CategorySelectionProps {
   onCategorySelect: (categoryId: string) => void;
@@ -32,30 +33,34 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
       </h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {categories.map((category) => (
-          <Card 
-            key={category.id}
-            className={cn(
-              "overflow-hidden border-2 transition-all duration-300",
-              "hover:shadow-xl hover:scale-105 cursor-pointer min-h-[200px]",
-              "dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
-            )}
-            onClick={() => onCategorySelect(category.id)}
-          >
-            <CardHeader className="pb-2">
-              <div className="text-5xl mb-3 text-center">{category.icon}</div>
-              <CardTitle className="text-center font-cairo text-2xl">{category.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-center font-cairo dark:text-slate-300 text-lg" dir="rtl">
-                {category.description}
-              </CardDescription>
-              <div className="mt-3 text-sm font-medium text-center text-slate-600 dark:text-slate-400">
-                {category.questionCount} سؤال
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {categories.map((category) => {
+          const questionCount = getQuestionsByCategory(category.id).length;
+          
+          return (
+            <Card 
+              key={category.id}
+              className={cn(
+                "overflow-hidden border-2 transition-all duration-300",
+                "hover:shadow-xl hover:scale-105 cursor-pointer min-h-[200px]",
+                "dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+              )}
+              onClick={() => onCategorySelect(category.id)}
+            >
+              <CardHeader className="pb-2">
+                <div className="text-5xl mb-3 text-center">{category.icon}</div>
+                <CardTitle className="text-center font-cairo text-2xl">{category.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-center font-cairo dark:text-slate-300 text-lg" dir="rtl">
+                  {category.description}
+                </CardDescription>
+                <div className="mt-3 text-sm font-medium text-center text-slate-600 dark:text-slate-400">
+                  {questionCount} سؤال
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <div className="mt-8 text-center">
