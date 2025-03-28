@@ -23,5 +23,6 @@ export const getQuestionsByCategoryAndLevel = (categoryId: string, levelId: stri
   );
 };
 
-export { Question } from './types';
+// Use 'export type' instead of 're-export' to fix the TS1205 error
+export type { Question } from './types';
 export default questions;
