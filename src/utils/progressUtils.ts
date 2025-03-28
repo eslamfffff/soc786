@@ -1,6 +1,7 @@
 
 import { shuffleArray } from './gameUtils';
 import CryptoJS from 'crypto-js';
+import { Question } from '@/data/questions/types';
 
 // Secret key for encrypting progress data (in a real app, this should be a server-side secret)
 const SECRET_KEY = 'lovable-quiz-app-secret-key';
@@ -96,14 +97,90 @@ export const saveLevelCompletion = (
   }
 };
 
+// Helper function to get questions based on difficulty
+const getQuestionsByDifficulty = (
+  questions: Question[],
+  difficultyRange: { min: number, max: number }
+): Question[] => {
+  return questions.filter(q => {
+    const difficulty = q.difficulty || 2; // Default to medium if not specified
+    return difficulty >= difficultyRange.min && difficulty <= difficultyRange.max;
+  });
+};
+
+// Get balanced questions by difficulty
+const getBalancedQuestions = (
+  questions: Question[],
+  level: string,
+  count: number
+): Question[] => {
+  // Define difficulty distributions for each level
+  const distributions = {
+    beginner: [
+      { range: { min: 1, max: 1.5 }, percentage: 0.6 }, // 60% easy
+      { range: { min: 1.6, max: 2.4 }, percentage: 0.4 }, // 40% medium
+      { range: { min: 2.5, max: 3 }, percentage: 0 }     // 0% hard
+    ],
+    intermediate: [
+      { range: { min: 1, max: 1.5 }, percentage: 0.2 },  // 20% easy
+      { range: { min: 1.6, max: 2.4 }, percentage: 0.6 }, // 60% medium
+      { range: { min: 2.5, max: 3 }, percentage: 0.2 }   // 20% hard
+    ],
+    advanced: [
+      { range: { min: 1, max: 1.5 }, percentage: 0 },    // 0% easy
+      { range: { min: 1.6, max: 2.4 }, percentage: 0.3 }, // 30% medium
+      { range: { min: 2.5, max: 3 }, percentage: 0.7 }   // 70% hard
+    ]
+  };
+
+  // Get the distribution for the specified level
+  const levelDistribution = distributions[level as keyof typeof distributions] || distributions.intermediate;
+  
+  // Calculate how many questions we need from each difficulty range
+  const questionCounts = levelDistribution.map(d => Math.round(count * d.percentage));
+  
+  // Make sure the total is correct (might be off by 1 due to rounding)
+  const totalCalculated = questionCounts.reduce((sum, current) => sum + current, 0);
+  if (totalCalculated < count) {
+    // Add the missing question to the medium difficulty
+    questionCounts[1] += (count - totalCalculated);
+  } else if (totalCalculated > count) {
+    // Remove extra questions from the medium difficulty if possible
+    if (questionCounts[1] > 0) {
+      questionCounts[1] -= (totalCalculated - count);
+    }
+  }
+
+  // Get questions for each difficulty range
+  const selectedQuestions: Question[] = [];
+  
+  levelDistribution.forEach((distribution, index) => {
+    if (questionCounts[index] > 0) {
+      const questionsInRange = getQuestionsByDifficulty(questions, distribution.range);
+      const shuffled = shuffleArray(questionsInRange);
+      selectedQuestions.push(...shuffled.slice(0, questionCounts[index]));
+    }
+  });
+  
+  // If we don't have enough questions, just get random ones to fill the quota
+  if (selectedQuestions.length < count) {
+    const remaining = shuffleArray(questions).filter(
+      q => !selectedQuestions.map(sq => sq.id).includes(q.id)
+    );
+    selectedQuestions.push(...remaining.slice(0, count - selectedQuestions.length));
+  }
+  
+  return shuffleArray(selectedQuestions);
+};
+
 // Get a set of unique questions that haven't been shown to the user yet
 export const getUniqueQuestions = (
-  questions: any[],
+  questions: Question[],
   categoryId: string,
   levelId: string,
   count: number,
   progress: UserProgress = loadProgress()
-): any[] => {
+): Question[] => {
   // Initialize usedQuestionIds for this category/level if it doesn't exist
   if (!progress.usedQuestionIds[categoryId]) {
     progress.usedQuestionIds[categoryId] = {};
@@ -125,8 +202,8 @@ export const getUniqueQuestions = (
     saveProgress(progress);
   }
   
-  // Shuffle and select the requested number of questions
-  const selectedQuestions = shuffleArray(availableQuestions).slice(0, count);
+  // Get balanced questions based on difficulty
+  const selectedQuestions = getBalancedQuestions(availableQuestions, levelId, count);
   
   // Mark these questions as used
   const questionIds = selectedQuestions.map(q => q.id);

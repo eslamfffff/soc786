@@ -42,11 +42,13 @@ export default function Index() {
 
     setSelectedLevel(levelId);
     
-    // Get non-repeating questions for this level
+    // Get non-repeating questions for this level with dynamic difficulty balancing
     const allLevelQuestions = getQuestionsByCategoryAndLevel(categoryId, levelId);
+    
+    // Determine questions per session based on level
     const questionsPerSession = levelId === 'beginner' ? 10 : levelId === 'intermediate' ? 12 : 15;
     
-    // Use our utility to get unique questions
+    // Use our utility to get unique questions with balanced difficulty
     const uniqueQuestions = getUniqueQuestions(
       allLevelQuestions,
       categoryId,
