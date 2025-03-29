@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AnswerOption from './AnswerOption';
 import Timer from './Timer';
 import ProgressBar from './ProgressBar';
@@ -73,7 +72,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
       const questionTime = getQuestionTime(questions[0]?.level);
       setTimeLeft(questionTime);
     }
-  }, [questions]);
+  }, [questions, toast]);
 
   const question = questions[currentQuestion];
   const category = categories.find(cat => cat.id === categoryId);
@@ -81,6 +80,22 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
   
   // Calculate time per question based on level
   const QUESTION_TIME = getQuestionTime(question?.level);
+
+  // Memoize handleTimeUp to prevent unnecessary re-renders
+  const handleTimeUp = useCallback(() => {
+    if (selectedAnswer === null) {
+      setIsTimerActive(false);
+      setIsRevealed(true);
+      setShowNextButton(true);
+      
+      // Show time up message
+      toast({
+        title: "انتهى الوقت!",
+        description: "الإجابة الصحيحة هي: " + question?.options[question?.correctAnswer],
+        variant: "destructive",
+      });
+    }
+  }, [selectedAnswer, question, toast]);
 
   const handleAnswerSelect = (index: number) => {
     if (selectedAnswer !== null || !isTimerActive) return;
@@ -124,21 +139,6 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
     setTimeout(() => {
       setShowNextButton(true);
     }, 2000);
-  };
-
-  const handleTimeUp = () => {
-    if (selectedAnswer === null) {
-      setIsTimerActive(false);
-      setIsRevealed(true);
-      setShowNextButton(true);
-      
-      // Show time up message
-      toast({
-        title: "انتهى الوقت!",
-        description: "الإجابة الصحيحة هي: " + question.options[question.correctAnswer],
-        variant: "destructive",
-      });
-    }
   };
 
   const handleNextQuestion = () => {

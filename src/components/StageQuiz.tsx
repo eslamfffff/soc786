@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AnswerOption from './AnswerOption';
 import Timer from './Timer';
 import ProgressBar from './ProgressBar';
@@ -81,13 +80,29 @@ const StageQuiz: React.FC<StageQuizProps> = ({
       const questionTime = getQuestionTime(stage.level);
       setTimeLeft(questionTime);
     }
-  }, [questions, stage.level]);
+  }, [questions, stage.level, toast]);
 
   const question = questions[currentQuestion];
   const category = categories.find(cat => cat.id === categoryId);
   
   // Calculate time per question based on level
   const QUESTION_TIME = getQuestionTime(stage.level);
+
+  // Memoize handleTimeUp to prevent unnecessary re-renders
+  const handleTimeUp = useCallback(() => {
+    if (selectedAnswer === null) {
+      setIsTimerActive(false);
+      setIsRevealed(true);
+      setShowNextButton(true);
+      
+      // Show time up message
+      toast({
+        title: "انتهى الوقت!",
+        description: "الإجابة الصحيحة هي: " + question.options[question.correctAnswer],
+        variant: "destructive",
+      });
+    }
+  }, [selectedAnswer, question, toast]);
 
   const handleAnswerSelect = (index: number) => {
     if (selectedAnswer !== null || !isTimerActive) return;
@@ -135,21 +150,6 @@ const StageQuiz: React.FC<StageQuizProps> = ({
     setTimeout(() => {
       setShowNextButton(true);
     }, 2000);
-  };
-
-  const handleTimeUp = () => {
-    if (selectedAnswer === null) {
-      setIsTimerActive(false);
-      setIsRevealed(true);
-      setShowNextButton(true);
-      
-      // Show time up message
-      toast({
-        title: "انتهى الوقت!",
-        description: "الإجابة الصحيحة هي: " + question.options[question.correctAnswer],
-        variant: "destructive",
-      });
-    }
   };
 
   const handleNextQuestion = () => {
