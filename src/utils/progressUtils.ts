@@ -10,6 +10,10 @@ const SECRET_KEY = 'lovable-quiz-app-secret-key';
 export interface UserProgress {
   // Track completed levels by category and level
   completedLevels: Record<string, Record<string, number>>;
+  // Track completed stages by category and stage
+  completedStages: Record<string, Record<string, boolean>>;
+  // Track stage completion percentage
+  stageCompletion: Record<string, Record<string, number>>;
   // Track used question IDs by category and level to prevent repetition
   usedQuestionIds: Record<string, Record<string, number[]>>;
 }
@@ -17,6 +21,8 @@ export interface UserProgress {
 // Initialize default progress
 const defaultProgress: UserProgress = {
   completedLevels: {},
+  completedStages: {},
+  stageCompletion: {},
   usedQuestionIds: {},
 };
 
@@ -74,6 +80,48 @@ export const isLevelUnlocked = (
   return false;
 };
 
+// Check if a stage is unlocked based on user progress
+export const isStageUnlocked = (
+  categoryId: string,
+  stageId: string,
+  progress: UserProgress
+): boolean => {
+  // Parse the stage ID to extract level and order
+  const parts = stageId.split('-');
+  const level = parts[0];
+  const order = parseInt(parts[1]);
+  
+  // First stage is always unlocked
+  if (level === 'easy' && order === 1) return true;
+  
+  // Check if level is unlocked
+  if (level === 'medium') {
+    // Need to complete at least 15 easy stages
+    const easyStagesCompleted = Object.keys(progress.completedStages[categoryId] || {})
+      .filter(id => id.startsWith('easy-') && progress.completedStages[categoryId][id])
+      .length;
+    
+    if (easyStagesCompleted < 15) return false;
+  }
+  
+  if (level === 'hard') {
+    // Need to complete at least 15 medium stages
+    const mediumStagesCompleted = Object.keys(progress.completedStages[categoryId] || {})
+      .filter(id => id.startsWith('medium-') && progress.completedStages[categoryId][id])
+      .length;
+    
+    if (mediumStagesCompleted < 15) return false;
+  }
+  
+  // If it's not the first stage, check if the previous stage is completed
+  if (order > 1) {
+    const previousStageId = `${level}-${order - 1}`;
+    return progress.completedStages[categoryId]?.[previousStageId] || false;
+  }
+  
+  return true;
+};
+
 // Save level completion score
 export const saveLevelCompletion = (
   categoryId: string,
@@ -95,6 +143,31 @@ export const saveLevelCompletion = (
     // Log completion for debugging
     console.log(`Level ${levelId} completed with score ${score}%`);
   }
+};
+
+// Save stage completion status
+export const saveStageCompletion = (
+  categoryId: string,
+  stageId: string,
+  completed: boolean,
+  percentage: number,
+  progress: UserProgress = loadProgress()
+): void => {
+  // Initialize category if it doesn't exist
+  if (!progress.completedStages[categoryId]) {
+    progress.completedStages[categoryId] = {};
+  }
+  
+  if (!progress.stageCompletion[categoryId]) {
+    progress.stageCompletion[categoryId] = {};
+  }
+  
+  progress.completedStages[categoryId][stageId] = completed;
+  progress.stageCompletion[categoryId][stageId] = percentage;
+  saveProgress(progress);
+  
+  // Log completion for debugging
+  console.log(`Stage ${stageId} completed: ${completed}, percentage: ${percentage}%`);
 };
 
 // Helper function to get questions based on difficulty
@@ -214,6 +287,21 @@ export const getUniqueQuestions = (
   saveProgress(progress);
   
   return selectedQuestions;
+};
+
+// Get questions for a specific stage
+export const getQuestionsForStage = (
+  questions: Question[],
+  categoryId: string,
+  stageId: string,
+  count: number,
+  progress: UserProgress = loadProgress()
+): Question[] => {
+  // Parse stage ID to get level
+  const level = stageId.split('-')[0];
+  
+  // For now, reuse the existing unique questions logic
+  return getUniqueQuestions(questions, categoryId, level, count, progress);
 };
 
 // Get the unlock requirements text for a level
