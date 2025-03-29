@@ -99,6 +99,14 @@
 
 .stage-card {
   transition: all 0.3s ease;
+  @apply relative overflow-hidden rounded-lg shadow-md text-center p-2;
+  max-width: 100px;
+  max-height: 100px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .stage-card:hover {
@@ -109,13 +117,41 @@
 .stage-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .stage-grid {
     grid-template-columns: repeat(5, 1fr);
   }
+}
+
+/* Dark mode fixes for stage text */
+.dark .stage-card {
+  @apply text-white border-slate-700 bg-slate-800;
+}
+
+.dark .stage-title {
+  @apply text-white;
+}
+
+.dark .stage-subtitle {
+  @apply text-slate-300;
+}
+
+/* Locked and unlocked stages */
+.stage-locked {
+  @apply bg-gray-200 dark:bg-gray-800 dark:border-gray-700;
+}
+
+.stage-unlocked {
+  @apply bg-blue-50 dark:bg-blue-900/30 dark:border-blue-800;
+}
+
+.stage-completed {
+  @apply bg-green-50 dark:bg-green-900/30 dark:border-green-800;
 }
 
 /* Animations */
@@ -134,8 +170,8 @@
 
 .milestone-image {
   position: absolute;
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
   border: 3px solid white;
   border-radius: 8px;
@@ -213,6 +249,9 @@
   background-color: #f8fafc;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .dark .quiz-option {
@@ -251,8 +290,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   border-radius: 50%;
   background-color: #e2e8f0;
   color: #475569;
@@ -268,6 +307,8 @@
 .option-text {
   flex: 1;
   text-align: right;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 @keyframes fadeIn {
@@ -277,4 +318,36 @@
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Fix next button appearance */
+.next-button {
+  animation: pulse-light 2s infinite;
+}
+
+@keyframes pulse-light {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Adjust quiz container for better responsiveness */
+@media (max-width: 768px) {
+  .quiz-container {
+    padding: 0.5rem;
+  }
+  
+  .quiz-card {
+    padding: 1rem;
+  }
+  
+  .quiz-question {
+    font-size: 1.25rem;
+  }
 }

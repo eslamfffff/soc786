@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import AnswerOption from './AnswerOption';
 import Timer from './Timer';
@@ -135,10 +136,8 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
     // Reveal correct answer
     setIsRevealed(true);
     
-    // Auto show next button after 2 seconds
-    setTimeout(() => {
-      setShowNextButton(true);
-    }, 2000);
+    // Show next button immediately
+    setShowNextButton(true);
   };
 
   const handleNextQuestion = () => {
@@ -189,11 +188,11 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
   if (isGameOver) {
     return (
       <div className="quiz-container">
-        <div className="quiz-card dark:bg-slate-800 dark:border-slate-700">
+        <div className="quiz-card dark:bg-slate-800 dark:border-slate-700 p-4 md:p-6">
           <Button 
             variant="ghost" 
             size="sm" 
-            className="absolute top-4 left-4 font-cairo flex items-center gap-2 text-base"
+            className="mb-4 md:absolute md:top-4 md:left-4 font-cairo flex items-center gap-2 text-base"
             onClick={onBackToCategories}
           >
             <ArrowLeft size={16} />
@@ -268,11 +267,11 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
   return (
     <div className="quiz-container">
       <div className={cn(
-        "quiz-card dark:bg-slate-800 dark:border-slate-700",
+        "quiz-card dark:bg-slate-800 dark:border-slate-700 p-4 md:p-6",
         isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0",
         "transition-all duration-500 ease-in-out"
       )}>
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -281,7 +280,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
                   onBackToCategories(); 
                 }}>
                   <Home className="h-4 w-4 mr-2" />
-                  <span>المستويات</span>
+                  <span className="dark:text-white">المستويات</span>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -290,7 +289,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
                   e.preventDefault(); 
                   onBackToCategories(); 
                 }}>
-                  {category?.name}
+                  <span className="dark:text-white">{category?.name}</span>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -306,7 +305,9 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>سؤال {currentQuestion + 1}/{questions.length}</BreadcrumbPage>
+                <BreadcrumbPage>
+                  <span className="dark:text-white">سؤال {currentQuestion + 1}/{questions.length}</span>
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -314,15 +315,15 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
 
         <Button 
           variant="outline" 
-          size="lg" 
-          className="absolute top-4 left-4 font-cairo flex items-center gap-2 text-base min-h-[60px] min-w-[60px]"
+          size="sm" 
+          className="mb-4 md:absolute md:top-4 md:left-4 font-cairo flex items-center gap-2 text-base"
           onClick={onBackToCategories}
         >
           <ArrowLeft size={18} />
           <span dir="rtl">العودة للمستويات</span>
         </Button>
         
-        <div className="quiz-header mt-10">
+        <div className="quiz-header mt-6 md:mt-10">
           <div className="flex justify-between mb-2">
             <ProgressBar current={currentQuestion + 1} total={questions.length} />
             <ScoreDisplay score={score} />
@@ -334,9 +335,9 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
           />
         </div>
         
-        <h2 className="quiz-question font-cairo dark:text-slate-100 text-2xl md:text-3xl mt-6" dir="rtl">{question.question}</h2>
+        <h2 className="quiz-question font-cairo dark:text-slate-100 text-xl md:text-2xl mt-6" dir="rtl">{question.question}</h2>
         
-        <div className="space-y-4 mt-8">
+        <div className="space-y-3 mt-6">
           {question.options.map((option, index) => (
             <AnswerOption
               key={index}
@@ -352,18 +353,18 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
         </div>
         
         {showNextButton && (
-          <div className="flex justify-center mt-8 animate-fade-in">
+          <div className="flex justify-center mt-6 md:mt-8 animate-fade-in">
             <Button 
               onClick={handleNextQuestion}
               size="lg"
-              className="next-button font-cairo text-lg py-6 min-h-[60px] min-w-[180px]"
+              className="next-button font-cairo text-lg py-2 px-6"
             >
               {currentQuestion + 1 >= questions.length ? "إنهاء الإختبار" : "السؤال التالي"}
             </Button>
           </div>
         )}
         
-        <footer className="mt-10 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
+        <footer className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
           <p className="text-slate-600 dark:text-slate-400 text-sm">
             Engineered by Islam Farid Ahmed
           </p>
