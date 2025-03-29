@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Stage } from '@/data/questions/types';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { Check, Lock, Unlock, Trophy, Star, Heart, Settings, Users } from 'lucide-react';
+import { Check, Lock, Unlock, Trophy, Star, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { loadProgress, isStageUnlocked } from '@/utils/progressUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -13,18 +14,15 @@ interface StageMapProps {
   stages: Stage[];
   category: string;
   onStageSelect: (stageId: string) => void;
+  onBackToLevels: () => void;
+  levelId: string;
 }
 
-const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect }) => {
+const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, onBackToLevels, levelId }) => {
   const { toast } = useToast();
   const progress = loadProgress();
-  const [stats, setStats] = useState({
-    lives: 3,
-    correctAnswers: 240,
-    starsEarned: 63,
-    currentStage: 32
-  });
-
+  const [animationComplete, setAnimationComplete] = useState(false);
+  
   // Initialize progress data if needed
   if (!progress.completedStages) {
     progress.completedStages = {};
@@ -41,6 +39,18 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect }) 
   if (!progress.stageCompletion[category]) {
     progress.stageCompletion[category] = {};
   }
+
+  useEffect(() => {
+    // Start with animation not complete
+    setAnimationComplete(false);
+    
+    // Set animation complete after a delay
+    const timer = setTimeout(() => {
+      setAnimationComplete(true);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [category, levelId]);
 
   const handleStageClick = (stage: Stage) => {
     const isUnlocked = isStageUnlocked(category, stage.id, progress);
@@ -60,170 +70,107 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect }) 
     onStageSelect(stage.id);
   };
 
+  // Filter stages by the current level
+  const currentLevelStages = stages.filter(stage => stage.id.startsWith(levelId));
+  
   // Calculate completion statistics
   const totalCompletedStages = Object.values(progress.completedStages[category] || {})
     .filter(Boolean).length;
   
-  const averageCompletion = Object.values(progress.stageCompletion[category] || {})
-    .reduce((sum, val) => sum + val, 0) / 
-    (Object.values(progress.stageCompletion[category] || {}).length || 1);
+  const levelLabel = levelId === 'beginner' ? 'مبتدئ' : 
+                    levelId === 'intermediate' ? 'متوسط' : 'متقدم';
+  
+  const levelColor = levelId === 'beginner' ? 'bg-green-100 text-green-800' : 
+                    levelId === 'intermediate' ? 'bg-blue-100 text-blue-800' : 
+                    'bg-red-100 text-red-800';
 
-  // Get player level based on completed stages (1 level per 2 completed stages)
-  const playerLevel = Math.max(1, Math.floor(totalCompletedStages / 2));
-  
-  // Determine player milestone based on level
-  const getMilestone = (level: number) => {
-    if (level >= 31) return "Legendary Status";
-    if (level >= 21) return "International Call-Up";
-    if (level >= 11) return "Professional Debut";
-    return "Youth Academy";
+  // Get background image based on level
+  const getBackgroundImage = () => {
+    switch(levelId) {
+      case 'beginner': return "url('/lovable-uploads/eecd19c1-0ef2-492d-bc35-8cc44d278946.png')";
+      case 'intermediate': return "url('/lovable-uploads/eecd19c1-0ef2-492d-bc35-8cc44d278946.png')";
+      case 'advanced': return "url('/lovable-uploads/eecd19c1-0ef2-492d-bc35-8cc44d278946.png')";
+      default: return "url('/lovable-uploads/eecd19c1-0ef2-492d-bc35-8cc44d278946.png')";
+    }
   };
-  
-  const currentMilestone = getMilestone(playerLevel);
-  
-  // Filter stages by level (we'll display them in a curved path)
-  const sortedStages = [...stages].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="relative">
-      {/* Football field background */}
+    <div className="relative min-h-screen">
+      {/* Map background */}
       <div className="bg-gradient-to-b from-green-600 to-green-700 min-h-screen pb-20 pt-4 relative overflow-hidden">
         {/* Field markings */}
-        <div className="absolute inset-0 z-0 opacity-30">
-          <div className="w-full h-full bg-[url('/lovable-uploads/eecd19c1-0ef2-492d-bc35-8cc44d278946.png')] bg-cover bg-center" />
+        <div className="absolute inset-0 z-0 opacity-40">
+          <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: getBackgroundImage() }} />
         </div>
         
-        {/* Stats Bar at the top */}
-        <div className="relative z-10 mb-10 flex justify-between items-center px-4">
-          <div className="flex items-center">
-            <div className="bg-white rounded-full p-2 shadow-md flex items-center space-x-2">
-              <Heart className="h-6 w-6 text-red-500" />
-              <span className="font-bold text-gray-800">{stats.lives}</span>
-            </div>
+        {/* Back button and level info */}
+        <div className="relative z-10 flex justify-between items-center px-6 py-4">
+          <Button 
+            variant="outline" 
+            className="bg-white/90 hover:bg-white font-cairo flex items-center gap-2"
+            onClick={onBackToLevels}
+          >
+            <ArrowLeft size={18} />
+            <span dir="rtl">العودة للمستويات</span>
+          </Button>
+          
+          <div className="bg-white/90 rounded-lg px-4 py-2 shadow-md">
+            <h2 className="text-xl font-bold text-center flex items-center gap-2 justify-center">
+              <Badge className={cn("text-sm", levelColor)}>
+                {levelLabel}
+              </Badge>
+              <span>المستوى {currentLevelStages.length > 0 ? currentLevelStages[0].order : 1} - {currentLevelStages.length > 0 ? currentLevelStages[currentLevelStages.length-1].order : 20}</span>
+            </h2>
           </div>
           
-          <div className="bg-white rounded-lg px-4 py-2 shadow-md">
-            <h2 className="text-xl font-bold text-center">Level {playerLevel}: {currentMilestone}</h2>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="bg-white rounded-full p-2 shadow-md flex items-center space-x-2">
-              <div className="bg-blue-500 rounded-full p-1">
-                <Star className="h-4 w-4 text-yellow-400" />
-              </div>
-              <span className="font-bold text-gray-800">{stats.starsEarned}</span>
-            </div>
-            
-            <div className="bg-white rounded-full p-2 shadow-md">
-              <div className="bg-blue-200 rounded-full p-1">
-                <span className="font-bold text-gray-800">{stats.correctAnswers}</span>
-              </div>
-            </div>
+          <div className="bg-white/90 rounded-lg px-4 py-2 shadow-md">
+            <span className="font-bold">
+              {totalCompletedStages} / {stages.length} مرحلة
+            </span>
           </div>
         </div>
         
-        {/* Player Stats Card */}
-        <div className="mx-auto max-w-md bg-white rounded-lg shadow-lg p-4 mb-8 relative z-10">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-bold">Player Stats</h3>
-            <Badge variant="outline" className="bg-blue-100 text-blue-800">
-              {totalCompletedStages}/{stages.length} Stages
-            </Badge>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <div className="text-gray-600 text-sm">Accuracy</div>
-              <div className="text-xl font-bold">{Math.round(averageCompletion)}%</div>
-            </div>
-            <div className="text-center">
-              <div className="text-gray-600 text-sm">Milestone</div>
-              <div className="text-xl font-bold">
-                {playerLevel >= 30 ? "⭐⭐⭐" : 
-                 playerLevel >= 20 ? "⭐⭐" : 
-                 playerLevel >= 10 ? "⭐" : "🔰"}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Curved Path with Stages */}
-        <div className="relative mx-auto max-w-3xl px-4 pb-20 z-10">
-          {/* Dotted path (using SVG for better curves) */}
-          <svg className="absolute inset-0 w-full h-full z-0" viewBox="0 0 400 1000" preserveAspectRatio="none">
-            <path 
-              d="M200,20 C100,120 300,300 150,400 C50,480 250,600 150,700 C50,800 300,900 200,980" 
-              fill="none" 
-              stroke="white" 
-              strokeWidth="5" 
-              strokeDasharray="10,10"
-              className="path-animation"
-            />
-          </svg>
-          
-          {/* Actual Stages */}
-          <div className="relative z-10">
-            {sortedStages.slice(0, 20).map((stage, index) => {
+        {/* Map grid container */}
+        <div className="relative mx-auto max-w-4xl px-4 mt-8 z-10">
+          <div className="grid grid-cols-4 gap-4 md:gap-6">
+            {currentLevelStages.map((stage, index) => {
               const isUnlocked = isStageUnlocked(category, stage.id, progress);
               const isCompleted = progress.completedStages[category]?.[stage.id] || false;
               const completionPercentage = progress.stageCompletion[category]?.[stage.id] || 0;
-              
-              // Calculate position along the path
-              const leftPos = index % 2 === 0 ? '10%' : 
-                           index % 3 === 0 ? '70%' : '40%';
-              const topSpacing = 120; // Space between stages
               
               return (
                 <TooltipProvider key={stage.id}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <motion.div
-                        whileHover={{ scale: isUnlocked ? 1.1 : 1 }}
-                        className="absolute"
-                        style={{
-                          left: leftPos,
-                          top: `${index * topSpacing}px`,
-                          transform: 'translate(-50%, -50%)'
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ 
+                          scale: animationComplete ? 1 : 0.5, 
+                          opacity: animationComplete ? 1 : 0,
                         }}
+                        transition={{ 
+                          delay: index * 0.05,
+                          duration: 0.3 
+                        }}
+                        className={cn(
+                          "stage-card p-2 relative flex flex-col items-center justify-center cursor-pointer",
+                          isCompleted ? "opacity-100" : isUnlocked ? "opacity-100" : "opacity-70"
+                        )}
                         onClick={() => handleStageClick(stage)}
                       >
                         <div 
                           className={cn(
-                            "w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl relative",
-                            isCompleted ? "bg-red-500" : 
-                            isUnlocked ? "bg-blue-500" : 
-                            "bg-gray-500"
+                            "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg relative border-4",
+                            isCompleted ? "bg-green-500 border-green-300" : 
+                            isUnlocked ? "bg-blue-500 border-blue-300" : 
+                            "bg-gray-500 border-gray-400"
                           )}
                         >
                           {/* Stage number */}
-                          {stage.order}
-                          
-                          {/* Stars at the top (based on completion %) */}
-                          {isCompleted && (
-                            <div className="absolute -top-6 flex space-x-1">
-                              <Star 
-                                className={cn(
-                                  "h-4 w-4", 
-                                  completionPercentage >= 30 ? "text-yellow-400" : "text-gray-400"
-                                )} 
-                              />
-                              <Star 
-                                className={cn(
-                                  "h-4 w-4", 
-                                  completionPercentage >= 60 ? "text-yellow-400" : "text-gray-400"
-                                )} 
-                              />
-                              <Star 
-                                className={cn(
-                                  "h-4 w-4", 
-                                  completionPercentage >= 90 ? "text-yellow-400" : "text-gray-400"
-                                )} 
-                              />
-                            </div>
-                          )}
+                          <span className="text-2xl">{stage.order}</span>
                           
                           {/* Status icon */}
-                          <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center bg-white">
+                          <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md">
                             {isCompleted ? (
                               <Check className="h-4 w-4 text-green-500" />
                             ) : isUnlocked ? (
@@ -233,29 +180,35 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect }) 
                             )}
                           </div>
                           
-                          {/* Trophy for milestone stages */}
-                          {[5, 10, 15, 20].includes(stage.order) && (
-                            <div className="absolute -bottom-6 -right-6 w-8 h-8 rounded-full flex items-center justify-center bg-yellow-400">
+                          {/* Stars for completed stages */}
+                          {isCompleted && (
+                            <div className="absolute -bottom-3 flex space-x-1 bg-white/80 rounded-full px-1 py-0.5 shadow-sm">
+                              <Star className={cn("h-3 w-3", completionPercentage >= 30 ? "text-yellow-400" : "text-gray-300")} />
+                              <Star className={cn("h-3 w-3", completionPercentage >= 60 ? "text-yellow-400" : "text-gray-300")} />
+                              <Star className={cn("h-3 w-3", completionPercentage >= 90 ? "text-yellow-400" : "text-gray-300")} />
+                            </div>
+                          )}
+                          
+                          {/* Trophy for milestone stages (every 5th stage) */}
+                          {stage.order % 5 === 0 && (
+                            <div className="absolute -bottom-6 -right-6 w-8 h-8 rounded-full flex items-center justify-center bg-yellow-400 shadow-md">
                               <Trophy className="h-5 w-5 text-white" />
                             </div>
                           )}
                         </div>
                         
-                        {/* Stage name (only for important stages) */}
-                        {[1, 5, 10, 15, 20].includes(stage.order) && (
-                          <div className="absolute -bottom-8 w-24 text-center left-1/2 transform -translate-x-1/2">
-                            <span className="text-xs font-bold bg-white px-2 py-1 rounded-md shadow-sm text-gray-800">
-                              {stage.title}
-                            </span>
-                          </div>
-                        )}
+                        <div className="mt-2 text-center">
+                          <span className="text-xs font-medium bg-white/90 px-2 py-1 rounded shadow-sm inline-block">
+                            {stage.title || `المرحلة ${stage.order}`}
+                          </span>
+                        </div>
                       </motion.div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="font-cairo" dir="rtl">
-                        {stage.title}
+                        {stage.title || `المرحلة ${stage.order}`}
                         <br />
-                        {isCompleted ? "تم الإكمال! النسبة: " + completionPercentage + "%" : 
+                        {isCompleted ? `تم الإكمال! ${completionPercentage}%` : 
                          isUnlocked ? "متاح اللعب" : 
                          "يجب إكمال المرحلة السابقة أولاً"}
                       </p>
@@ -267,19 +220,10 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect }) 
           </div>
         </div>
         
-        {/* Bottom navigation bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white p-3 flex justify-between items-center z-20">
-          <button className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white">
-            <Settings className="h-6 w-6" />
-          </button>
-          
-          <div className="text-center">
-            <span className="font-bold text-gray-800">My Football Career</span>
-          </div>
-          
-          <button className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white">
-            <Users className="h-6 w-6" />
-          </button>
+        <div className="mt-10 text-center relative z-10">
+          <p className="text-white font-cairo text-lg bg-black/20 mx-auto max-w-md rounded-lg p-2" dir="rtl">
+            أكمل كل مرحلة للتقدم في مسيرتك الكروية!
+          </p>
         </div>
       </div>
     </div>
