@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Stage } from '@/data/questions/types';
 import { cn } from '@/lib/utils';
@@ -26,7 +25,9 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect }) 
       const previousStage = stages.find(s => s.order === stage.order - 1);
       toast({
         title: "المرحلة مقفلة",
-        description: `يجب إكمال المرحلة "${previousStage?.title}" أولاً`,
+        description: previousStage 
+          ? `يجب إكمال المرحلة "${previousStage?.title}" أولاً` 
+          : "يجب إكمال المراحل السابقة أولاً",
         variant: "destructive",
       });
       return;
@@ -34,6 +35,23 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect }) 
     
     onStageSelect(stage.id);
   };
+
+  // Make sure completedStages and stageCompletion are properly initialized
+  if (!progress.completedStages) {
+    progress.completedStages = {};
+  }
+  
+  if (!progress.completedStages[category]) {
+    progress.completedStages[category] = {};
+  }
+  
+  if (!progress.stageCompletion) {
+    progress.stageCompletion = {};
+  }
+  
+  if (!progress.stageCompletion[category]) {
+    progress.stageCompletion[category] = {};
+  }
 
   // Group stages by level for easier rendering
   const stagesByLevel: Record<string, Stage[]> = {
@@ -73,8 +91,8 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect }) 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {levelStages.map((stage) => {
                 const isUnlocked = isStageUnlocked(category, stage.id, progress);
-                const isCompleted = progress.completedStages?.[category]?.[stage.id] || false;
-                const completionPercentage = progress.stageCompletion?.[category]?.[stage.id] || 0;
+                const isCompleted = progress.completedStages[category]?.[stage.id] || false;
+                const completionPercentage = progress.stageCompletion[category]?.[stage.id] || 0;
                 
                 return (
                   <TooltipProvider key={stage.id}>

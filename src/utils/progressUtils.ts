@@ -94,6 +94,15 @@ export const isStageUnlocked = (
   // First stage is always unlocked
   if (level === 'easy' && order === 1) return true;
   
+  // Ensure that completedStages and the category exist
+  if (!progress.completedStages) {
+    progress.completedStages = {};
+  }
+  
+  if (!progress.completedStages[categoryId]) {
+    progress.completedStages[categoryId] = {};
+  }
+  
   // Check if level is unlocked
   if (level === 'medium') {
     // Need to complete at least 15 easy stages
