@@ -18,7 +18,11 @@ interface StageQuizProps {
   stage: Stage;
   categoryId: string;
   onBack: () => void;
-  onComplete: (completed: boolean, percentage: number) => void;
+  onComplete: (completed: boolean, percentage: number, stats: {
+    score: number,
+    correctAnswers: number,
+    totalQuestions: number
+  }) => void;
 }
 
 const StageQuiz: React.FC<StageQuizProps> = ({ 
@@ -160,12 +164,23 @@ const StageQuiz: React.FC<StageQuizProps> = ({
         const completionPercentage = Math.round((correctAnswers / questions.length) * 100);
         const stageCompleted = completionPercentage >= 70; // Need 70% to complete a stage
         
-        // Save stage completion
-        saveStageCompletion(categoryId, stage.id, stageCompleted, completionPercentage);
+        const quizStats = {
+          score,
+          correctAnswers,
+          totalQuestions: questions.length
+        };
         
-        // Pass completion status back to parent
-        onComplete(stageCompleted, completionPercentage);
-        setIsGameOver(true);
+        try {
+          // Save stage completion
+          saveStageCompletion(categoryId, stage.id, stageCompleted, completionPercentage);
+          
+          // Pass completion status and stats back to parent
+          onComplete(stageCompleted, completionPercentage, quizStats);
+        } catch (error) {
+          console.error("Error saving stage completion:", error);
+          // Still try to show the completion screen even if saving failed
+          onComplete(stageCompleted, completionPercentage, quizStats);
+        }
       } else {
         setCurrentQuestion((prev) => prev + 1);
         setSelectedAnswer(null);

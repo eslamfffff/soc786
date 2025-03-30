@@ -73,8 +73,8 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
 
   return (
     <div className="relative mb-4" aria-label="Question timer">
-      <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
-        <span>{timeLeft}s</span>
+      <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300 mb-1">
+        <span className="font-medium">{timeLeft}s</span>
         <span className={cn(
           "font-medium",
           percentage > 60 ? "text-green-600 dark:text-green-400" : 
@@ -85,30 +85,32 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
         </span>
       </div>
       
-      <Progress 
-        value={percentage} 
-        className="h-2 bg-slate-200 dark:bg-slate-700"
-      >
-        <div 
-          className={cn(
-            "h-full transition-all duration-1000 ease-linear rounded-full",
-            getTimerColor()
-          )}
-          style={{ width: `${percentage}%` }}
-        />
-      </Progress>
-      
-      {/* Pulsing effect when time is running low */}
-      {isActive && percentage <= 30 && (
-        <div 
-          className="absolute inset-0 rounded-full animate-pulse opacity-50"
-          style={{ 
-            background: percentage <= 15 ? 
-              "radial-gradient(circle, rgba(239,68,68,0.2) 0%, rgba(0,0,0,0) 70%)" : 
-              "radial-gradient(circle, rgba(245,158,11,0.2) 0%, rgba(0,0,0,0) 70%)" 
-          }}
-        />
-      )}
+      <div className="timer-wrapper overflow-hidden">
+        <Progress 
+          value={percentage} 
+          className="h-3 bg-slate-200 dark:bg-slate-700"
+        >
+          <div 
+            className={cn(
+              "h-full transition-all duration-1000 ease-linear rounded-full",
+              getTimerColor()
+            )}
+            style={{ width: `${percentage}%` }}
+          />
+        </Progress>
+        
+        {/* Pulsing effect when time is running low */}
+        {isActive && percentage <= 30 && (
+          <div 
+            className="absolute inset-0 rounded-full animate-pulse opacity-50"
+            style={{ 
+              background: percentage <= 15 ? 
+                "radial-gradient(circle, rgba(239,68,68,0.2) 0%, rgba(0,0,0,0) 70%)" : 
+                "radial-gradient(circle, rgba(245,158,11,0.2) 0%, rgba(0,0,0,0) 70%)" 
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

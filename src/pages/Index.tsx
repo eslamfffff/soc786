@@ -83,6 +83,11 @@ export default function Index() {
   const [currentQuestions, setCurrentQuestions] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.CATEGORIES);
   const { theme } = useTheme();
+  const [quizStats, setQuizStats] = useState({
+    score: 0,
+    correctAnswers: 0,
+    totalQuestions: 10
+  });
 
   // Log developer signature on load
   useEffect(() => {
@@ -159,9 +164,15 @@ export default function Index() {
     setViewMode(ViewMode.STAGES);
   };
 
-  const handleStageComplete = (completed: boolean, percentage: number) => {
-    // Make sure to set the view mode before showing the completion screen
-    // This fixes the black screen issue
+  const handleStageComplete = (completed: boolean, percentage: number, stats: { 
+    score: number, 
+    correctAnswers: number,
+    totalQuestions: number 
+  }) => {
+    // Save the stats for display in the completion screen
+    setQuizStats(stats);
+    
+    // Set the view mode to show completion screen
     setViewMode(ViewMode.STAGE_COMPLETE);
   };
 
@@ -264,9 +275,9 @@ export default function Index() {
           <div className="quiz-card dark:bg-slate-800 dark:border-slate-700">
             <StageComplete
               stage={selectedStage}
-              score={2500} // Mock score
-              correctAnswers={7} // Mock correct answers
-              totalQuestions={10} // Mock total questions
+              score={quizStats.score}
+              correctAnswers={quizStats.correctAnswers}
+              totalQuestions={quizStats.totalQuestions}
               onBackToStages={handleBackToStages}
               onNextStage={hasNextStage() ? handleNextStage : undefined}
               hasNextStage={hasNextStage()}

@@ -89,16 +89,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
 
   // Get background based on level
   const getLevelBackground = () => {
-    switch(levelId) {
-      case 'beginner': 
-        return "bg-gradient-to-b from-blue-900 to-blue-700";
-      case 'intermediate':
-        return "bg-gradient-to-b from-blue-800 to-blue-600";
-      case 'advanced':
-        return "bg-gradient-to-b from-blue-700 to-blue-500";
-      default:
-        return "bg-gradient-to-b from-blue-900 to-blue-700";
-    }
+    return "bg-gradient-to-b from-blue-900 to-blue-700";
   };
 
   // Get stage icon based on order
@@ -136,7 +127,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
   };
 
   // Calculate positions for the winding path
-  const calculateStagePosition = (index: number, total: number) => {
+  const calculateStagePosition = (index: number, total: number): React.CSSProperties => {
     // This creates a zig-zag pattern from bottom to top
     const row = total - index - 1;
     const isEvenRow = row % 2 === 0;
@@ -157,19 +148,26 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
   return (
     <div className="relative min-h-screen">
       {/* Map background */}
-      <div className={cn(
-        "min-h-screen pb-20 pt-4 relative overflow-hidden",
-        getLevelBackground()
-      )}>
-        {/* Field markings - using the custom background */}
+      <div 
+        className={cn(
+          "min-h-screen pb-20 pt-4 relative overflow-hidden",
+          getLevelBackground()
+        )}
+        style={{
+          backgroundImage: `url('/lovable-uploads/269ba37d-98da-4ba6-8e87-2ebf8168319e.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Field markings - hexagonal pattern overlay */}
         <div className="absolute inset-0 z-0 opacity-30">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <pattern id="pattern-circles" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
-                <circle cx="25" cy="25" r="20" fill="none" stroke="white" strokeWidth="1" opacity="0.2" />
+              <pattern id="pattern-hexagons" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
+                <path d="M25,0 L50,14.43 L50,43.3 L25,57.74 L0,43.3 L0,14.43 Z" fill="none" stroke="white" strokeWidth="1" opacity="0.2" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#pattern-circles)" />
+            <rect width="100%" height="100%" fill="url(#pattern-hexagons)" />
           </svg>
         </div>
         
@@ -299,14 +297,14 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                         
                         {/* Stage name - make sure it's visible in dark mode */}
                         <div className="absolute -bottom-10 text-center min-w-[80px]">
-                          <span className="stage-bubble-text dark:bg-slate-800 dark:text-white text-xs">
+                          <span className="stage-bubble-text dark:bg-slate-800 dark:text-white dark:border dark:border-slate-600 text-xs font-bold px-3 py-1">
                             {stage.title || `المرحلة ${stage.order}`}
                           </span>
                         </div>
                       </motion.div>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="font-cairo dark:text-white" dir="rtl">
+                    <TooltipContent className="dark:bg-slate-700 dark:text-white dark:border-slate-600">
+                      <p className="font-cairo" dir="rtl">
                         {stage.title || `المرحلة ${stage.order}`}
                         <br />
                         {isCompleted ? `تم الإكمال! ${completionPercentage}%` : 
