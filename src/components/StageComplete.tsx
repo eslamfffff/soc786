@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Stage } from '@/data/questions/types';
@@ -29,8 +29,18 @@ const StageComplete: React.FC<StageCompleteProps> = ({
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
   const passed = percentage >= 70;
   
+  // تحديد عدد النجوم بناءً على النسبة المئوية
+  const getStarsCount = () => {
+    if (percentage >= 90) return 3; // ممتاز - 3 نجوم
+    if (percentage >= 70) return 2; // جيد - 2 نجوم
+    if (percentage >= 50) return 1; // مقبول - نجمة واحدة
+    return 0; // ضعيف - بدون نجوم
+  };
+  
+  const starsCount = getStarsCount();
+  
   // Trigger confetti effect on component mount if passed
-  React.useEffect(() => {
+  useEffect(() => {
     if (passed) {
       confetti({
         particleCount: 100,
@@ -76,6 +86,21 @@ const StageComplete: React.FC<StageCompleteProps> = ({
           {' - '}
           {stage.title}
         </Badge>
+      </div>
+      
+      {/* عرض النجوم بشكل واضح */}
+      <div className="flex justify-center gap-2 mb-6">
+        {[1, 2, 3].map((star) => (
+          <Star 
+            key={star}
+            className={cn(
+              "w-10 h-10 transition-all duration-500",
+              star <= starsCount 
+                ? "text-yellow-400 fill-yellow-400 scale-110" 
+                : "text-gray-300 dark:text-gray-600"
+            )}
+          />
+        ))}
       </div>
       
       <div className="score-circle mb-8">
@@ -158,7 +183,7 @@ const StageComplete: React.FC<StageCompleteProps> = ({
       </div>
 
       <div className="flex flex-wrap gap-4 justify-center">
-        {passed && hasNextStage && (
+        {passed && hasNextStage && onNextStage && (
           <Button 
             onClick={onNextStage}
             size="lg"
@@ -170,7 +195,7 @@ const StageComplete: React.FC<StageCompleteProps> = ({
         )}
         <Button 
           onClick={onBackToStages} 
-          variant={passed && hasNextStage ? "outline" : "default"}
+          variant={passed && hasNextStage && onNextStage ? "outline" : "default"}
           size="lg"
           className="min-w-[180px] min-h-[60px] font-cairo text-lg"
         >

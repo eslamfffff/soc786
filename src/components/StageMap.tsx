@@ -109,7 +109,13 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
   const getStarRating = (percentage: number) => {
     const stars = [];
     const totalStars = 3;
-    const filledStars = percentage >= 90 ? 3 : percentage >= 60 ? 2 : percentage >= 30 ? 1 : 0;
+    
+    // تحديد عدد النجوم بناءً على النسبة المئوية
+    let filledStars = 0;
+    if (percentage >= 90) filledStars = 3; // ممتاز - 3 نجوم
+    else if (percentage >= 70) filledStars = 2; // جيد - 2 نجوم
+    else if (percentage >= 50) filledStars = 1; // مقبول - نجمة واحدة
+    else filledStars = 0; // ضعيف - بدون نجوم
     
     for (let i = 0; i < totalStars; i++) {
       stars.push(
@@ -143,6 +149,17 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
       marginRight: isEvenRow ? '20px' : '0',
       marginTop: index === 0 ? '0' : '-20px', // Overlap to create connected path
     };
+  };
+
+  // تحقق مما إذا كانت المرحلة ستفتح المرحلة التالية
+  const willUnlockNextStage = (currentStage: Stage, nextStage: Stage | undefined) => {
+    if (!nextStage) return false;
+    
+    // تحقق إذا كانت المرحلة الحالية مكتملة وما إذا كانت ستفتح المرحلة التالية
+    const isCurrentComplete = progress.completedStages[category]?.[currentStage.id] || false;
+    const isNextUnlocked = isStageUnlocked(category, nextStage.id, progress);
+    
+    return isCurrentComplete && isNextUnlocked;
   };
 
   return (
@@ -215,6 +232,40 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
               strokeLinecap="round"
               className="path-animation"
             />
+            
+            {/* المسارات بين المراحل المكتملة والمفتوحة */}
+            {limitedStages.map((stage, idx) => {
+              if (idx === limitedStages.length - 1) return null; // لا تضيف مسارًا بعد المرحلة الأخيرة
+              
+              const nextStage = limitedStages[idx + 1];
+              const isPath = willUnlockNextStage(stage, nextStage);
+              
+              if (!isPath) return null;
+              
+              const isEvenIdx = idx % 2 === 0;
+              const nextEven = (idx + 1) % 2 === 0;
+              
+              // المسار بين مرحلتين
+              let pathCoords;
+              if (isEvenIdx) {
+                pathCoords = `M${10 + (idx * 10)},${90 - (idx * 10)} C${15 + (idx * 10)},${90 - (idx * 10)} ${15 + (idx * 10)},${80 - (idx * 10)} ${20 + (idx * 10)},${80 - (idx * 10)}`;
+              } else {
+                pathCoords = `M${90 - (idx * 10)},${90 - (idx * 10)} C${85 - (idx * 10)},${90 - (idx * 10)} ${85 - (idx * 10)},${80 - (idx * 10)} ${80 - (idx * 10)},${80 - (idx * 10)}`;
+              }
+              
+              return (
+                <path 
+                  key={`path-${idx}`}
+                  d={pathCoords}
+                  fill="none" 
+                  stroke="#4CAF50" 
+                  strokeWidth="5" 
+                  strokeLinecap="round"
+                  strokeDasharray="10,5"
+                  className="path-animation"
+                />
+              );
+            })}
           </svg>
           
           {/* Stages container - flex column from bottom to top */}
@@ -291,6 +342,19 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                                 background: 'radial-gradient(circle, rgba(34,197,94,0.3) 0%, rgba(0,0,0,0) 70%)',
                                 zIndex: -1,
                               }}
+                            />
+                          )}
+                          
+                          {/* خط ربط إلى المرحلة التالية إذا كانت هذه المرحلة مكتملة */}
+                          {isCompleted && index < limitedStages.length - 1 && (
+                            <div className={cn(
+                              "absolute h-2 bg-green-500 z-0",
+                              index % 2 === 0 ? "left-full w-10" : "right-full w-10"
+                            )}
+                            style={{
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                            }}
                             />
                           )}
                         </div>

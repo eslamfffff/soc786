@@ -85,14 +85,14 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
         </span>
       </div>
       
-      <div className="timer-wrapper overflow-hidden">
+      <div className="timer-wrapper overflow-hidden rounded-md">
         <Progress 
           value={percentage} 
           className="h-3 bg-slate-200 dark:bg-slate-700"
         >
           <div 
             className={cn(
-              "h-full transition-all duration-1000 ease-linear rounded-full",
+              "h-full transition-all duration-1000 ease-linear",
               getTimerColor()
             )}
             style={{ width: `${percentage}%` }}

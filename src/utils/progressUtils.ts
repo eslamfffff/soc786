@@ -1,335 +1,208 @@
-
-import { shuffleArray } from './gameUtils';
-import CryptoJS from 'crypto-js';
-import { Question } from '@/data/questions/types';
-
-// Secret key for encrypting progress data (in a real app, this should be a server-side secret)
-const SECRET_KEY = 'lovable-quiz-app-secret-key';
-
-// Interface for user progress data
-export interface UserProgress {
-  // Track completed levels by category and level
-  completedLevels: Record<string, Record<string, number>>;
-  // Track completed stages by category and stage
-  completedStages: Record<string, Record<string, boolean>>;
-  // Track stage completion percentage
-  stageCompletion: Record<string, Record<string, number>>;
-  // Track used question IDs by category and level to prevent repetition
-  usedQuestionIds: Record<string, Record<string, number[]>>;
-}
-
-// Initialize default progress
-const defaultProgress: UserProgress = {
-  completedLevels: {},
-  completedStages: {},
-  stageCompletion: {},
-  usedQuestionIds: {},
-};
-
-// Save progress to localStorage with encryption
-export const saveProgress = (progress: UserProgress): void => {
+// Function to load user progress from localStorage
+export const loadProgress = () => {
   try {
-    const encryptedData = CryptoJS.AES.encrypt(
-      JSON.stringify(progress),
-      SECRET_KEY
-    ).toString();
-    localStorage.setItem('quiz-progress', encryptedData);
-    console.log('Progress saved successfully');
+    const serializedProgress = localStorage.getItem('userProgress');
+    if (serializedProgress === null) {
+      return {
+        completedLevels: {},
+        completedStages: {},
+        stageCompletion: {}
+      };
+    }
+    return JSON.parse(serializedProgress);
   } catch (error) {
-    console.error('Failed to save progress:', error);
+    console.error("Failed to load progress from localStorage:", error);
+    return {
+      completedLevels: {},
+      completedStages: {},
+      stageCompletion: {}
+    };
   }
 };
 
-// Load progress from localStorage with decryption
-export const loadProgress = (): UserProgress => {
+// Function to save user progress to localStorage
+export const saveProgress = (progress: any) => {
   try {
-    const encryptedData = localStorage.getItem('quiz-progress');
-    if (!encryptedData) return defaultProgress;
-
-    const decryptedData = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY).toString(CryptoJS.enc.Utf8);
-    if (!decryptedData) return defaultProgress;
-
-    return JSON.parse(decryptedData);
+    const serializedProgress = JSON.stringify(progress);
+    localStorage.setItem('userProgress', serializedProgress);
   } catch (error) {
-    console.error('Failed to load progress, resetting:', error);
-    return defaultProgress;
+    console.error("Failed to save progress to localStorage:", error);
   }
 };
 
-// Check if a level is unlocked based on user progress
-export const isLevelUnlocked = (
-  categoryId: string,
-  levelId: string,
-  progress: UserProgress
-): boolean => {
-  // Beginner is always unlocked
-  if (levelId === 'beginner') return true;
-  
-  // For intermediate, player needs 70% in beginner
-  if (levelId === 'intermediate') {
-    const beginnerScore = progress.completedLevels[categoryId]?.['beginner'] || 0;
-    return beginnerScore >= 70;
+// Function to save level completion status
+export const saveLevelCompletion = (categoryId: string, levelId: string, percentage: number) => {
+  const progress = loadProgress();
+  if (!progress.completedLevels) {
+    progress.completedLevels = {};
   }
-  
-  // For advanced, player needs 80% in intermediate
-  if (levelId === 'advanced') {
-    const intermediateScore = progress.completedLevels[categoryId]?.['intermediate'] || 0;
-    return intermediateScore >= 80;
-  }
-  
-  return false;
-};
-
-// Check if a stage is unlocked based on user progress
-export const isStageUnlocked = (
-  categoryId: string,
-  stageId: string,
-  progress: UserProgress
-): boolean => {
-  // Parse the stage ID to extract level and order
-  const parts = stageId.split('-');
-  const level = parts[0];
-  const order = parseInt(parts[1]);
-  
-  // First stage is always unlocked
-  if (level === 'easy' && order === 1) return true;
-  
-  // Ensure that completedStages and the category exist
-  if (!progress.completedStages) {
-    progress.completedStages = {};
-  }
-  
-  if (!progress.completedStages[categoryId]) {
-    progress.completedStages[categoryId] = {};
-  }
-  
-  // Check if level is unlocked
-  if (level === 'medium') {
-    // Need to complete at least 15 easy stages
-    const easyStagesCompleted = Object.keys(progress.completedStages[categoryId] || {})
-      .filter(id => id.startsWith('easy-') && progress.completedStages[categoryId][id])
-      .length;
-    
-    if (easyStagesCompleted < 15) return false;
-  }
-  
-  if (level === 'hard') {
-    // Need to complete at least 15 medium stages
-    const mediumStagesCompleted = Object.keys(progress.completedStages[categoryId] || {})
-      .filter(id => id.startsWith('medium-') && progress.completedStages[categoryId][id])
-      .length;
-    
-    if (mediumStagesCompleted < 15) return false;
-  }
-  
-  // If it's not the first stage, check if the previous stage is completed
-  if (order > 1) {
-    const previousStageId = `${level}-${order - 1}`;
-    return progress.completedStages[categoryId]?.[previousStageId] || false;
-  }
-  
-  return true;
-};
-
-// Save level completion score
-export const saveLevelCompletion = (
-  categoryId: string,
-  levelId: string,
-  score: number,
-  progress: UserProgress = loadProgress()
-): void => {
-  // Initialize category if it doesn't exist
   if (!progress.completedLevels[categoryId]) {
     progress.completedLevels[categoryId] = {};
   }
-  
-  // Only update if new score is higher
-  const currentScore = progress.completedLevels[categoryId][levelId] || 0;
-  if (score > currentScore) {
-    progress.completedLevels[categoryId][levelId] = score;
-    saveProgress(progress);
-    
-    // Log completion for debugging
-    console.log(`Level ${levelId} completed with score ${score}%`);
-  }
+  progress.completedLevels[categoryId][levelId] = percentage;
+  saveProgress(progress);
 };
 
-// Save stage completion status
-export const saveStageCompletion = (
-  categoryId: string,
-  stageId: string,
-  completed: boolean,
-  percentage: number,
-  progress: UserProgress = loadProgress()
-): void => {
-  // Initialize category if it doesn't exist
+// Function to save stage completion status
+export const saveStageCompletion = (categoryId: string, stageId: string, completed: boolean, percentage: number) => {
+  const progress = loadProgress();
+  if (!progress.completedStages) {
+    progress.completedStages = {};
+  }
   if (!progress.completedStages[categoryId]) {
     progress.completedStages[categoryId] = {};
   }
-  
+  progress.completedStages[categoryId][stageId] = completed;
+    
+  if (!progress.stageCompletion) {
+    progress.stageCompletion = {};
+  }
+    
   if (!progress.stageCompletion[categoryId]) {
     progress.stageCompletion[categoryId] = {};
   }
-  
-  progress.completedStages[categoryId][stageId] = completed;
+    
   progress.stageCompletion[categoryId][stageId] = percentage;
   saveProgress(progress);
-  
-  // Log completion for debugging
-  console.log(`Stage ${stageId} completed: ${completed}, percentage: ${percentage}%`);
 };
 
-// Helper function to get questions based on difficulty
-const getQuestionsByDifficulty = (
-  questions: Question[],
-  difficultyRange: { min: number, max: number }
-): Question[] => {
-  return questions.filter(q => {
-    const difficulty = q.difficulty || 2; // Default to medium if not specified
-    return difficulty >= difficultyRange.min && difficulty <= difficultyRange.max;
-  });
+// Function to check if a level is unlocked
+export const isLevelUnlocked = (categoryId: string, levelId: string, progress: any): boolean => {
+  if (levelId === 'beginner') return true;
+  
+  const previousLevelId = levelId === 'intermediate' ? 'beginner' : 'intermediate';
+  const requiredPercentage = getUnlockThreshold(levelId);
+  
+  const completedLevels = progress.completedLevels || {};
+  const categoryProgress = completedLevels[categoryId] || {};
+  
+  return (categoryProgress[previousLevelId] || 0) >= requiredPercentage;
 };
 
-// Get balanced questions by difficulty
-const getBalancedQuestions = (
-  questions: Question[],
-  level: string,
-  count: number
-): Question[] => {
-  // Define difficulty distributions for each level
-  const distributions = {
-    beginner: [
-      { range: { min: 1, max: 1.5 }, percentage: 0.6 }, // 60% easy
-      { range: { min: 1.6, max: 2.4 }, percentage: 0.4 }, // 40% medium
-      { range: { min: 2.5, max: 3 }, percentage: 0 }     // 0% hard
-    ],
-    intermediate: [
-      { range: { min: 1, max: 1.5 }, percentage: 0.2 },  // 20% easy
-      { range: { min: 1.6, max: 2.4 }, percentage: 0.6 }, // 60% medium
-      { range: { min: 2.5, max: 3 }, percentage: 0.2 }   // 20% hard
-    ],
-    advanced: [
-      { range: { min: 1, max: 1.5 }, percentage: 0 },    // 0% easy
-      { range: { min: 1.6, max: 2.4 }, percentage: 0.3 }, // 30% medium
-      { range: { min: 2.5, max: 3 }, percentage: 0.7 }   // 70% hard
-    ]
-  };
-
-  // Get the distribution for the specified level
-  const levelDistribution = distributions[level as keyof typeof distributions] || distributions.intermediate;
+// Function to check if a stage is unlocked
+export const isStageUnlocked = (categoryId: string, stageId: string, progress: any): boolean => {
+  const stages = stageId.split('-');
+  const level = stages[0];
+  const stageNumber = parseInt(stages[1]);
   
-  // Calculate how many questions we need from each difficulty range
-  const questionCounts = levelDistribution.map(d => Math.round(count * d.percentage));
+  if (stageNumber === 1) return true;
   
-  // Make sure the total is correct (might be off by 1 due to rounding)
-  const totalCalculated = questionCounts.reduce((sum, current) => sum + current, 0);
-  if (totalCalculated < count) {
-    // Add the missing question to the medium difficulty
-    questionCounts[1] += (count - totalCalculated);
-  } else if (totalCalculated > count) {
-    // Remove extra questions from the medium difficulty if possible
-    if (questionCounts[1] > 0) {
-      questionCounts[1] -= (totalCalculated - count);
-    }
-  }
-
-  // Get questions for each difficulty range
-  const selectedQuestions: Question[] = [];
-  
-  levelDistribution.forEach((distribution, index) => {
-    if (questionCounts[index] > 0) {
-      const questionsInRange = getQuestionsByDifficulty(questions, distribution.range);
-      const shuffled = shuffleArray(questionsInRange);
-      selectedQuestions.push(...shuffled.slice(0, questionCounts[index]));
-    }
-  });
-  
-  // If we don't have enough questions, just get random ones to fill the quota
-  if (selectedQuestions.length < count) {
-    const remaining = shuffleArray(questions).filter(
-      q => !selectedQuestions.map(sq => sq.id).includes(q.id)
-    );
-    selectedQuestions.push(...remaining.slice(0, count - selectedQuestions.length));
-  }
-  
-  return shuffleArray(selectedQuestions);
+  const previousStageId = `${level}-${stageNumber - 1}`;
+  return progress.completedStages?.[categoryId]?.[previousStageId] === true;
 };
 
-// Get a set of unique questions that haven't been shown to the user yet
-export const getUniqueQuestions = (
-  questions: Question[],
-  categoryId: string,
-  levelId: string,
-  count: number,
-  progress: UserProgress = loadProgress()
-): Question[] => {
-  // Initialize usedQuestionIds for this category/level if it doesn't exist
-  if (!progress.usedQuestionIds[categoryId]) {
-    progress.usedQuestionIds[categoryId] = {};
-  }
-  if (!progress.usedQuestionIds[categoryId][levelId]) {
-    progress.usedQuestionIds[categoryId][levelId] = [];
-  }
-  
-  const usedIds = progress.usedQuestionIds[categoryId][levelId] || [];
-  
-  // Filter available questions that haven't been used
-  let availableQuestions = questions.filter(q => !usedIds.includes(q.id));
-  
-  // If there aren't enough questions left, reset the used questions
-  if (availableQuestions.length < count) {
-    console.log(`Resetting used questions for ${categoryId}/${levelId}`);
-    progress.usedQuestionIds[categoryId][levelId] = [];
-    availableQuestions = questions;
-    saveProgress(progress);
-  }
-  
-  // Get balanced questions based on difficulty
-  const selectedQuestions = getBalancedQuestions(availableQuestions, levelId, count);
-  
-  // Mark these questions as used
-  const questionIds = selectedQuestions.map(q => q.id);
-  progress.usedQuestionIds[categoryId][levelId] = [
-    ...progress.usedQuestionIds[categoryId][levelId],
-    ...questionIds
-  ];
-  saveProgress(progress);
-  
-  return selectedQuestions;
-};
-
-// Get questions for a specific stage
-export const getQuestionsForStage = (
-  questions: Question[],
-  categoryId: string,
-  stageId: string,
-  count: number,
-  progress: UserProgress = loadProgress()
-): Question[] => {
-  // Parse stage ID to get level
-  const level = stageId.split('-')[0];
-  
-  // For now, reuse the existing unique questions logic
-  return getUniqueQuestions(questions, categoryId, level, count, progress);
-};
-
-// Get the unlock requirements text for a level
+// Function to get the unlock requirement text
 export const getUnlockRequirementText = (levelId: string): string => {
-  if (levelId === 'beginner') return 'مفتوح للجميع';
-  if (levelId === 'intermediate') return 'يتطلب إكمال المستوى المبتدئ بنسبة 70%';
-  if (levelId === 'advanced') return 'يتطلب إكمال المستوى المتوسط بنسبة 80%';
-  return '';
+  if (levelId === 'beginner') return "هذا المستوى مفتوح تلقائيًا.";
+  
+  const previousLevel = levelId === 'intermediate' ? 'المبتدئ' : 'المتوسط';
+  const threshold = getUnlockThreshold(levelId);
+  
+  return `يجب إكمال المستوى ${previousLevel} بنسبة ${threshold}% على الأقل لفتح هذا المستوى.`;
 };
 
-// Get the completion percentage needed to unlock a level
+// Function to get the unlock threshold
 export const getUnlockThreshold = (levelId: string): number => {
-  if (levelId === 'intermediate') return 70;
-  if (levelId === 'advanced') return 80;
-  return 0; // Beginner has no threshold
+  switch (levelId) {
+    case 'intermediate':
+      return 70;
+    case 'advanced':
+      return 70;
+    default:
+      return 70;
+  }
 };
 
-// Reset progress for testing purposes
-export const resetAllProgress = (): void => {
-  saveProgress(defaultProgress);
-  console.log('All progress has been reset');
+// أضف معرف المرحلة لضمان الحصول على أسئلة مختلفة لكل مرحلة
+export const getUniqueQuestions = (
+  allQuestions: any[], 
+  categoryId: string, 
+  levelId: string, 
+  count: number = 10,
+  stageId?: string
+) => {
+  if (allQuestions.length === 0) return [];
+  
+  // استخدم معرف المرحلة لإنشاء بذرة مختلفة للتوزيع العشوائي
+  const stageSeed = stageId ? parseInt(stageId.split('-')[1]) || 1 : 1;
+  
+  // فلترة الأسئلة لهذه الفئة والمستوى
+  const filteredQuestions = allQuestions.filter(
+    q => q.category === categoryId && q.level === levelId
+  );
+  
+  if (filteredQuestions.length === 0) return [];
+  
+  // اخلط الأسئلة بطريقة ثابتة باستخدام معرف المرحلة
+  let shuffled = [...filteredQuestions];
+  
+  // استخدام خوارزمية خلط يمكن التنبؤ بها
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(((i * stageSeed) % shuffled.length) * 0.7);
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  // للحصول على توزيع متوازن للصعوبة، ننظم الأسئلة
+  let easyQuestions = shuffled.filter(q => q.difficulty === 1);
+  let mediumQuestions = shuffled.filter(q => q.difficulty === 2);
+  let hardQuestions = shuffled.filter(q => q.difficulty === 3);
+  
+  // إذا لم يكن هناك صعوبة محددة، استخدم التصنيف الافتراضي
+  if (easyQuestions.length + mediumQuestions.length + hardQuestions.length === 0) {
+    easyQuestions = shuffled.slice(0, Math.floor(shuffled.length * 0.4));
+    mediumQuestions = shuffled.slice(Math.floor(shuffled.length * 0.4), Math.floor(shuffled.length * 0.7));
+    hardQuestions = shuffled.slice(Math.floor(shuffled.length * 0.7));
+  }
+  
+  const result = [];
+  
+  // توزيع الأسئلة بناءً على المستوى
+  if (levelId === 'beginner') {
+    // للمبتدئين: 60% سهل، 30% متوسط، 10% صعب
+    const easyCount = Math.min(Math.ceil(count * 0.6), easyQuestions.length);
+    const mediumCount = Math.min(Math.ceil(count * 0.3), mediumQuestions.length);
+    const hardCount = Math.min(count - easyCount - mediumCount, hardQuestions.length);
+    
+    result.push(...easyQuestions.slice(0, easyCount));
+    result.push(...mediumQuestions.slice(0, mediumCount));
+    result.push(...hardQuestions.slice(0, hardCount));
+  } else if (levelId === 'intermediate') {
+    // للمتوسط: 30% سهل، 50% متوسط، 20% صعب
+    const easyCount = Math.min(Math.ceil(count * 0.3), easyQuestions.length);
+    const mediumCount = Math.min(Math.ceil(count * 0.5), mediumQuestions.length);
+    const hardCount = Math.min(count - easyCount - mediumCount, hardQuestions.length);
+    
+    result.push(...easyQuestions.slice(0, easyCount));
+    result.push(...mediumQuestions.slice(0, mediumCount));
+    result.push(...hardQuestions.slice(0, hardCount));
+  } else {
+    // للمتقدم: 10% سهل، 40% متوسط، 50% صعب
+    const easyCount = Math.min(Math.ceil(count * 0.1), easyQuestions.length);
+    const mediumCount = Math.min(Math.ceil(count * 0.4), mediumQuestions.length);
+    const hardCount = Math.min(count - easyCount - mediumCount, hardQuestions.length);
+    
+    result.push(...easyQuestions.slice(0, easyCount));
+    result.push(...mediumQuestions.slice(0, mediumCount));
+    result.push(...hardQuestions.slice(0, hardCount));
+  }
+  
+  // إذا لم يكن لدينا ما يكفي من الأسئلة، أضف المزيد من القائمة المخلوطة
+  if (result.length < count) {
+    const remaining = count - result.length;
+    const usedIds = new Set(result.map(q => q.id));
+    
+    const extraQuestions = shuffled
+      .filter(q => !usedIds.has(q.id))
+      .slice(0, remaining);
+    
+    result.push(...extraQuestions);
+  }
+  
+  // اخلط النتيجة النهائية بطريقة مختلفة لكل مرحلة
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = (i + stageSeed) % result.length;
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  
+  return result.slice(0, count);
 };

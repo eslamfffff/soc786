@@ -40,7 +40,11 @@ const generateStages = (level: string, count: number = 10): Stage[] => {
       title: specialTitles[i] || `المرحلة ${i}`,
       level: stageDifficulty as 'easy' | 'medium' | 'hard',
       order: i,
-      unlockRule: i === 1 ? 'none' : `complete-stage-${i-1}`
+      unlockRule: i === 1 ? 'none' : `complete-stage-${i-1}`,
+      reward: {
+        coins: i * 50,
+        badge: i === 10 ? "إتمام المستوى" : undefined
+      }
     });
   }
   
@@ -140,7 +144,8 @@ export default function Index() {
       allLevelQuestions,
       selectedCategory,
       selectedLevel,
-      questionsPerStage
+      questionsPerStage,
+      stage.id // Pass the stage ID to ensure different questions per stage
     );
     
     setCurrentQuestions(uniqueQuestions);
@@ -279,8 +284,9 @@ export default function Index() {
               correctAnswers={quizStats.correctAnswers}
               totalQuestions={quizStats.totalQuestions}
               onBackToStages={handleBackToStages}
-              onNextStage={hasNextStage() ? handleNextStage : undefined}
-              hasNextStage={hasNextStage()}
+              // لا نريد الانتقال التلقائي إلى المرحلة التالية - تم تعطيل هذه الخاصية
+              onNextStage={undefined}
+              hasNextStage={false}
             />
           </div>
         </div>
