@@ -12,7 +12,6 @@ interface TimerProps {
 const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [percentage, setPercentage] = useState(100);
-  const [key, setKey] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hasCalledTimeUp = useRef(false);
 
@@ -27,7 +26,6 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
     // Reset timer when duration changes or becomes active again
     setTimeLeft(duration);
     setPercentage(100);
-    setKey(prev => prev + 1);
     hasCalledTimeUp.current = false;
     
     // Clear any existing interval

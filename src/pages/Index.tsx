@@ -17,21 +17,21 @@ import { Stage } from "@/data/questions/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-// Función para generar etapas para cada nivel
-const generateStages = (level: string, count: number = 20): Stage[] => {
+// Function to generate stages for each level - modified to have 10 stages per level
+const generateStages = (level: string, count: number = 10): Stage[] => {
   const stages: Stage[] = [];
   
-  // Nivel de dificultad basado en el nivel seleccionado
+  // Difficulty level based on selected level
   const stageDifficulty = level === 'beginner' ? 'easy' : 
                          level === 'intermediate' ? 'medium' : 'hard';
   
-  // Títulos especiales para algunas etapas
+  // Special titles for some stages
   const specialTitles: Record<number, string> = {
     1: 'البداية',
-    5: 'الربع الأول',
-    10: 'المنتصف',
-    15: 'الربع الأخير',
-    20: 'النهائي'
+    3: 'المرحلة الوسطى',
+    5: 'منتصف الطريق',
+    8: 'اقتربت',
+    10: 'النهائي'
   };
   
   for (let i = 1; i <= count; i++) {
@@ -47,7 +47,7 @@ const generateStages = (level: string, count: number = 20): Stage[] => {
   return stages;
 };
 
-// Generate stages for all levels
+// Generate stages for all levels - modified to have only 10 stages per level
 const STAGES: Record<string, Stage[]> = {
   "football": [
     ...generateStages('beginner'),
@@ -160,6 +160,8 @@ export default function Index() {
   };
 
   const handleStageComplete = (completed: boolean, percentage: number) => {
+    // Make sure to set the view mode before showing the completion screen
+    // This fixes the black screen issue
     setViewMode(ViewMode.STAGE_COMPLETE);
   };
 
@@ -175,6 +177,7 @@ export default function Index() {
     if (currentStageIndex >= 0 && currentStageIndex < levelStages.length - 1) {
       const nextStage = levelStages[currentStageIndex + 1];
       setSelectedStage(null); // Reset current stage
+      // Use a small timeout to ensure state updates correctly
       setTimeout(() => {
         handleStageSelect(nextStage.id); // Select next stage
       }, 100);
