@@ -141,6 +141,16 @@
   @apply text-slate-300;
 }
 
+/* Stage map bubble text */
+.stage-bubble-text {
+  @apply bg-white/90 dark:bg-slate-800/90 px-2 py-1 rounded-md shadow-sm text-xs font-medium;
+  color: #333;
+}
+
+.dark .stage-bubble-text {
+  color: white;
+}
+
 /* Locked and unlocked stages */
 .stage-locked {
   @apply bg-gray-200 dark:bg-gray-800 dark:border-gray-700;
@@ -216,27 +226,8 @@
 /* Timer progress bar */
 .timer-container {
   width: 100%;
-  height: 6px;
-  background-color: rgba(0, 0, 0, 0.1);
   margin: 8px 0;
-  border-radius: 3px;
   overflow: hidden;
-}
-
-.timer-bar {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-.timer-progress {
-  height: 100%;
-  background: linear-gradient(90deg, #38bdf8, #3b82f6);
-  border-radius: 3px;
-}
-
-.dark .timer-progress {
-  background: linear-gradient(90deg, #0ea5e9, #2563eb);
 }
 
 /* Quiz option animations */
@@ -349,5 +340,61 @@
   
   .quiz-question {
     font-size: 1.25rem;
+  }
+}
+
+/* Stage path styles */
+.stage-path {
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 5, 15;
+  animation: dash-animation 30s linear infinite;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+}
+
+@keyframes dash-animation {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+/* Stage bubbles and checkpoints */
+.stage-checkpoint {
+  @apply bg-yellow-400 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-950;
+  border: 3px solid white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.stage-checkpoint:hover {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+}
+
+/* Stage map levels */
+.level-beginner {
+  background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);
+}
+
+.level-intermediate {
+  background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+}
+
+.level-advanced {
+  background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .stage-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .stage-card {
+    max-width: 80px;
+    min-height: 70px;
   }
 }

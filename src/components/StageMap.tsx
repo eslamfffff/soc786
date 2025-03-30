@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Stage } from '@/data/questions/types';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { Check, Lock, Unlock, Trophy, Star, ArrowLeft } from 'lucide-react';
+import { Check, Lock, Unlock, Trophy, Star, ArrowLeft, MapPin, Flag, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -84,6 +84,20 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     levelId === 'intermediate' ? 'bg-blue-100 text-blue-800' : 
                     'bg-red-100 text-red-800';
 
+  // Get background based on level
+  const getLevelBackground = () => {
+    switch(levelId) {
+      case 'beginner': 
+        return "bg-gradient-to-b from-green-500 to-green-700";
+      case 'intermediate':
+        return "bg-gradient-to-b from-blue-500 to-blue-700";
+      case 'advanced':
+        return "bg-gradient-to-b from-red-500 to-red-700";
+      default:
+        return "bg-gradient-to-b from-green-500 to-green-700";
+    }
+  };
+
   // Get background image based on level
   const getBackgroundImage = () => {
     switch(levelId) {
@@ -94,10 +108,60 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
     }
   };
 
+  // Get stage icon based on order
+  const getStageIcon = (order: number, isCompleted: boolean, isUnlocked: boolean) => {
+    // Special stages
+    if (order === 20) return <Flag className="h-5 w-5 text-red-500" />;
+    if (order === 1) return <MapPin className="h-5 w-5 text-blue-500" />;
+    if (order % 5 === 0) return <Trophy className="h-5 w-5 text-yellow-500" />;
+    
+    // Regular stages
+    if (isCompleted) return <Check className="h-4 w-4 text-green-500" />;
+    if (isUnlocked) return <Unlock className="h-4 w-4 text-blue-500" />;
+    return <Lock className="h-4 w-4 text-gray-500" />;
+  };
+
+  // Create path elements to connect stages
+  const renderStagePaths = () => {
+    // Only render paths if animation is complete
+    if (!animationComplete || currentLevelStages.length <= 1) return null;
+    
+    const paths = [];
+    for (let i = 0; i < currentLevelStages.length - 1; i++) {
+      const isCurrentUnlocked = isStageUnlocked(category, currentLevelStages[i].id, progress);
+      const isNextUnlocked = isStageUnlocked(category, currentLevelStages[i+1].id, progress);
+      
+      paths.push(
+        <motion.div 
+          key={`path-${i}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: i * 0.05 + 0.3, duration: 0.5 }}
+          className="absolute z-0"
+          style={{
+            left: `${(i % 5) * 20 + 10}%`,  
+            top: `${Math.floor(i / 5) * 120 + 80}px`,
+            width: '15%',
+            height: '40px',
+            backgroundImage: `linear-gradient(90deg, 
+              ${isCurrentUnlocked ? 'rgba(34, 197, 94, 0.6)' : 'rgba(156, 163, 175, 0.4)'}, 
+              ${isNextUnlocked ? 'rgba(34, 197, 94, 0.6)' : 'rgba(156, 163, 175, 0.4)'}
+            )`,
+            clipPath: 'polygon(0 45%, 100% 45%, 100% 55%, 0 55%)'
+          }}
+        />
+      );
+    }
+    return paths;
+  };
+
   return (
     <div className="relative min-h-screen">
       {/* Map background */}
-      <div className="bg-gradient-to-b from-green-600 to-green-700 min-h-screen pb-20 pt-4 relative overflow-hidden">
+      <div className={cn(
+        "min-h-screen pb-20 pt-4 relative overflow-hidden",
+        getLevelBackground()
+      )}>
         {/* Field markings */}
         <div className="absolute inset-0 z-0 opacity-40">
           <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: getBackgroundImage() }} />
@@ -114,7 +178,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             <span dir="rtl">العودة للمستويات</span>
           </Button>
           
-          <div className="bg-white/90 rounded-lg px-4 py-2 shadow-md">
+          <div className="bg-white/90 dark:bg-slate-800/90 rounded-lg px-4 py-2 shadow-md">
             <h2 className="text-xl font-bold text-center flex items-center gap-2 justify-center">
               <Badge className={cn("text-sm", levelColor)}>
                 {levelLabel}
@@ -123,20 +187,30 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             </h2>
           </div>
           
-          <div className="bg-white/90 rounded-lg px-4 py-2 shadow-md">
-            <span className="font-bold">
+          <div className="bg-white/90 dark:bg-slate-800/90 rounded-lg px-4 py-2 shadow-md">
+            <span className="font-bold text-slate-800 dark:text-white">
               {totalCompletedStages} / {stages.length} مرحلة
             </span>
           </div>
         </div>
         
+        {/* Render connecting paths between stages */}
+        <div className="relative mx-auto max-w-4xl px-4 mt-8 z-0">
+          {renderStagePaths()}
+        </div>
+        
         {/* Map grid container */}
         <div className="relative mx-auto max-w-4xl px-4 mt-8 z-10">
-          <div className="grid grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 md:gap-6">
             {currentLevelStages.map((stage, index) => {
               const isUnlocked = isStageUnlocked(category, stage.id, progress);
               const isCompleted = progress.completedStages[category]?.[stage.id] || false;
               const completionPercentage = progress.stageCompletion[category]?.[stage.id] || 0;
+              
+              // Special stages get different styling
+              const isSpecialStage = stage.order === 1 || stage.order === 5 || 
+                                    stage.order === 10 || stage.order === 15 || 
+                                    stage.order === 20;
               
               return (
                 <TooltipProvider key={stage.id}>
@@ -161,6 +235,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                         <div 
                           className={cn(
                             "w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg relative border-4",
+                            isSpecialStage && "stage-checkpoint",
                             isCompleted ? "bg-green-500 border-green-300" : 
                             isUnlocked ? "bg-blue-500 border-blue-300" : 
                             "bg-gray-500 border-gray-400"
@@ -170,19 +245,26 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                           <span className="text-2xl">{stage.order}</span>
                           
                           {/* Status icon */}
-                          <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md">
-                            {isCompleted ? (
-                              <Check className="h-4 w-4 text-green-500" />
-                            ) : isUnlocked ? (
-                              <Unlock className="h-4 w-4 text-blue-500" />
-                            ) : (
-                              <Lock className="h-4 w-4 text-gray-500" />
-                            )}
+                          <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-slate-800 shadow-md">
+                            {getStageIcon(stage.order, isCompleted, isUnlocked)}
                           </div>
+                          
+                          {/* Animate completed stages */}
+                          {isCompleted && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute inset-0 rounded-full"
+                              style={{
+                                background: 'radial-gradient(circle, rgba(34,197,94,0.4) 0%, rgba(0,0,0,0) 70%)',
+                                zIndex: -1,
+                              }}
+                            />
+                          )}
                           
                           {/* Stars for completed stages */}
                           {isCompleted && (
-                            <div className="absolute -bottom-3 flex space-x-1 bg-white/80 rounded-full px-1 py-0.5 shadow-sm">
+                            <div className="absolute -bottom-3 flex space-x-1 bg-white/80 dark:bg-slate-800/80 rounded-full px-1 py-0.5 shadow-sm">
                               <Star className={cn("h-3 w-3", completionPercentage >= 30 ? "text-yellow-400" : "text-gray-300")} />
                               <Star className={cn("h-3 w-3", completionPercentage >= 60 ? "text-yellow-400" : "text-gray-300")} />
                               <Star className={cn("h-3 w-3", completionPercentage >= 90 ? "text-yellow-400" : "text-gray-300")} />
@@ -195,10 +277,24 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                               <Trophy className="h-5 w-5 text-white" />
                             </div>
                           )}
+                          
+                          {/* Starting flag */}
+                          {stage.order === 1 && (
+                            <div className="absolute -top-6 -left-6 w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 shadow-md">
+                              <MapPin className="h-5 w-5 text-white" />
+                            </div>
+                          )}
+                          
+                          {/* Finish flag */}
+                          {stage.order === currentLevelStages.length && (
+                            <div className="absolute -bottom-6 -left-6 w-8 h-8 rounded-full flex items-center justify-center bg-red-500 shadow-md">
+                              <Flag className="h-5 w-5 text-white" />
+                            </div>
+                          )}
                         </div>
                         
                         <div className="mt-2 text-center">
-                          <span className="text-xs font-medium bg-white/90 px-2 py-1 rounded shadow-sm inline-block">
+                          <span className="stage-bubble-text">
                             {stage.title || `المرحلة ${stage.order}`}
                           </span>
                         </div>
@@ -222,9 +318,36 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
         
         <div className="mt-10 text-center relative z-10">
           <p className="text-white font-cairo text-lg bg-black/20 mx-auto max-w-md rounded-lg p-2" dir="rtl">
-            أكمل كل مرحلة للتقدم في مسيرتك الكروية!
+            أكمل كل مرحلة للتقدم في مسيرتك!
           </p>
         </div>
+
+        {/* Decorative elements */}
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/40 to-transparent z-5"
+        />
+        
+        {/* Animated particles for visual interest */}
+        {animationComplete && Array.from({ length: 10 }).map((_, i) => (
+          <motion.div
+            key={`particle-${i}`}
+            initial={{ y: -20, x: Math.random() * 100, opacity: 0 }}
+            animate={{ 
+              y: [Math.random() * 100, Math.random() * 500], 
+              x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
+              opacity: [0, 0.7, 0]
+            }}
+            transition={{ 
+              duration: 10 + Math.random() * 20,
+              repeat: Infinity,
+              delay: i * 2
+            }}
+            className="absolute w-3 h-3 rounded-full bg-white/30 z-0"
+          />
+        ))}
       </div>
     </div>
   );
