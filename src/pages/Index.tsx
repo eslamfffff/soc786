@@ -139,13 +139,27 @@ export default function Index() {
     // Always 10 questions per stage
     const questionsPerStage = 10;
     
-    // Use our utility to get unique questions with balanced difficulty
+    // إنشاء رقم عشوائي فريد لكل مرحلة بناءً على معرف المرحلة
+    // هذا سيضمن أن نفس المرحلة ستحصل دائمًا على نفس الأسئلة العشوائية
+    const getStableSeed = (stageId: string) => {
+      let hash = 0;
+      for (let i = 0; i < stageId.length; i++) {
+        const char = stageId.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return Math.abs(hash);
+    };
+    
+    const stageSeed = getStableSeed(stageId);
+    
+    // تضمين بذرة فريدة لكل مرحلة لضمان اختلاف الأسئلة
     const uniqueQuestions = getUniqueQuestions(
       allLevelQuestions,
       selectedCategory,
       selectedLevel,
       questionsPerStage,
-      stage.id // Pass the stage ID to ensure different questions per stage
+      `${stageId}-${stageSeed}` // استخدام معرف المرحلة مع بذرة ثابتة
     );
     
     setCurrentQuestions(uniqueQuestions);

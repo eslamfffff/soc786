@@ -87,11 +87,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     levelId === 'intermediate' ? 'bg-blue-100 text-blue-800' : 
                     'bg-red-100 text-red-800';
 
-  // Get background based on level
-  const getLevelBackground = () => {
-    return "bg-gradient-to-b from-blue-900 to-blue-700";
-  };
-
   // Get stage icon based on order
   const getStageIcon = (order: number, isCompleted: boolean, isUnlocked: boolean) => {
     // Special stages
@@ -105,52 +100,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
     return <Lock className="h-4 w-4 text-gray-500" />;
   };
 
-  // Get star rating based on completion percentage
-  const getStarRating = (percentage: number) => {
-    const stars = [];
-    const totalStars = 3;
-    
-    // تحديد عدد النجوم بناءً على النسبة المئوية
-    let filledStars = 0;
-    if (percentage >= 90) filledStars = 3; // ممتاز - 3 نجوم
-    else if (percentage >= 70) filledStars = 2; // جيد - 2 نجوم
-    else if (percentage >= 50) filledStars = 1; // مقبول - نجمة واحدة
-    else filledStars = 0; // ضعيف - بدون نجوم
-    
-    for (let i = 0; i < totalStars; i++) {
-      stars.push(
-        <Star 
-          key={i} 
-          className={cn(
-            "h-4 w-4", 
-            i < filledStars ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
-          )} 
-        />
-      );
-    }
-    
-    return stars;
-  };
-
-  // Calculate positions for the winding path
-  const calculateStagePosition = (index: number, total: number): React.CSSProperties => {
-    // This creates a zig-zag pattern from bottom to top
-    const row = total - index - 1;
-    const isEvenRow = row % 2 === 0;
-    
-    // For even rows, stages go from right to left
-    // For odd rows, stages go from left to right
-    const horizontalPosition = isEvenRow ? 'flex-end' : 'flex-start';
-    
-    return {
-      position: 'relative',
-      alignSelf: horizontalPosition,
-      marginLeft: isEvenRow ? '0' : '20px', 
-      marginRight: isEvenRow ? '20px' : '0',
-      marginTop: index === 0 ? '0' : '-20px', // Overlap to create connected path
-    };
-  };
-
   // تحقق مما إذا كانت المرحلة ستفتح المرحلة التالية
   const willUnlockNextStage = (currentStage: Stage, nextStage: Stage | undefined) => {
     if (!nextStage) return false;
@@ -161,32 +110,78 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
     
     return isCurrentComplete && isNextUnlocked;
   };
+  
+  // عرض النجوم بشكل أكثر احترافية
+  const renderStars = (percentage: number) => {
+    let starCount = 0;
+    if (percentage >= 90) starCount = 3; // ممتاز
+    else if (percentage >= 70) starCount = 2; // جيد
+    else if (percentage >= 50) starCount = 1; // مقبول
+    
+    return (
+      <div className="flex mt-1">
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ 
+              scale: animationComplete ? 1 : 0, 
+              opacity: animationComplete ? 1 : 0 
+            }}
+            transition={{ 
+              delay: animationComplete ? 0.5 + (i * 0.1) : 0,
+              duration: 0.4,
+              type: "spring",
+              stiffness: 200
+            }}
+            className="relative"
+          >
+            <div className={cn(
+              "w-5 h-5 mx-[-2px]",
+              i < starCount ? "text-yellow-400" : "text-gray-400 opacity-40"
+            )}>
+              <svg viewBox="0 0 24 24" fill={i < starCount ? "#FFD700" : "#808080"} xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
+                  stroke={i < starCount ? "#FFA000" : "#555555"} 
+                  strokeWidth="1.5"
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {i < starCount && (
+                <motion.div 
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 0.8, 0] }}
+                  transition={{ 
+                    delay: animationComplete ? 0.7 + (i * 0.2) : 0,
+                    duration: 1.5,
+                    repeat: 0
+                  }}
+                >
+                  <div className="w-full h-full bg-yellow-300 rounded-full blur-sm"></div>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="relative min-h-screen">
-      {/* Map background */}
+      {/* Map background with the new uploaded image */}
       <div 
-        className={cn(
-          "min-h-screen pb-20 pt-4 relative overflow-hidden",
-          getLevelBackground()
-        )}
+        className="min-h-screen pb-20 pt-4 relative overflow-hidden"
         style={{
-          backgroundImage: `url('/lovable-uploads/269ba37d-98da-4ba6-8e87-2ebf8168319e.png')`,
+          backgroundImage: `url('/lovable-uploads/0a548561-de49-46fc-ba7c-047bae73a678.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
-        {/* Field markings - hexagonal pattern overlay */}
-        <div className="absolute inset-0 z-0 opacity-30">
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="pattern-hexagons" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
-                <path d="M25,0 L50,14.43 L50,43.3 L25,57.74 L0,43.3 L0,14.43 Z" fill="none" stroke="white" strokeWidth="1" opacity="0.2" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#pattern-hexagons)" />
-          </svg>
-        </div>
+        {/* Overlay to enhance visibility of content */}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 to-blue-950/60"></div>
         
         {/* Back button and level info */}
         <div className="relative z-10 flex justify-between items-center px-6 py-4">
@@ -214,188 +209,151 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             </span>
           </div>
         </div>
-        
-        {/* Winding path container */}
-        <div className="relative mx-auto max-w-3xl px-4 pt-10 z-10">
-          {/* The winding path SVG - orange path like in the reference image */}
-          <svg 
-            className="absolute top-0 left-0 w-full h-full z-0" 
-            viewBox="0 0 100 100" 
-            preserveAspectRatio="none"
-            style={{ transform: "scale(1.05)" }}
-          >
-            <path 
-              d="M10,90 C30,90 30,70 50,70 C70,70 70,50 50,50 C30,50 30,30 50,30 C70,30 70,10 90,10" 
-              fill="none" 
-              stroke="#E67E22" 
-              strokeWidth="8" 
-              strokeLinecap="round"
-              className="path-animation"
-            />
-            
-            {/* المسارات بين المراحل المكتملة والمفتوحة */}
-            {limitedStages.map((stage, idx) => {
-              if (idx === limitedStages.length - 1) return null; // لا تضيف مسارًا بعد المرحلة الأخيرة
-              
-              const nextStage = limitedStages[idx + 1];
-              const isPath = willUnlockNextStage(stage, nextStage);
-              
-              if (!isPath) return null;
-              
-              const isEvenIdx = idx % 2 === 0;
-              const nextEven = (idx + 1) % 2 === 0;
-              
-              // المسار بين مرحلتين
-              let pathCoords;
-              if (isEvenIdx) {
-                pathCoords = `M${10 + (idx * 10)},${90 - (idx * 10)} C${15 + (idx * 10)},${90 - (idx * 10)} ${15 + (idx * 10)},${80 - (idx * 10)} ${20 + (idx * 10)},${80 - (idx * 10)}`;
-              } else {
-                pathCoords = `M${90 - (idx * 10)},${90 - (idx * 10)} C${85 - (idx * 10)},${90 - (idx * 10)} ${85 - (idx * 10)},${80 - (idx * 10)} ${80 - (idx * 10)},${80 - (idx * 10)}`;
-              }
-              
-              return (
-                <path 
-                  key={`path-${idx}`}
-                  d={pathCoords}
-                  fill="none" 
-                  stroke="#4CAF50" 
-                  strokeWidth="5" 
-                  strokeLinecap="round"
-                  strokeDasharray="10,5"
-                  className="path-animation"
-                />
-              );
-            })}
-          </svg>
-          
-          {/* Stages container - flex column from bottom to top */}
-          <div className="flex flex-col-reverse items-stretch space-y-reverse space-y-16 relative z-10">
+
+        {/* Main winding path container - similar to the referenced image */}
+        <div className="container mx-auto max-w-lg px-4 pt-10 z-10 relative">
+          {/* The winding path - implement to match reference image */}
+          <div className="relative min-h-[600px] w-full">
+            {/* Base path (curved line) */}
+            <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 320 600" preserveAspectRatio="none">
+              <motion.path
+                d="M160,580 C80,520 240,470 160,410 C80,350 240,300 160,240 C80,180 240,130 160,70 C80,10 160,10 160,10"
+                fill="none"
+                stroke="#E67E22"
+                strokeWidth="16"
+                strokeLinecap="round"
+                strokeDasharray="0,0"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 2, ease: "easeInOut" }}
+              />
+            </svg>
+
+            {/* Render stage nodes along the path */}
             {limitedStages.map((stage, index) => {
               const isUnlocked = isStageUnlocked(category, stage.id, progress);
               const isCompleted = progress.completedStages[category]?.[stage.id] || false;
               const completionPercentage = progress.stageCompletion[category]?.[stage.id] || 0;
               
+              // Calculate position along the path based on index
+              const posY = 580 - (index * (570 / (limitedStages.length - 1)));
+              // Alternate between left and right sides of the path
+              const posX = index % 2 === 0 ? 100 : 220;
+              
+              // Calculate the next stage for path connection
+              const nextStage = index < limitedStages.length - 1 ? limitedStages[index + 1] : null;
+              const showCompletionPath = nextStage && isCompleted;
+              
               return (
-                <TooltipProvider key={stage.id}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <motion.div
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        animate={{ 
-                          scale: animationComplete ? 1 : 0.5, 
-                          opacity: animationComplete ? 1 : 0,
-                        }}
-                        transition={{ 
-                          delay: index * 0.05,
-                          duration: 0.3 
-                        }}
-                        className={cn(
-                          "w-20 h-20 md:w-24 md:h-24 relative flex items-center justify-center cursor-pointer"
-                        )}
-                        style={calculateStagePosition(index, limitedStages.length)}
-                        onClick={() => handleStageClick(stage)}
-                      >
-                        <div 
+                <motion.div
+                  key={stage.id}
+                  className="absolute"
+                  style={{ 
+                    top: posY, 
+                    left: posX,
+                    zIndex: 30 - index
+                  }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ 
+                    opacity: animationComplete ? 1 : 0, 
+                    scale: animationComplete ? 1 : 0 
+                  }}
+                  transition={{ 
+                    delay: 0.5 + (index * 0.15), 
+                    duration: 0.5,
+                    type: "spring"
+                  }}
+                >
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <motion.div
                           className={cn(
-                            "w-full h-full rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg border-4",
-                            isCompleted ? "bg-green-600 border-green-300" : 
-                            isUnlocked ? "bg-blue-600 border-blue-300" : 
-                            "bg-gray-600 border-gray-400 opacity-80"
+                            "w-16 h-16 rounded-full flex items-center justify-center relative cursor-pointer shadow-lg transform hover:scale-105 transition-transform",
+                            isCompleted ? "bg-blue-700 border-4 border-blue-300" : 
+                            isUnlocked ? "bg-blue-600 border-4 border-blue-400" : 
+                            "bg-gray-600 border-4 border-gray-400"
                           )}
+                          onClick={() => handleStageClick(stage)}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
                         >
-                          {/* Stage number - larger font */}
-                          <span className="text-3xl">{stage.order}</span>
+                          {/* Stage number */}
+                          <span className="text-2xl font-bold text-white">{stage.order}</span>
                           
-                          {/* Status icon */}
-                          <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-slate-800 shadow-md">
-                            {getStageIcon(stage.order, isCompleted, isUnlocked)}
-                          </div>
-                          
-                          {/* Star ratings - positioned below the circle */}
-                          {(isCompleted || isUnlocked) && (
-                            <div className="absolute -bottom-6 flex space-x-1">
-                              {getStarRating(completionPercentage)}
-                            </div>
-                          )}
-                          
-                          {/* Lock for locked stages */}
+                          {/* Lock overlay for locked stages */}
                           {!isUnlocked && (
-                            <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/30">
-                              <Lock className="h-8 w-8 text-white" />
+                            <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/50">
+                              <Lock className="h-7 w-7 text-white" />
                             </div>
                           )}
                           
-                          {/* Glow effect for completed stages */}
-                          {isCompleted && (
-                            <motion.div
-                              initial={{ scale: 0.8 }}
-                              animate={{ 
-                                scale: [0.8, 1.1, 0.8], 
-                              }}
-                              transition={{ 
-                                duration: 2,
-                                repeat: Infinity,
-                                repeatType: "reverse"
-                              }}
-                              className="absolute inset-0 rounded-full"
-                              style={{
-                                background: 'radial-gradient(circle, rgba(34,197,94,0.3) 0%, rgba(0,0,0,0) 70%)',
-                                zIndex: -1,
-                              }}
-                            />
+                          {/* Stars below the stage icon */}
+                          {(isCompleted || (isUnlocked && completionPercentage > 0)) && (
+                            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2">
+                              {renderStars(completionPercentage)}
+                            </div>
                           )}
-                          
-                          {/* خط ربط إلى المرحلة التالية إذا كانت هذه المرحلة مكتملة */}
-                          {isCompleted && index < limitedStages.length - 1 && (
-                            <div className={cn(
-                              "absolute h-2 bg-green-500 z-0",
-                              index % 2 === 0 ? "left-full w-10" : "right-full w-10"
-                            )}
-                            style={{
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                            }}
-                            />
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-slate-800 border-slate-700">
+                        <div className="text-center text-white font-cairo" dir="rtl">
+                          <p className="font-bold">{stage.title}</p>
+                          {isCompleted ? (
+                            <p className="text-green-300">تم الإكمال! {completionPercentage}%</p>
+                          ) : isUnlocked ? (
+                            <p className="text-blue-300">متاح اللعب</p>
+                          ) : (
+                            <p className="text-red-300">مقفل - أكمل المرحلة السابقة</p>
                           )}
                         </div>
-                        
-                        {/* Stage name - make sure it's visible in dark mode */}
-                        <div className="absolute -bottom-10 text-center min-w-[80px]">
-                          <span className="stage-bubble-text dark:bg-slate-800 dark:text-white dark:border dark:border-slate-600 text-xs font-bold px-3 py-1">
-                            {stage.title || `المرحلة ${stage.order}`}
-                          </span>
-                        </div>
-                      </motion.div>
-                    </TooltipTrigger>
-                    <TooltipContent className="dark:bg-slate-700 dark:text-white dark:border-slate-600">
-                      <p className="font-cairo" dir="rtl">
-                        {stage.title || `المرحلة ${stage.order}`}
-                        <br />
-                        {isCompleted ? `تم الإكمال! ${completionPercentage}%` : 
-                         isUnlocked ? "متاح اللعب" : 
-                         "يجب إكمال المرحلة السابقة أولاً"}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
+                  {/* Path connection to next stage - only show if current stage is completed */}
+                  {showCompletionPath && (
+                    <motion.div
+                      className="absolute"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: animationComplete ? 1 : 0 }}
+                      transition={{ delay: 1 + (index * 0.15) }}
+                      style={{
+                        zIndex: -1,
+                        width: index % 2 === 0 ? '140px' : '140px',
+                        height: '50px',
+                        top: index % 2 === 0 ? '-25px' : '-25px',
+                        left: index % 2 === 0 ? '-30px' : '-90px',
+                        transformOrigin: index % 2 === 0 ? 'left center' : 'right center',
+                        transform: index % 2 === 0 ? 'rotate(-30deg)' : 'rotate(30deg)'
+                      }}
+                    >
+                      <div className="w-full h-3 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
+                    </motion.div>
+                  )}
+                  
+                  {/* Stage title bubble */}
+                  <div className="absolute mt-7 left-1/2 -translate-x-1/2 min-w-[80px] text-center">
+                    <motion.div
+                      className="stage-bubble-text font-cairo font-bold text-xs py-1 px-2 whitespace-nowrap"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: animationComplete ? 1 : 0, y: animationComplete ? 0 : 10 }}
+                      transition={{ delay: 0.8 + (index * 0.15) }}
+                    >
+                      {stage.title}
+                    </motion.div>
+                  </div>
+                </motion.div>
               );
             })}
           </div>
         </div>
         
         <div className="mt-16 text-center relative z-10">
-          <p className="text-white font-cairo text-lg bg-black/20 mx-auto max-w-md rounded-lg p-2" dir="rtl">
+          <p className="text-white font-cairo text-lg bg-black/30 mx-auto max-w-md rounded-lg p-2 backdrop-blur-sm" dir="rtl">
             أكمل كل مرحلة للتقدم في مسيرتك!
           </p>
         </div>
-
-        {/* Decorative elements */}
-        <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-          className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/40 to-transparent z-5"
-        />
       </div>
     </div>
   );
