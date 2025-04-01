@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Stage } from '@/data/questions/types';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { Check, Lock, Unlock, Trophy, Star, ArrowLeft, MapPin, Flag, Award } from 'lucide-react';
+import { Check, Lock, Unlock, Trophy, Star, ArrowLeft, MapPin, Flag, Award, X, Compass, Ship, Anchor, Skull } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -88,27 +88,23 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     'bg-red-100 text-red-800';
 
   // Get stage icon based on order
-  const getStageIcon = (order: number, isCompleted: boolean, isUnlocked: boolean) => {
-    // Special stages
-    if (order === 10) return <Flag className="h-5 w-5 text-red-500" />;
-    if (order === 1) return <MapPin className="h-5 w-5 text-blue-500" />;
-    if (order % 5 === 0) return <Trophy className="h-5 w-5 text-yellow-500" />;
+  const getStageIcon = (order: number, isCompleted: boolean) => {
+    if (isCompleted) return <Check className="h-5 w-5 text-green-500" />;
     
-    // Regular stages
-    if (isCompleted) return <Check className="h-4 w-4 text-green-500" />;
-    if (isUnlocked) return <Unlock className="h-4 w-4 text-blue-500" />;
-    return <Lock className="h-4 w-4 text-gray-500" />;
-  };
-
-  // تحقق مما إذا كانت المرحلة ستفتح المرحلة التالية
-  const willUnlockNextStage = (currentStage: Stage, nextStage: Stage | undefined) => {
-    if (!nextStage) return false;
-    
-    // تحقق إذا كانت المرحلة الحالية مكتملة وما إذا كانت ستفتح المرحلة التالية
-    const isCurrentComplete = progress.completedStages[category]?.[currentStage.id] || false;
-    const isNextUnlocked = isStageUnlocked(category, nextStage.id, progress);
-    
-    return isCurrentComplete && isNextUnlocked;
+    // Special stages with treasure-map themed icons
+    switch(order) {
+      case 1: return <MapPin className="h-5 w-5 text-red-600" />;
+      case 2: return <Anchor className="h-5 w-5 text-blue-600" />;
+      case 3: return <Ship className="h-5 w-5 text-indigo-600" />;
+      case 4: return <Compass className="h-5 w-5 text-cyan-600" />;
+      case 5: return <X className="h-5 w-5 text-purple-600" />;
+      case 6: return <Anchor className="h-5 w-5 text-amber-600" />;
+      case 7: return <Skull className="h-5 w-5 text-gray-600" />;
+      case 8: return <Ship className="h-5 w-5 text-emerald-600" />;
+      case 9: return <Compass className="h-5 w-5 text-orange-600" />;
+      case 10: return <Trophy className="h-5 w-5 text-yellow-500" />;
+      default: return <MapPin className="h-5 w-5 text-teal-600" />;
+    }
   };
   
   // عرض النجوم بشكل أكثر احترافية
@@ -169,33 +165,51 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
     );
   };
 
+  // Calculate paths for the treasure map
+  const getPathCoordinates = (index: number, totalStages: number) => {
+    // Create a zigzag path that resembles a treasure map route
+    const baseX = 160; // Center of the map
+    const startY = 550; // Bottom of the map
+    const endY = 50; // Top of the map
+    const totalHeight = startY - endY;
+    const segmentHeight = totalHeight / (totalStages - 1);
+    
+    // Make the path zigzag
+    const amplitude = 100; // How far left/right the zigzag goes
+    const y = startY - (index * segmentHeight);
+    // Alternate left and right, but with some randomness
+    const xOffset = ((index % 2) * 2 - 1) * amplitude * (0.8 + Math.cos(index * 0.7) * 0.2);
+    
+    return { x: baseX + xOffset, y };
+  };
+
   return (
     <div className="relative min-h-screen">
-      {/* Map background with the new uploaded image */}
+      {/* Treasure Map background */}
       <div 
         className="min-h-screen pb-20 pt-4 relative overflow-hidden"
         style={{
-          backgroundImage: `url('/lovable-uploads/0a548561-de49-46fc-ba7c-047bae73a678.png')`,
+          backgroundImage: `url('/lovable-uploads/c03b91b5-be2d-430c-8eea-e0c0ff3e9b47.jpeg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
         {/* Overlay to enhance visibility of content */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 to-blue-950/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-950/20 to-amber-800/20"></div>
         
         {/* Back button and level info */}
         <div className="relative z-10 flex justify-between items-center px-6 py-4">
           <Button 
             variant="outline" 
-            className="bg-white/90 hover:bg-white font-cairo flex items-center gap-2"
+            className="bg-amber-50/90 hover:bg-amber-50 text-amber-900 font-cairo flex items-center gap-2 border-amber-700"
             onClick={onBackToLevels}
           >
             <ArrowLeft size={18} />
             <span dir="rtl">العودة للمستويات</span>
           </Button>
           
-          <div className="bg-white/90 dark:bg-slate-800/90 rounded-lg px-4 py-2 shadow-md">
-            <h2 className="text-xl font-bold text-center flex items-center gap-2 justify-center dark:text-white">
+          <div className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-4 py-2 shadow-md border-2 border-amber-700">
+            <h2 className="text-xl font-bold text-center flex items-center gap-2 justify-center text-amber-900 dark:text-amber-50">
               <Badge className={cn("text-sm", levelColor)}>
                 {levelLabel}
               </Badge>
@@ -203,60 +217,79 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             </h2>
           </div>
           
-          <div className="bg-white/90 dark:bg-slate-800/90 rounded-lg px-4 py-2 shadow-md">
-            <span className="font-bold text-slate-800 dark:text-white">
+          <div className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-4 py-2 shadow-md border-2 border-amber-700">
+            <span className="font-bold text-amber-900 dark:text-amber-50">
               {totalCompletedStages} / {limitedStages.length} مرحلة
             </span>
           </div>
         </div>
 
-        {/* Main winding path container - similar to the referenced image */}
+        {/* Main treasure map path */}
         <div className="container mx-auto max-w-lg px-4 pt-10 z-10 relative">
-          {/* The winding path - implement to match reference image */}
+          {/* The treasure map path */}
           <div className="relative min-h-[600px] w-full">
-            {/* Base path (curved line) */}
+            {/* Dotted path - using SVG for better control */}
             <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 320 600" preserveAspectRatio="none">
+              {/* Create zigzag dotted line path */}
               <motion.path
-                d="M160,580 C80,520 240,470 160,410 C80,350 240,300 160,240 C80,180 240,130 160,70 C80,10 160,10 160,10"
+                d={`M${getPathCoordinates(0, limitedStages.length).x},${getPathCoordinates(0, limitedStages.length).y} 
+                   ${Array.from({length: limitedStages.length - 1}, (_, i) => 
+                     `L${getPathCoordinates(i + 1, limitedStages.length).x},${getPathCoordinates(i + 1, limitedStages.length).y}`
+                   ).join(' ')}`}
                 fill="none"
-                stroke="#E67E22"
-                strokeWidth="16"
+                stroke="#8B4513"
+                strokeWidth="6"
                 strokeLinecap="round"
-                strokeDasharray="0,0"
+                strokeDasharray="1, 15"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
                 transition={{ duration: 2, ease: "easeInOut" }}
               />
+              
+              {/* Solid path underneath for completed stages */}
+              <motion.path
+                d={`M${getPathCoordinates(0, limitedStages.length).x},${getPathCoordinates(0, limitedStages.length).y} 
+                   ${Array.from({length: limitedStages.length - 1}, (_, i) => {
+                     // Only include stages that are completed in the solid path
+                     const stageCompleted = progress.completedStages[category]?.[limitedStages[i]?.id] || false;
+                     if (stageCompleted) {
+                       return `L${getPathCoordinates(i + 1, limitedStages.length).x},${getPathCoordinates(i + 1, limitedStages.length).y}`;
+                     }
+                     return '';
+                   }).join(' ')}`}
+                fill="none"
+                stroke="#A0522D"
+                strokeWidth="8"
+                strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 2.5, ease: "easeInOut", delay: 0.5 }}
+              />
             </svg>
 
-            {/* Render stage nodes along the path */}
+            {/* Render stage nodes along the treasure path */}
             {limitedStages.map((stage, index) => {
               const isUnlocked = isStageUnlocked(category, stage.id, progress);
               const isCompleted = progress.completedStages[category]?.[stage.id] || false;
               const completionPercentage = progress.stageCompletion[category]?.[stage.id] || 0;
               
-              // Calculate position along the path based on index
-              const posY = 580 - (index * (570 / (limitedStages.length - 1)));
-              // Alternate between left and right sides of the path
-              const posX = index % 2 === 0 ? 100 : 220;
-              
-              // Calculate the next stage for path connection
-              const nextStage = index < limitedStages.length - 1 ? limitedStages[index + 1] : null;
-              const showCompletionPath = nextStage && isCompleted;
+              // Get position from our path calculation function
+              const position = getPathCoordinates(index, limitedStages.length);
               
               return (
                 <motion.div
                   key={stage.id}
                   className="absolute"
                   style={{ 
-                    top: posY, 
-                    left: posX,
+                    top: position.y - 30, // Center the icon
+                    left: position.x - 30, // Center the icon
                     zIndex: 30 - index
                   }}
-                  initial={{ opacity: 0, scale: 0 }}
+                  initial={{ opacity: 0, scale: 0, rotate: -30 }}
                   animate={{ 
                     opacity: animationComplete ? 1 : 0, 
-                    scale: animationComplete ? 1 : 0 
+                    scale: animationComplete ? 1 : 0,
+                    rotate: 0
                   }}
                   transition={{ 
                     delay: 0.5 + (index * 0.15), 
@@ -269,40 +302,69 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                       <TooltipTrigger>
                         <motion.div
                           className={cn(
-                            "w-16 h-16 rounded-full flex items-center justify-center relative cursor-pointer shadow-lg transform hover:scale-105 transition-transform",
-                            isCompleted ? "bg-blue-700 border-4 border-blue-300" : 
-                            isUnlocked ? "bg-blue-600 border-4 border-blue-400" : 
-                            "bg-gray-600 border-4 border-gray-400"
+                            "w-16 h-16 rounded-full flex items-center justify-center relative cursor-pointer",
+                            isCompleted ? "bg-yellow-500 border-4 border-amber-700 shadow-[0_0_15px_rgba(245,158,11,0.5)]" : 
+                            isUnlocked ? "bg-amber-400 border-4 border-amber-700 shadow-md" : 
+                            "bg-slate-600 border-4 border-slate-800 opacity-80"
                           )}
                           onClick={() => handleStageClick(stage)}
-                          whileHover={{ scale: 1.1 }}
+                          whileHover={{ scale: 1.1, rotate: [0, -5, 5, -5, 0] }}
                           whileTap={{ scale: 0.95 }}
                         >
+                          <div className={cn(
+                            "absolute inset-0 rounded-full overflow-hidden",
+                            isUnlocked ? "" : "grayscale brightness-50"
+                          )}>
+                            {/* Background texture for the stage markers */}
+                            <div className="w-full h-full bg-gradient-to-br from-amber-300 to-amber-600"></div>
+                            <div className="absolute inset-0 bg-[url('/lovable-uploads/ece5b219-22bb-496e-8cbb-2d07647c2edf.jpeg')] opacity-30 mix-blend-overlay"></div>
+                          </div>
+                          
                           {/* Stage number */}
-                          <span className="text-2xl font-bold text-white">{stage.order}</span>
+                          <div className="relative z-10 flex flex-col items-center justify-center">
+                            <span className="text-2xl font-bold text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">{stage.order}</span>
+                            <div className="mt-1">
+                              {getStageIcon(stage.order, isCompleted)}
+                            </div>
+                          </div>
                           
                           {/* Lock overlay for locked stages */}
                           {!isUnlocked && (
-                            <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/50">
-                              <Lock className="h-7 w-7 text-white" />
+                            <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/50 z-20">
+                              <Lock className="h-7 w-7 text-white drop-shadow-lg" />
                             </div>
                           )}
                           
                           {/* Stars below the stage icon */}
                           {(isCompleted || (isUnlocked && completionPercentage > 0)) && (
-                            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2">
+                            <div className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 z-10">
                               {renderStars(completionPercentage)}
                             </div>
                           )}
+                          
+                          {/* Glow effect for the next unlocked stage */}
+                          {isUnlocked && !isCompleted && (
+                            <motion.div 
+                              className="absolute inset-0 rounded-full"
+                              animate={{ 
+                                boxShadow: ['0 0 5px 2px rgba(255,204,0,0.3)', '0 0 15px 5px rgba(255,204,0,0.6)', '0 0 5px 2px rgba(255,204,0,0.3)']
+                              }}
+                              transition={{ 
+                                duration: 2,
+                                repeat: Infinity,
+                                repeatType: "reverse"
+                              }}
+                            />
+                          )}
                         </motion.div>
                       </TooltipTrigger>
-                      <TooltipContent className="bg-slate-800 border-slate-700">
-                        <div className="text-center text-white font-cairo" dir="rtl">
-                          <p className="font-bold">{stage.title}</p>
+                      <TooltipContent className="bg-amber-800 border-amber-600 shadow-xl">
+                        <div className="text-center text-amber-50 font-cairo" dir="rtl">
+                          <p className="font-bold text-lg">{stage.title}</p>
                           {isCompleted ? (
                             <p className="text-green-300">تم الإكمال! {completionPercentage}%</p>
                           ) : isUnlocked ? (
-                            <p className="text-blue-300">متاح اللعب</p>
+                            <p className="text-yellow-300">متاح اللعب</p>
                           ) : (
                             <p className="text-red-300">مقفل - أكمل المرحلة السابقة</p>
                           )}
@@ -311,31 +373,10 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     </Tooltip>
                   </TooltipProvider>
                   
-                  {/* Path connection to next stage - only show if current stage is completed */}
-                  {showCompletionPath && (
-                    <motion.div
-                      className="absolute"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: animationComplete ? 1 : 0 }}
-                      transition={{ delay: 1 + (index * 0.15) }}
-                      style={{
-                        zIndex: -1,
-                        width: index % 2 === 0 ? '140px' : '140px',
-                        height: '50px',
-                        top: index % 2 === 0 ? '-25px' : '-25px',
-                        left: index % 2 === 0 ? '-30px' : '-90px',
-                        transformOrigin: index % 2 === 0 ? 'left center' : 'right center',
-                        transform: index % 2 === 0 ? 'rotate(-30deg)' : 'rotate(30deg)'
-                      }}
-                    >
-                      <div className="w-full h-3 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
-                    </motion.div>
-                  )}
-                  
                   {/* Stage title bubble */}
-                  <div className="absolute mt-7 left-1/2 -translate-x-1/2 min-w-[80px] text-center">
+                  <div className="absolute mt-8 left-1/2 -translate-x-1/2 min-w-[80px] text-center">
                     <motion.div
-                      className="stage-bubble-text font-cairo font-bold text-xs py-1 px-2 whitespace-nowrap"
+                      className="stage-bubble-text bg-amber-900/70 text-amber-50 font-cairo font-bold text-xs py-1 px-2 rounded-lg whitespace-nowrap border border-amber-600/50 shadow-md"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: animationComplete ? 1 : 0, y: animationComplete ? 0 : 10 }}
                       transition={{ delay: 0.8 + (index * 0.15) }}
@@ -343,15 +384,55 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                       {stage.title}
                     </motion.div>
                   </div>
+                  
+                  {/* Small decorative elements around the map - only for certain stages */}
+                  {index % 3 === 0 && (
+                    <motion.div 
+                      className="absolute"
+                      style={{ 
+                        top: Math.random() * 80 - 40, 
+                        left: Math.random() * 80 - 40,
+                        zIndex: -1
+                      }}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 0.7, scale: 1 }}
+                      transition={{ delay: 1.5 + (index * 0.1) }}
+                    >
+                      <img 
+                        src="/lovable-uploads/d6dbdcbd-c9dd-48f4-be1c-8b1c0ab0a39e.png" 
+                        className="w-10 h-10 object-contain opacity-70"
+                        alt="Map decoration"
+                      />
+                    </motion.div>
+                  )}
                 </motion.div>
               );
             })}
+            
+            {/* Decorative elements on the map */}
+            <motion.div
+              className="absolute top-1/4 right-5 opacity-70 z-0"
+              initial={{ opacity: 0, rotate: -20 }}
+              animate={{ opacity: 0.7, rotate: 0 }}
+              transition={{ delay: 1, duration: 1 }}
+            >
+              <Compass className="h-12 w-12 text-amber-800" />
+            </motion.div>
+            
+            <motion.div
+              className="absolute bottom-1/4 left-5 opacity-70 z-0"
+              initial={{ opacity: 0, rotate: 20 }}
+              animate={{ opacity: 0.7, rotate: 0 }}
+              transition={{ delay: 1.2, duration: 1 }}
+            >
+              <Ship className="h-10 w-10 text-amber-800" />
+            </motion.div>
           </div>
         </div>
         
         <div className="mt-16 text-center relative z-10">
-          <p className="text-white font-cairo text-lg bg-black/30 mx-auto max-w-md rounded-lg p-2 backdrop-blur-sm" dir="rtl">
-            أكمل كل مرحلة للتقدم في مسيرتك!
+          <p className="text-amber-50 font-cairo text-lg bg-amber-900/50 mx-auto max-w-md rounded-lg p-3 backdrop-blur-sm border border-amber-600/50 shadow-lg" dir="rtl">
+            اتبع مسار الكنز وأكمل كل مرحلة للوصول إلى الجائزة النهائية!
           </p>
         </div>
       </div>
