@@ -287,6 +287,103 @@ const islamicQuestions: Question[] = [
     category: "islam",
     level: "advanced",
     difficulty: 2.5
+  },
+  
+  // New advanced level questions
+  {
+    id: 31,
+    question: "من هو الصحابي الذي روى حديث 'إنما الأعمال بالنيات'؟",
+    options: ["أبو هريرة", "عمر بن الخطاب", "أنس بن مالك", "عبد الله بن عباس"],
+    correctAnswer: 1,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.6
+  },
+  {
+    id: 32,
+    question: "ما هي آخر غزوة غزاها النبي محمد ﷺ بنفسه؟",
+    options: ["غزوة تبوك", "غزوة حنين", "غزوة بدر", "غزوة أحد"],
+    correctAnswer: 0,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.7
+  },
+  {
+    id: 33,
+    question: "أي من الصحابة كان يلقب بذي النورين؟",
+    options: ["علي بن أبي طالب", "عمر بن الخطاب", "أبو بكر الصديق", "عثمان بن عفان"],
+    correctAnswer: 3,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.5
+  },
+  {
+    id: 34,
+    question: "ما هي السور�� التي تعادل ثلث القرآن؟",
+    options: ["سورة الإخلاص", "سورة الفاتحة", "سورة الكوثر", "سورة الناس"],
+    correctAnswer: 0,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.6
+  },
+  {
+    id: 35,
+    question: "من هم العشرة المبشرون بالجنة؟",
+    options: [
+      "أبو بكر وعمر وعثمان وعلي وطلحة والزبير وسعد وسعيد وأبو عبيدة وعبد الرحمن بن عوف", 
+      "أبو بكر وعمر وعثمان وعلي وحمزة وجعفر وزيد وبلال وعمار وأبو ذر", 
+      "أبو بكر وعمر وعثمان وعلي والحسن والحسين وفاطمة وخديجة وعائشة ومريم", 
+      "أبو بكر وعمر وعثمان وعلي وخالد ومعاذ وأبي وأنس وسلمان وأبو الدرداء"
+    ],
+    correctAnswer: 0,
+    category: "islam",
+    level: "advanced",
+    difficulty: 3.0
+  },
+  {
+    id: 36,
+    question: "ما هو الركن السادس من أركان الإيمان؟",
+    options: ["الإيمان بالله", "الإيمان بالرسل", "الإيمان باليوم الآخر", "الإيمان بالقضاء والقدر"],
+    correctAnswer: 3,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.5
+  },
+  {
+    id: 37,
+    question: "ما هي السنة التي حدثت فيها غزوة بدر؟",
+    options: ["السنة الأولى للهجرة", "السنة الثانية للهجرة", "السنة الثالثة للهجرة", "السنة الرابعة للهجرة"],
+    correctAnswer: 1,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.7
+  },
+  {
+    id: 38,
+    question: "ما معنى 'الزُّبُر' في القرآن الكريم؟",
+    options: ["الكتب", "الحجارة", "الجبال", "الحديد"],
+    correctAnswer: 0,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.8
+  },
+  {
+    id: 39,
+    question: "من هو أول من جمع القرآن في مصحف واحد؟",
+    options: ["أبو بكر الصديق", "عمر بن الخطاب", "عثمان بن عفان", "علي بن أبي طالب"],
+    correctAnswer: 0,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.6
+  },
+  {
+    id: 40,
+    question: "ما هي سورة القتال في القرآن الكريم؟",
+    options: ["سورة الأنفال", "سورة التوبة", "سورة محمد", "سورة الأحزاب"],
+    correctAnswer: 2,
+    category: "islam",
+    level: "advanced",
+    difficulty: 2.9
   }
 ];
 
