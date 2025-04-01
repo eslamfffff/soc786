@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { getQuestionsByCategoryAndLevel } from "@/data/questions";
 import categories from "@/data/categories";
@@ -14,7 +15,8 @@ import StageQuiz from "@/components/StageQuiz";
 import StageComplete from "@/components/StageComplete";
 import { Stage } from "@/data/questions/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // Function to generate stages for each level - modified to have 10 stages per level
 const generateStages = (level: string, count: number = 10): Stage[] => {
@@ -230,7 +232,15 @@ export default function Index() {
 
   return (
     <div className={`min-h-screen ${getBackgroundClass()} pb-10 transition-colors duration-300`}>
-      <ThemeToggle />
+      <div className="flex justify-between items-center p-2">
+        <ThemeToggle />
+        <Link to="/admin">
+          <Button variant="outline" size="sm" className="flex items-center gap-1">
+            <Settings className="h-4 w-4" />
+            <span className="hidden md:inline">لوحة الإدارة</span>
+          </Button>
+        </Link>
+      </div>
       
       {viewMode === ViewMode.CATEGORIES && (
         <CategorySelection onCategorySelect={handleCategorySelect} />

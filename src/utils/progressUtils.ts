@@ -1,3 +1,4 @@
+
 // Function to load user progress from localStorage
 export const loadProgress = () => {
   try {
@@ -113,6 +114,20 @@ export const getUnlockThreshold = (levelId: string): number => {
   }
 };
 
+// Load custom uploaded questions from localStorage
+export const loadUploadedQuestions = () => {
+  try {
+    const serializedQuestions = localStorage.getItem('uploadedQuestions');
+    if (serializedQuestions === null) {
+      return [];
+    }
+    return JSON.parse(serializedQuestions);
+  } catch (error) {
+    console.error("Failed to load uploaded questions from localStorage:", error);
+    return [];
+  }
+};
+
 // Improved function to ensure unique questions for each stage
 export const getUniqueQuestions = (
   allQuestions: any[], 
@@ -126,8 +141,19 @@ export const getUniqueQuestions = (
   // Parse stage number from stageId
   const stageNumber = stageId ? parseInt(stageId.split('-')[1]) || 1 : 1;
   
+  // Include custom uploaded questions that match the category and level
+  const uploadedQuestions = loadUploadedQuestions().filter(
+    (q: any) => q.category === categoryId && q.level === levelId
+  );
+  
+  // Combine default questions with uploaded questions
+  const combinedQuestions = [
+    ...allQuestions,
+    ...uploadedQuestions
+  ];
+  
   // Filter questions for this category and level
-  const filteredQuestions = allQuestions.filter(
+  const filteredQuestions = combinedQuestions.filter(
     q => q.category === categoryId && q.level === levelId
   );
   
