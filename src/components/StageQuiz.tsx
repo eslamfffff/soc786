@@ -87,7 +87,11 @@ const StageQuiz: React.FC<StageQuizProps> = ({
     }
   }, [questions, stage.level, toast]);
 
-  const question = questions[currentQuestion];
+  // Get the current question safely
+  const question = questions.length > 0 && currentQuestion < questions.length 
+    ? questions[currentQuestion] 
+    : null;
+    
   const category = categories.find(cat => cat.id === categoryId);
   
   // Calculate time per question based on level
@@ -95,7 +99,7 @@ const StageQuiz: React.FC<StageQuizProps> = ({
 
   // Memoize handleTimeUp to prevent unnecessary re-renders
   const handleTimeUp = useCallback(() => {
-    if (selectedAnswer === null) {
+    if (selectedAnswer === null && question) {
       setIsTimerActive(false);
       setIsRevealed(true);
       setShowNextButton(true);
@@ -110,7 +114,7 @@ const StageQuiz: React.FC<StageQuizProps> = ({
   }, [selectedAnswer, question, toast]);
 
   const handleAnswerSelect = (index: number) => {
-    if (selectedAnswer !== null || !isTimerActive) return;
+    if (selectedAnswer !== null || !isTimerActive || !question) return;
     
     setSelectedAnswer(index);
     setIsTimerActive(false);
@@ -242,6 +246,31 @@ const StageQuiz: React.FC<StageQuizProps> = ({
             onClick={onBack}
           >
             إعادة المحاولة
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // If we have questions but the current question is null (safety check)
+  if (!question) {
+    return (
+      <div className="quiz-container">
+        <div className="quiz-card dark:bg-slate-800 dark:border-slate-700 flex flex-col items-center justify-center min-h-[400px]">
+          <AlertTriangle className="h-16 w-16 text-yellow-500 mb-4" />
+          <h2 className="text-2xl font-bold font-cairo text-slate-800 dark:text-slate-200 mb-2" dir="rtl">
+            خطأ في عرض السؤال
+          </h2>
+          <p className="text-lg font-cairo text-slate-700 dark:text-slate-300 mb-6 text-center max-w-md" dir="rtl">
+            حدث خطأ في عرض السؤال الحالي. يرجى العودة والمحاولة مرة أخرى.
+          </p>
+          <Button 
+            variant="default" 
+            size="lg" 
+            className="font-cairo"
+            onClick={onBack}
+          >
+            العودة للمراحل
           </Button>
         </div>
       </div>

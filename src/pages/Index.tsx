@@ -139,8 +139,7 @@ export default function Index() {
     // Always 10 questions per stage
     const questionsPerStage = 10;
     
-    // إنشاء رقم عشوائي فريد لكل مرحلة بناءً على معرف المرحلة
-    // هذا سيضمن أن نفس المرحلة ستحصل دائمًا على نفس الأسئلة العشوائية
+    // Create a unique random seed for each stage based on its ID
     const getStableSeed = (stageId: string) => {
       let hash = 0;
       for (let i = 0; i < stageId.length; i++) {
@@ -153,13 +152,13 @@ export default function Index() {
     
     const stageSeed = getStableSeed(stageId);
     
-    // تضمين بذرة فريدة لكل مرحلة لضمان اختلاف الأسئلة
+    // Include a unique seed for each stage to ensure different questions
     const uniqueQuestions = getUniqueQuestions(
       allLevelQuestions,
       selectedCategory,
       selectedLevel,
       questionsPerStage,
-      `${stageId}-${stageSeed}` // استخدام معرف المرحلة مع بذرة ثابتة
+      `${stageId}-${stageSeed}` // Use stage ID with a stable seed
     );
     
     setCurrentQuestions(uniqueQuestions);
@@ -279,9 +278,9 @@ export default function Index() {
         />
       )}
       
-      {viewMode === ViewMode.STAGE_QUIZ && selectedCategory && selectedStage && (
+      {viewMode === ViewMode.STAGE_QUIZ && selectedCategory && selectedStage && currentQuestions.length > 0 && (
         <StageQuiz
-          questions={currentQuestions.length > 0 ? currentQuestions : []}
+          questions={currentQuestions}
           stage={selectedStage}
           categoryId={selectedCategory}
           onBack={handleBackToStages}
@@ -298,7 +297,7 @@ export default function Index() {
               correctAnswers={quizStats.correctAnswers}
               totalQuestions={quizStats.totalQuestions}
               onBackToStages={handleBackToStages}
-              // لا نريد الانتقال التلقائي إلى المرحلة التالية - تم تعطيل هذه الخاصية
+              // Disable automatic progress to next stage
               onNextStage={undefined}
               hasNextStage={false}
             />
@@ -313,4 +312,4 @@ export default function Index() {
       </div>
     </div>
   );
-};
+}
