@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { getQuestionsByCategoryAndLevel } from "@/data/questions";
 import categories from "@/data/categories";
@@ -133,32 +132,19 @@ export default function Index() {
     setSelectedStage(stage);
     setViewMode(ViewMode.STAGE_QUIZ);
     
-    // Get questions for this stage
+    // Get questions for this stage using the improved getUniqueQuestions function
     const allLevelQuestions = getQuestionsByCategoryAndLevel(selectedCategory, selectedLevel);
     
     // Always 10 questions per stage
     const questionsPerStage = 10;
     
-    // Create a unique random seed for each stage based on its ID
-    const getStableSeed = (stageId: string) => {
-      let hash = 0;
-      for (let i = 0; i < stageId.length; i++) {
-        const char = stageId.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-      }
-      return Math.abs(hash);
-    };
-    
-    const stageSeed = getStableSeed(stageId);
-    
-    // Include a unique seed for each stage to ensure different questions
+    // Use the stageId directly to ensure deterministic but different questions for each stage
     const uniqueQuestions = getUniqueQuestions(
       allLevelQuestions,
       selectedCategory,
       selectedLevel,
       questionsPerStage,
-      `${stageId}-${stageSeed}` // Use stage ID with a stable seed
+      stageId // Pass the full stageId for better uniqueness
     );
     
     setCurrentQuestions(uniqueQuestions);

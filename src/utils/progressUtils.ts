@@ -113,7 +113,7 @@ export const getUnlockThreshold = (levelId: string): number => {
   }
 };
 
-// أضف معرف المرحلة لضمان الحصول على أسئلة مختلفة لكل مرحلة
+// Improved function to ensure unique questions for each stage
 export const getUniqueQuestions = (
   allQuestions: any[], 
   categoryId: string, 
@@ -123,84 +123,99 @@ export const getUniqueQuestions = (
 ) => {
   if (allQuestions.length === 0) return [];
   
-  // استخدم معرف المرحلة لإنشاء بذرة مختلفة للتوزيع العشوائي
-  const stageSeed = stageId ? parseInt(stageId.split('-')[1]) || 1 : 1;
+  // Parse stage number from stageId
+  const stageNumber = stageId ? parseInt(stageId.split('-')[1]) || 1 : 1;
   
-  // فلترة الأسئلة لهذه الفئة والمستوى
+  // Filter questions for this category and level
   const filteredQuestions = allQuestions.filter(
     q => q.category === categoryId && q.level === levelId
   );
   
   if (filteredQuestions.length === 0) return [];
   
-  // اخلط الأسئلة بطريقة ثابتة باستخدام معرف المرحلة
-  let shuffled = [...filteredQuestions];
+  // Create a more deterministic but different shuffle for each stage
+  // Use a consistent seeded random approach
+  const seedRandom = (seed: number) => {
+    let state = seed;
+    return () => {
+      state = (state * 9301 + 49297) % 233280;
+      return state / 233280;
+    };
+  };
   
-  // استخدام خوارزمية خلط يمكن التنبؤ بها
+  // Use stage number as part of the seed for consistent but different questions per stage
+  const random = seedRandom(stageNumber * 100 + (levelId === 'beginner' ? 1 : levelId === 'intermediate' ? 2 : 3) * 1000);
+  
+  // Make a copy of questions to shuffle
+  const shuffled = [...filteredQuestions];
+  
+  // Fisher-Yates shuffle with seeded random
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(((i * stageSeed) % shuffled.length) * 0.7);
+    const j = Math.floor(random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   
-  // للحصول على توزيع متوازن للصعوبة، ننظم الأسئلة
+  // Get difficulty-based questions
   let easyQuestions = shuffled.filter(q => q.difficulty === 1);
   let mediumQuestions = shuffled.filter(q => q.difficulty === 2);
   let hardQuestions = shuffled.filter(q => q.difficulty === 3);
   
-  // إذا لم يكن هناك صعوبة محددة، استخدم التصنيف الافتراضي
+  // If difficulty isn't specified, create balanced pools
   if (easyQuestions.length + mediumQuestions.length + hardQuestions.length === 0) {
-    easyQuestions = shuffled.slice(0, Math.floor(shuffled.length * 0.4));
-    mediumQuestions = shuffled.slice(Math.floor(shuffled.length * 0.4), Math.floor(shuffled.length * 0.7));
-    hardQuestions = shuffled.slice(Math.floor(shuffled.length * 0.7));
+    const chunkSize = Math.floor(shuffled.length / 3);
+    easyQuestions = shuffled.slice(0, chunkSize);
+    mediumQuestions = shuffled.slice(chunkSize, chunkSize * 2);
+    hardQuestions = shuffled.slice(chunkSize * 2);
   }
   
-  const result = [];
+  // Modify selection based on stage number to ensure progression
+  // Earlier stages get more easy questions, later stages get more hard questions
+  const stagePosition = Math.min(stageNumber / 10, 1); // 0 to 1 based on stage position
   
-  // توزيع الأسئلة بناءً على المستوى
+  let easyRatio, mediumRatio, hardRatio;
+  
   if (levelId === 'beginner') {
-    // للمبتدئين: 60% سهل، 30% متوسط، 10% صعب
-    const easyCount = Math.min(Math.ceil(count * 0.6), easyQuestions.length);
-    const mediumCount = Math.min(Math.ceil(count * 0.3), mediumQuestions.length);
-    const hardCount = Math.min(count - easyCount - mediumCount, hardQuestions.length);
-    
-    result.push(...easyQuestions.slice(0, easyCount));
-    result.push(...mediumQuestions.slice(0, mediumCount));
-    result.push(...hardQuestions.slice(0, hardCount));
+    // Beginner level: gradually decrease easy questions, increase medium and hard
+    easyRatio = 0.7 - stagePosition * 0.4; // 0.7 → 0.3
+    mediumRatio = 0.2 + stagePosition * 0.3; // 0.2 → 0.5
+    hardRatio = 0.1 + stagePosition * 0.1; // 0.1 → 0.2
   } else if (levelId === 'intermediate') {
-    // للمتوسط: 30% سهل، 50% متوسط، 20% صعب
-    const easyCount = Math.min(Math.ceil(count * 0.3), easyQuestions.length);
-    const mediumCount = Math.min(Math.ceil(count * 0.5), mediumQuestions.length);
-    const hardCount = Math.min(count - easyCount - mediumCount, hardQuestions.length);
-    
-    result.push(...easyQuestions.slice(0, easyCount));
-    result.push(...mediumQuestions.slice(0, mediumCount));
-    result.push(...hardQuestions.slice(0, hardCount));
+    // Intermediate level: balance between all types with progression
+    easyRatio = 0.4 - stagePosition * 0.3; // 0.4 → 0.1
+    mediumRatio = 0.4; // Stay constant
+    hardRatio = 0.2 + stagePosition * 0.3; // 0.2 → 0.5
   } else {
-    // للمتقدم: 10% سهل، 40% متوسط، 50% صعب
-    const easyCount = Math.min(Math.ceil(count * 0.1), easyQuestions.length);
-    const mediumCount = Math.min(Math.ceil(count * 0.4), mediumQuestions.length);
-    const hardCount = Math.min(count - easyCount - mediumCount, hardQuestions.length);
-    
-    result.push(...easyQuestions.slice(0, easyCount));
-    result.push(...mediumQuestions.slice(0, mediumCount));
-    result.push(...hardQuestions.slice(0, hardCount));
+    // Advanced level: mostly medium and hard with progression
+    easyRatio = 0.2 - stagePosition * 0.1; // 0.2 → 0.1
+    mediumRatio = 0.5 - stagePosition * 0.2; // 0.5 → 0.3
+    hardRatio = 0.3 + stagePosition * 0.3; // 0.3 → 0.6
   }
   
-  // إذا لم يكن لدينا ما يكفي من الأسئلة، أضف المزيد من القائمة المخلوطة
+  // Calculate counts for each difficulty
+  const easyCount = Math.max(1, Math.min(Math.round(count * easyRatio), easyQuestions.length));
+  const hardCount = Math.max(1, Math.min(Math.round(count * hardRatio), hardQuestions.length));
+  const mediumCount = Math.min(count - easyCount - hardCount, mediumQuestions.length);
+  
+  // Select questions based on calculated counts
+  const result = [
+    ...easyQuestions.slice(0, easyCount),
+    ...mediumQuestions.slice(0, mediumCount),
+    ...hardQuestions.slice(0, hardCount)
+  ];
+  
+  // If we don't have enough questions, add more from any difficulty
   if (result.length < count) {
-    const remaining = count - result.length;
+    // Remaining shuffled questions not already selected
     const usedIds = new Set(result.map(q => q.id));
+    const remainingQuestions = shuffled.filter(q => !usedIds.has(q.id));
     
-    const extraQuestions = shuffled
-      .filter(q => !usedIds.has(q.id))
-      .slice(0, remaining);
-    
-    result.push(...extraQuestions);
+    // Add remaining questions up to count
+    result.push(...remainingQuestions.slice(0, count - result.length));
   }
   
-  // اخلط النتيجة النهائية بطريقة مختلفة لكل مرحلة
+  // Final shuffle of the result for better question order
   for (let i = result.length - 1; i > 0; i--) {
-    const j = (i + stageSeed) % result.length;
+    const j = Math.floor(random() * (i + 1));
     [result[i], result[j]] = [result[j], result[i]];
   }
   
