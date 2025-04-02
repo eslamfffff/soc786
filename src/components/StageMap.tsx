@@ -602,7 +602,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                 className="w-28 h-28 rounded-full border-2 border-blue-500/20 absolute"
                 initial={{ scale: 0, opacity: 0.8 }}
                 animate={{ scale: 3, opacity: 0 }}
-                transition={{ duration: a6, repeat: Infinity, repeatDelay: 2 }}
+                transition={{ duration: 6, repeat: Infinity, repeatDelay: 2 }}
               />
               <motion.div
                 className="w-28 h-28 rounded-full border-2 border-blue-500/30 absolute"
@@ -659,4 +659,3 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
 };
 
 export default StageMap;
-
