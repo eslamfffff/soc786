@@ -1,8 +1,8 @@
 
 import * as React from "react"
 
-// Reduced mobile breakpoint to better target phones
-const MOBILE_BREAKPOINT = 640
+// Mobile breakpoint set to 768px (md) for better responsive behavior with our interactive map
+const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
