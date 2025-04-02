@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Stage } from '@/data/questions/types';
 import { cn } from '@/lib/utils';
 import { motion, useAnimation } from 'framer-motion';
-import { Check, Lock, Trophy, Star, ArrowLeft, MapPin, Flag, Award, X, Compass, Ship, Anchor, Skull } from 'lucide-react';
+import { Check, Lock, Trophy, Star, ArrowLeft, MapPin, Flag, Award, X, Compass, Ship, Anchor, Skull, BookOpen, Map, Route } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +26,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
   const mapRef = useRef<HTMLDivElement>(null);
   const pathControls = useAnimation();
   const isMobile = useIsMobile();
+  const [isBookOpen, setIsBookOpen] = useState(true);
   
   if (!progress.completedStages) {
     progress.completedStages = {};
@@ -77,7 +78,11 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
       return;
     }
     
-    onStageSelect(stage.id);
+    // Add page turning effect
+    setIsBookOpen(false);
+    setTimeout(() => {
+      onStageSelect(stage.id);
+    }, 500);
   };
 
   const currentLevelStages = stages.filter(stage => stage.id.startsWith(levelId));
@@ -98,34 +103,21 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     levelId === 'intermediate' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200' : 
                     'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
 
-  // Adjust node size based on device
-  const nodeSize = isMobile ? {
-    width: 60,
-    height: 60,
-    fontSize: 'text-lg',
-    iconSize: 'h-4 w-4'
-  } : {
-    width: 80,
-    height: 80,
-    fontSize: 'text-2xl',
-    iconSize: 'h-5 w-5'
-  };
-
   const getStageIcon = (order: number, isCompleted: boolean) => {
-    if (isCompleted) return <Check className={cn("text-green-500", nodeSize.iconSize)} />;
+    if (isCompleted) return <Check className={cn("text-green-500 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
     
     switch(order) {
-      case 1: return <MapPin className={cn("text-red-600", nodeSize.iconSize)} />;
-      case 2: return <Anchor className={cn("text-blue-600", nodeSize.iconSize)} />;
-      case 3: return <Ship className={cn("text-indigo-600", nodeSize.iconSize)} />;
-      case 4: return <Compass className={cn("text-cyan-600", nodeSize.iconSize)} />;
-      case 5: return <X className={cn("text-purple-600", nodeSize.iconSize)} />;
-      case 6: return <Anchor className={cn("text-amber-600", nodeSize.iconSize)} />;
-      case 7: return <Skull className={cn("text-gray-600", nodeSize.iconSize)} />;
-      case 8: return <Ship className={cn("text-emerald-600", nodeSize.iconSize)} />;
-      case 9: return <Compass className={cn("text-orange-600", nodeSize.iconSize)} />;
-      case 10: return <Trophy className={cn("text-yellow-500", nodeSize.iconSize)} />;
-      default: return <MapPin className={cn("text-teal-600", nodeSize.iconSize)} />;
+      case 1: return <MapPin className={cn("text-red-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 2: return <Anchor className={cn("text-blue-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 3: return <Ship className={cn("text-indigo-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 4: return <Compass className={cn("text-cyan-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 5: return <X className={cn("text-purple-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 6: return <Anchor className={cn("text-amber-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 7: return <Skull className={cn("text-gray-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 8: return <Ship className={cn("text-emerald-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 9: return <Compass className={cn("text-orange-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      case 10: return <Trophy className={cn("text-yellow-500 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
+      default: return <MapPin className={cn("text-teal-600 drop-shadow-md", isMobile ? "h-4 w-4" : "h-5 w-5")} />;
     }
   };
 
@@ -195,62 +187,39 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
     );
   };
 
-  const getPathCoordinates = (index: number, totalStages: number) => {
-    // Adjust path base values for mobile
-    const baseX = isMobile ? 120 : 160;
-    const startY = isMobile ? 450 : 550;
-    const endY = isMobile ? 40 : 50;
-    const totalHeight = startY - endY;
-    const segmentHeight = totalHeight / (totalStages - 1);
-    
-    // Reduce randomness for mobile for more predictable layout
-    const seedX = index * (isMobile ? 3 : 5) + (index % 2 === 0 ? 13 : 7);
-    const seedY = index * (isMobile ? 2 : 3) + (index % 3 === 0 ? 17 : 11);
-    
-    const y = startY - (index * segmentHeight);
-    
-    // Reduce the wave amplitude on mobile
-    const xAmplitude = isMobile ? 50 : 80;
-    const xOffset = Math.sin(index * 0.7) * xAmplitude + Math.cos(seedX) * (isMobile ? 10 : 20); 
-    const yOffset = Math.cos(seedY) * (isMobile ? 5 : 10);
-    
-    return { 
-      x: baseX + xOffset, 
-      y: y + yOffset
-    };
-  };
-
   return (
     <div className="relative min-h-screen" ref={mapRef}>
       <div 
-        className="min-h-screen pb-20 pt-4 relative overflow-hidden"
-        style={{
-          backgroundImage: `url('/lovable-uploads/c03b91b5-be2d-430c-8eea-e0c0ff3e9b47.jpeg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        className={cn(
+          "min-h-screen pb-20 pt-4 relative overflow-hidden transition-all duration-500",
+          isBookOpen ? "opacity-100" : "opacity-0 scale-90"
+        )}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-950/30 to-amber-800/20 mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-amber-950/10 to-transparent"></div>
-        
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div 
-            className="absolute -top-20 left-1/3 w-96 h-[800px] bg-amber-300/10 blur-3xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.2, 0.1, 0.2, 0] }}
-            transition={{ duration: 8, repeat: Infinity, repeatType: "reverse" }}
-          />
-          <motion.div 
-            className="absolute -top-20 right-1/4 w-80 h-[700px] bg-amber-100/5 blur-3xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.15, 0.05, 0.15, 0] }}
-            transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", delay: 2 }}
-          />
+        {/* Book-style background effect */}
+        <div className="absolute inset-0 bg-amber-100 dark:bg-amber-900/40 overflow-hidden">
+          {/* Paper texture */}
+          <div className="absolute inset-0 bg-[url('/lovable-uploads/ece5b219-22bb-496e-8cbb-2d07647c2edf.jpeg')] opacity-20 mix-blend-multiply"></div>
+          
+          {/* Book binding shadow */}
+          <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-amber-800/30 to-transparent"></div>
+          
+          {/* Page fold corner */}
+          <div className="absolute top-0 right-0 w-20 h-20">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-200/50 shadow-inner transform origin-top-right"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 border-l border-b border-amber-700/20 transform rotate-[315deg] origin-top-right shadow-md"></div>
+          </div>
+          
+          {/* Random ink stains */}
+          <div className="absolute top-1/4 left-1/5 w-12 h-8 bg-amber-900/10 rounded-full blur-md transform rotate-12"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-16 h-6 bg-amber-900/5 rounded-full blur-md transform -rotate-6"></div>
+          
+          {/* Coffee stain */}
+          <div className="absolute bottom-1/4 left-1/3 w-16 h-16 rounded-full bg-amber-800/10 blur-md"></div>
         </div>
         
-        {/* Header - Simplified for mobile */}
+        {/* Header */}
         <div className={cn(
-          "relative z-20 flex justify-between items-center px-2 sm:px-6 py-2 sm:py-4 bg-gradient-to-b from-amber-900/30 to-transparent",
+          "relative z-20 flex justify-between items-center px-2 sm:px-6 py-2 sm:py-4",
           isMobile ? "flex-col gap-2" : "flex-row"
         )}>
           <motion.div
@@ -261,7 +230,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             <Button 
               variant="outline" 
               size={isMobile ? "sm" : "default"}
-              className="bg-amber-50/90 hover:bg-amber-50 text-amber-900 font-cairo flex items-center gap-2 border-amber-700 shadow-md backdrop-blur-sm"
+              className="bg-amber-50/90 hover:bg-amber-50 text-amber-900 font-cairo flex items-center gap-2 border-amber-700 shadow-md"
               onClick={onBackToLevels}
             >
               <ArrowLeft size={isMobile ? 14 : 18} />
@@ -273,7 +242,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-            className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow-md border-2 border-amber-700 backdrop-blur-sm"
+            className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow-md border-2 border-amber-700"
           >
             <h2 className={cn(
               "font-bold text-center flex items-center gap-2 justify-center text-amber-900 dark:text-amber-50",
@@ -290,7 +259,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             initial={{ x: 50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow-md border-2 border-amber-700 backdrop-blur-sm"
+            className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow-md border-2 border-amber-700"
           >
             <div className="flex flex-col items-center">
               <span className={cn(
@@ -311,386 +280,305 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           </motion.div>
         </div>
 
-        {/* Map container - Adjusted for mobile */}
-        <div className="container mx-auto max-w-lg px-2 sm:px-4 pt-6 sm:pt-10 z-10 relative">
-          <div className={cn(
-            "relative w-full",
-            isMobile ? "min-h-[500px]" : "min-h-[600px]"
-          )}>
-            <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 320 600" preserveAspectRatio="none">
-              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-              
-              <pattern id="pathPattern" patternUnits="userSpaceOnUse" width="30" height="30">
-                <image href="/lovable-uploads/ece5b219-22bb-496e-8cbb-2d07647c2edf.jpeg" width="30" height="30" opacity="0.3" />
-              </pattern>
-              
-              <motion.path
-                d={`M${getPathCoordinates(0, limitedStages.length).x},${getPathCoordinates(0, limitedStages.length).y} 
-                   ${Array.from({length: limitedStages.length - 1}, (_, i) => 
-                     `L${getPathCoordinates(i + 1, limitedStages.length).x},${getPathCoordinates(i + 1, limitedStages.length).y}`
-                   ).join(' ')}`}
-                fill="none"
-                stroke="url(#pathPattern)"
-                strokeWidth={isMobile ? "6" : "8"}
-                strokeLinecap="round"
-                strokeDasharray="1, 15"
-                filter="url(#glow)"
-                initial={{ pathLength: 0, opacity: 0.5 }}
-                animate={pathControls}
-                style={{ filter: "drop-shadow(0 0 8px rgba(180, 83, 9, 0.6))" }}
-              />
-              
-              <motion.path
-                d={`M${getPathCoordinates(0, limitedStages.length).x},${getPathCoordinates(0, limitedStages.length).y} 
-                   ${Array.from({length: limitedStages.length - 1}, (_, i) => {
-                     const stageCompleted = progress.completedStages[category]?.[limitedStages[i]?.id] || false;
-                     if (stageCompleted) {
-                       return `L${getPathCoordinates(i + 1, limitedStages.length).x},${getPathCoordinates(i + 1, limitedStages.length).y}`;
-                     }
-                     return '';
-                   }).join(' ')}`}
-                fill="none"
-                stroke="#A0522D"
-                strokeWidth={isMobile ? "10" : "12"}
-                strokeLinecap="round"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 2.5, ease: "easeInOut", delay: 0.5 }}
-              />
-              
-              {Array.from({length: limitedStages.length - 1}, (_, i) => {
-                const startPoint = getPathCoordinates(i, limitedStages.length);
-                const endPoint = getPathCoordinates(i + 1, limitedStages.length);
-                const midX = (startPoint.x + endPoint.x) / 2;
-                const midY = (startPoint.y + endPoint.y) / 2;
-                const stageCompleted = progress.completedStages[category]?.[limitedStages[i]?.id] || false;
+        {/* Book pages with stages */}
+        <div className="container mx-auto px-4 pt-6 sm:pt-10 z-10 relative">
+          <div className="bg-amber-50 dark:bg-amber-900/40 border-2 border-amber-800/20 rounded-lg shadow-xl overflow-hidden">
+            {/* Book title */}
+            <motion.div 
+              className="text-center py-4 border-b-2 border-amber-800/20"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="flex justify-center items-center gap-2">
+                <BookOpen className="h-6 w-6 text-amber-800 dark:text-amber-200" />
+                <h1 className="text-2xl font-bold text-amber-800 dark:text-amber-200" dir="rtl">
+                  كتاب المراحل
+                </h1>
+              </div>
+              <p className="text-amber-700 dark:text-amber-300 mt-1 text-sm" dir="rtl">
+                اختر مرحلة للبدء في المغامرة
+              </p>
+            </motion.div>
+            
+            {/* Two page layout */}
+            <div className={cn(
+              "flex flex-col md:flex-row min-h-[500px]",
+              isMobile ? "gap-8 p-4" : "gap-0"
+            )}>
+              {/* Left page - Stage map */}
+              <div className={cn(
+                "relative flex-1 p-4 md:p-6 border-r border-amber-800/10 md:min-h-[600px]",
+                isMobile ? "" : "bg-gradient-to-r from-amber-100/30 to-transparent dark:from-amber-800/30"
+              )}>
+                <div className="flex items-center justify-center mb-4">
+                  <Map className="h-5 w-5 text-amber-700 dark:text-amber-300 mr-2" />
+                  <h3 className="text-lg font-bold text-amber-700 dark:text-amber-300" dir="rtl">خريطة المسار</h3>
+                </div>
                 
-                return stageCompleted ? (
-                  <motion.circle 
-                    key={`footprint-${i}`}
-                    cx={midX + (Math.random() * 10 - 5)} 
-                    cy={midY + (Math.random() * 10 - 5)} 
-                    r={isMobile ? "2" : "3"}
-                    fill="#8B4513"
+                {/* Stage path */}
+                <div className="relative h-full">
+                  <motion.div
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.7 }}
-                    transition={{ delay: 1.5 + (i * 0.1) }}
-                  />
-                ) : null;
-              })}
-            </svg>
-
-            {limitedStages.map((stage, index) => {
-              const isUnlocked = isStageUnlocked(category, stage.id, progress);
-              const isCompleted = progress.completedStages[category]?.[stage.id] || false;
-              const completionPercentage = progress.stageCompletion[category]?.[stage.id] || 0;
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1 }}
+                    className="absolute inset-0"
+                  >
+                    <svg width="100%" height="100%" viewBox="0 0 300 500" preserveAspectRatio="none">
+                      <defs>
+                        <pattern id="paperPattern" patternUnits="userSpaceOnUse" width="200" height="200">
+                          <image href="/lovable-uploads/ece5b219-22bb-496e-8cbb-2d07647c2edf.jpeg" width="200" height="200" opacity="0.1" />
+                        </pattern>
+                      </defs>
+                      <motion.path
+                        d="M50,450 Q100,400 80,350 Q60,300 120,250 Q180,200 150,150 Q120,100 180,50"
+                        fill="none"
+                        stroke="url(#paperPattern)"
+                        strokeWidth="25"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 2 }}
+                      />
+                      <motion.path
+                        d="M50,450 Q100,400 80,350 Q60,300 120,250 Q180,200 150,150 Q120,100 180,50"
+                        fill="none"
+                        stroke="#8B4513"
+                        strokeOpacity="0.6"
+                        strokeWidth="8"
+                        strokeDasharray="1, 15"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 2, delay: 0.5 }}
+                      />
+                    </svg>
+                  </motion.div>
+                  
+                  {/* Stage nodes along the path */}
+                  {limitedStages.map((stage, index) => {
+                    const isUnlocked = isStageUnlocked(category, stage.id, progress);
+                    const isCompleted = progress.completedStages[category]?.[stage.id] || false;
+                    const completionPercentage = progress.stageCompletion[category]?.[stage.id] || 0;
+                    
+                    // Calculate position along the path
+                    const progress = index / (limitedStages.length - 1);
+                    const yPos = 450 - (progress * 400);
+                    
+                    // Add some variation to x position
+                    const xOffset = Math.sin(index * 0.7) * 60;
+                    const xPos = 120 + xOffset;
+                    
+                    return (
+                      <motion.div
+                        key={stage.id}
+                        className="absolute"
+                        style={{ 
+                          top: yPos - 20, 
+                          left: xPos - 20,
+                          zIndex: 10
+                        }}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ 
+                          scale: animationComplete ? 1 : 0,
+                          opacity: animationComplete ? 1 : 0
+                        }}
+                        transition={{ 
+                          delay: 0.8 + (index * 0.15), 
+                          duration: 0.5,
+                          type: "spring"
+                        }}
+                      >
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <motion.button
+                                className={cn(
+                                  "w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center relative cursor-pointer border-2",
+                                  isCompleted ? "bg-amber-400 border-amber-700" : 
+                                  isUnlocked ? "bg-amber-200 border-amber-600" : 
+                                  "bg-gray-300 border-gray-500 opacity-70"
+                                )}
+                                onClick={() => handleStageClick(stage)}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                disabled={!isUnlocked}
+                              >
+                                <div className={cn(
+                                  "absolute inset-0 rounded-full overflow-hidden",
+                                  isUnlocked ? "" : "grayscale"
+                                )}>
+                                  <div className="absolute inset-0 bg-gradient-to-br from-amber-200 to-amber-500 opacity-50"></div>
+                                  <div className="absolute inset-0 bg-[url('/lovable-uploads/ece5b219-22bb-496e-8cbb-2d07647c2edf.jpeg')] opacity-20 mix-blend-overlay"></div>
+                                </div>
+                                
+                                <div className="relative z-10 flex flex-col items-center justify-center">
+                                  <span className="font-bold text-amber-900 text-lg">{stage.order}</span>
+                                  <div className="mt-1">
+                                    {getStageIcon(stage.order, isCompleted)}
+                                  </div>
+                                </div>
+                                
+                                {!isUnlocked && (
+                                  <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/40 z-20">
+                                    <Lock className="text-white h-5 w-5" />
+                                  </div>
+                                )}
+                                
+                                {isCompleted && (
+                                  <motion.div 
+                                    className="absolute -bottom-2 transform -translate-x-1/2 left-1/2"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 1.2 + (index * 0.1) }}
+                                  >
+                                    {renderStars(completionPercentage)}
+                                  </motion.div>
+                                )}
+                              </motion.button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                              <div className="text-center p-1" dir="rtl">
+                                <p className="font-bold">{stage.title}</p>
+                                {isCompleted ? (
+                                  <p className="text-green-600">تم الإكمال!</p>
+                                ) : isUnlocked ? (
+                                  <p className="text-blue-600">متاح اللعب</p>
+                                ) : (
+                                  <p className="text-red-600">مقفل</p>
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        {/* Stage label */}
+                        <div className="absolute left-1/2 -translate-x-1/2 mt-3 whitespace-nowrap">
+                          <span className="text-xs font-bold bg-amber-100 dark:bg-amber-800 text-amber-900 dark:text-amber-100 px-2 py-1 rounded-full border border-amber-300 dark:border-amber-600">
+                            {stage.title}
+                          </span>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
               
-              const position = getPathCoordinates(index, limitedStages.length);
-              
-              return (
-                <motion.div
-                  key={stage.id}
-                  className="absolute"
-                  style={{ 
-                    top: position.y - (isMobile ? 20 : 30),
-                    left: position.x - (isMobile ? 20 : 30),
-                    zIndex: 30 - index
-                  }}
-                  initial={{ opacity: 0, scale: 0, rotate: -30 }}
-                  animate={{ 
-                    opacity: animationComplete ? 1 : 0, 
-                    scale: animationComplete ? 1 : 0,
-                    rotate: 0
-                  }}
-                  transition={{ 
-                    delay: 0.8 + (index * 0.15), 
-                    duration: 0.5,
-                    type: "spring"
-                  }}
-                >
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <motion.div
-                          className={cn(
-                            "rounded-full flex items-center justify-center relative cursor-pointer",
-                            isMobile ? "w-12 h-12" : "w-16 h-16",
-                            isCompleted ? "bg-yellow-500 border-4 border-amber-700 shadow-[0_0_15px_rgba(245,158,11,0.6)]" : 
-                            isUnlocked ? "bg-amber-400 border-4 border-amber-700 shadow-lg" : 
-                            "bg-slate-600 border-4 border-slate-800 opacity-80"
-                          )}
+              {/* Right page - Stage list */}
+              <div className={cn(
+                "flex-1 p-4 md:p-6 md:min-h-[600px]",
+                isMobile ? "" : "bg-gradient-to-l from-amber-100/30 to-transparent dark:from-amber-800/30"
+              )}>
+                <div className="flex items-center justify-center mb-4">
+                  <Route className="h-5 w-5 text-amber-700 dark:text-amber-300 mr-2" />
+                  <h3 className="text-lg font-bold text-amber-700 dark:text-amber-300" dir="rtl">قائمة المراحل</h3>
+                </div>
+                
+                <div className="space-y-2">
+                  {limitedStages.map((stage, index) => {
+                    const isUnlocked = isStageUnlocked(category, stage.id, progress);
+                    const isCompleted = progress.completedStages[category]?.[stage.id] || false;
+                    
+                    return (
+                      <motion.div
+                        key={stage.id}
+                        initial={{ x: 30, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 + (index * 0.1) }}
+                      >
+                        <button
                           onClick={() => handleStageClick(stage)}
-                          whileHover={{ scale: 1.1, rotate: [0, -5, 5, -5, 0] }}
-                          whileTap={{ scale: 0.95 }}
+                          disabled={!isUnlocked}
+                          className={cn(
+                            "w-full p-2 sm:p-3 rounded-md border text-right flex items-center gap-2 transition-all",
+                            isCompleted ? "bg-amber-100 dark:bg-amber-800/50 border-amber-300 dark:border-amber-700" :
+                            isUnlocked ? "bg-amber-50 dark:bg-amber-900/50 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-800/70" :
+                            "bg-gray-100 dark:bg-gray-800/50 border-gray-300 dark:border-gray-700 opacity-60 cursor-not-allowed"
+                          )}
+                          dir="rtl"
                         >
                           <div className={cn(
-                            "absolute inset-0 rounded-full overflow-hidden",
-                            isUnlocked ? "" : "grayscale brightness-50"
+                            "h-8 w-8 rounded-full flex items-center justify-center",
+                            isCompleted ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300" :
+                            isUnlocked ? "bg-amber-200 text-amber-800 dark:bg-amber-800/80 dark:text-amber-200" :
+                            "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
                           )}>
-                            <div className="w-full h-full bg-gradient-to-br from-amber-300 to-amber-600"></div>
-                            <div className="absolute inset-0 bg-[url('/lovable-uploads/ece5b219-22bb-496e-8cbb-2d07647c2edf.jpeg')] opacity-30 mix-blend-overlay"></div>
-                            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-amber-400/10 to-amber-900/20"></div>
-                            <div className="absolute inset-0 shadow-inner rounded-full"></div>
+                            {isCompleted ? (
+                              <Check className="h-4 w-4" />
+                            ) : !isUnlocked ? (
+                              <Lock className="h-4 w-4" />
+                            ) : (
+                              <span>{stage.order}</span>
+                            )}
                           </div>
                           
-                          <div className="relative z-10 flex flex-col items-center justify-center">
-                            <span className={cn(
-                              "font-bold text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)]",
-                              isMobile ? "text-lg" : "text-2xl"
-                            )}>{stage.order}</span>
-                            <div className="mt-1">
-                              {getStageIcon(stage.order, isCompleted)}
+                          <div className="flex-1">
+                            <div className="font-bold text-amber-900 dark:text-amber-100">
+                              {stage.title}
+                            </div>
+                            <div className="text-xs text-amber-700 dark:text-amber-300">
+                              {isCompleted ? "تم الإكمال" : isUnlocked ? "متاح اللعب" : "مقفل"}
                             </div>
                           </div>
                           
-                          {!isUnlocked && (
-                            <motion.div 
-                              className="absolute inset-0 rounded-full flex items-center justify-center bg-black/50 z-20"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 1 + (index * 0.1) }}
-                            >
-                              <Lock className={cn(
-                                "text-white drop-shadow-lg",
-                                isMobile ? "h-5 w-5" : "h-7 w-7"
-                              )} />
-                            </motion.div>
-                          )}
-                          
-                          {(isCompleted || (isUnlocked && completionPercentage > 0)) && (
-                            <div className={cn(
-                              "absolute left-1/2 transform -translate-x-1/2 z-10", 
-                              isMobile ? "-bottom-5" : "-bottom-7"
-                            )}>
-                              {renderStars(completionPercentage)}
+                          {isCompleted && (
+                            <div className="flex">
+                              {[...Array(3)].map((_, i) => {
+                                const percentage = progress.stageCompletion[category]?.[stage.id] || 0;
+                                let starCount = 0;
+                                if (percentage >= 90) starCount = 3;
+                                else if (percentage >= 70) starCount = 2;
+                                else if (percentage >= 50) starCount = 1;
+                                
+                                return (
+                                  <Star 
+                                    key={i}
+                                    className={cn(
+                                      "h-4 w-4",
+                                      i < starCount ? "text-yellow-500 fill-yellow-500" : "text-gray-300 dark:text-gray-600"
+                                    )}
+                                  />
+                                );
+                              })}
                             </div>
                           )}
-                          
-                          {isUnlocked && !isCompleted && (
-                            <motion.div 
-                              className="absolute inset-0 rounded-full"
-                              animate={{ 
-                                boxShadow: ['0 0 5px 2px rgba(255,204,0,0.3)', '0 0 20px 8px rgba(255,204,0,0.6)', '0 0 5px 2px rgba(255,204,0,0.3)']
-                              }}
-                              transition={{ 
-                                duration: 2,
-                                repeat: Infinity,
-                                repeatType: "reverse"
-                              }}
-                            />
-                          )}
-                        </motion.div>
-                      </TooltipTrigger>
-                      <TooltipContent 
-                        className="bg-amber-800 border-amber-600 shadow-xl"
-                        sideOffset={5}
-                        side="top"
-                      >
-                        <div className="text-center text-amber-50 font-cairo p-1" dir="rtl">
-                          <p className={cn(
-                            "font-bold",
-                            isMobile ? "text-base" : "text-lg"
-                          )}>{stage.title}</p>
-                          {isCompleted ? (
-                            <p className="text-green-300">تم الإكمال! {completionPercentage}%</p>
-                          ) : isUnlocked ? (
-                            <p className="text-yellow-300">متاح اللعب</p>
-                          ) : (
-                            <p className="text-red-300">مقفل - أكمل المرحلة السابقة</p>
-                          )}
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  
-                  {/* Stage title - Adjust for mobile */}
-                  <div className={cn(
-                    "absolute left-1/2 -translate-x-1/2 min-w-[80px] text-center",
-                    isMobile ? "mt-6" : "mt-8"
-                  )}>
-                    <motion.div
-                      className={cn(
-                        "stage-bubble-text bg-amber-900/80 text-amber-50 font-cairo font-bold py-1 px-2 rounded-lg whitespace-nowrap border border-amber-600/50 shadow-md backdrop-blur-sm",
-                        isMobile ? "text-[0.65rem]" : "text-xs"
-                      )}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: animationComplete ? 1 : 0, y: animationComplete ? 0 : 10 }}
-                      transition={{ delay: 0.8 + (index * 0.15) }}
-                    >
-                      {stage.title}
-                    </motion.div>
-                  </div>
-                  
-                  {/* Decorative elements - conditionally render based on mobile */}
-                  {!isMobile && index % 2 === 0 && (
-                    <motion.div 
-                      className="absolute"
-                      style={{ 
-                        top: Math.random() * 100 - 50, 
-                        left: Math.random() * 100 - 50,
-                        zIndex: -1,
-                        rotate: Math.random() * 40 - 20
-                      }}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 0.8, scale: 1 }}
-                      transition={{ delay: 1.5 + (index * 0.1) }}
-                    >
-                      <img 
-                        src="/lovable-uploads/d6dbdcbd-c9dd-48f4-be1c-8b1c0ab0a39e.png" 
-                        className="w-10 h-10 object-contain opacity-80 drop-shadow-lg"
-                        alt="Map decoration"
-                      />
-                    </motion.div>
-                  )}
-                  
-                  {!isMobile && (stage.order === 5 || stage.order === 10) && (
-                    <motion.div
-                      className="absolute -right-10 -top-6 z-0"
-                      initial={{ opacity: 0, scale: 0, rotate: -10 }}
-                      animate={{ opacity: 0.9, scale: 1, rotate: 5 }}
-                      transition={{ delay: 1.7 + (index * 0.1), duration: 0.7 }}
-                    >
-                      {stage.order === 10 ? (
-                        <div className="w-14 h-14 flex items-center justify-center">
-                          <motion.div
-                            animate={{ rotate: [0, 5, 0, -5, 0] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                          >
-                            <Trophy className="h-14 w-14 text-yellow-500 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)]" />
-                          </motion.div>
-                        </div>
-                      ) : (
-                        <div className="w-12 h-12 flex items-center justify-center">
-                          <motion.div
-                            animate={{ rotate: [0, 3, -3, 0] }}
-                            transition={{ duration: 3, repeat: Infinity }}
-                          >
-                            <Flag className="h-12 w-12 text-amber-500 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]" />
-                          </motion.div>
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </motion.div>
-              );
-            })}
-            
-            {/* Compass - Only show on larger screens */}
-            {!isMobile && (
-              <motion.div
-                className="absolute top-1/4 right-5 opacity-80 z-0"
-                initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
-                animate={{ opacity: 0.8, rotate: 0, scale: 1 }}
-                transition={{ delay: 1, duration: 1 }}
-              >
-                <motion.div
-                  animate={{ rotate: [0, 5, 0, -5, 0] }}
-                  transition={{ duration: 6, repeat: Infinity }}
-                >
-                  <Compass className="h-14 w-14 text-amber-800 drop-shadow-lg" />
-                </motion.div>
-              </motion.div>
-            )}
-            
-            {/* Ship - Only show on larger screens */}
-            {!isMobile && (
-              <motion.div
-                className="absolute bottom-1/4 left-5 opacity-70 z-0"
-                initial={{ opacity: 0, rotate: 20, scale: 0.8 }}
-                animate={{ opacity: 0.7, rotate: 0, scale: 1 }}
-                transition={{ delay: 1.2, duration: 1 }}
-              >
-                <motion.div
-                  animate={{ y: [0, -5, 0, 5, 0], rotate: [0, -3, 0, 3, 0] }}
-                  transition={{ duration: 8, repeat: Infinity }}
-                >
-                  <Ship className="h-12 w-12 text-amber-800 drop-shadow-lg" />
-                </motion.div>
-              </motion.div>
-            )}
-            
-            {/* Anchor - Use smaller size on mobile */}
-            <motion.div
-              className={cn(
-                "absolute z-0",
-                isMobile ? "bottom-5 right-10" : "bottom-10 right-20"
-              )}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.8 }}
-              transition={{ delay: 2, duration: 1 }}
-            >
-              <motion.div
-                className={cn(
-                  "rounded-full border-2 border-blue-500/20 absolute",
-                  isMobile ? "w-20 h-20" : "w-28 h-28"
-                )}
-                initial={{ scale: 0, opacity: 0.8 }}
-                animate={{ scale: 3, opacity: 0 }}
-                transition={{ duration: 6, repeat: Infinity, repeatDelay: 2 }}
-              />
-              <motion.div
-                className={cn(
-                  "rounded-full border-2 border-blue-500/30 absolute",
-                  isMobile ? "w-20 h-20" : "w-28 h-28"
-                )}
-                initial={{ scale: 0, opacity: 0.8 }}
-                animate={{ scale: 2, opacity: 0 }}
-                transition={{ duration: 4, repeat: Infinity, delay: 1, repeatDelay: 2 }}
-              />
-              <div className={cn(
-                "absolute",
-                isMobile ? "top-7 left-7" : "top-10 left-10"
-              )}>
-                <Anchor className={cn(
-                  "text-blue-500/60",
-                  isMobile ? "h-6 w-6" : "h-8 w-8"
-                )} />
+                        </button>
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
-            </motion.div>
+            </div>
+            
+            {/* Book footer */}
+            <div className="border-t-2 border-amber-800/20 p-4 text-center">
+              <p className="text-amber-700 dark:text-amber-300 text-sm italic" dir="rtl">
+                اتبع مسار الكنز وأكمل كل مرحلة للوصول إلى الجائزة النهائية!
+              </p>
+            </div>
           </div>
-        </div>
-        
-        {/* Footer text - Adjust for mobile */}
-        <div className="mt-10 sm:mt-16 text-center relative z-10">
+          
+          {/* Book binding effect */}
+          <div className="absolute left-1/2 top-6 bottom-0 w-4 -translate-x-1/2 bg-gradient-to-r from-transparent via-amber-800/20 to-transparent hidden md:block"></div>
+          
+          {/* Decorative elements */}
           <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1, duration: 0.7 }}
+            className="absolute top-24 right-10 opacity-40 hidden md:block"
+            initial={{ opacity: 0, rotate: -10 }}
+            animate={{ opacity: 0.4, rotate: 0 }}
+            transition={{ duration: 1, delay: 1.5 }}
           >
-            <p className={cn(
-              "text-amber-50 font-cairo bg-amber-900/60 mx-auto rounded-lg p-2 sm:p-3 backdrop-blur-sm border border-amber-600/50 shadow-lg",
-              isMobile ? "text-sm max-w-xs" : "text-lg max-w-md"
-            )} dir="rtl">
-              اتبع مسار الكنز وأكمل كل مرحلة للوصول إلى الجائزة النهائية!
-            </p>
+            <Compass className="h-12 w-12 text-amber-800 dark:text-amber-500" />
           </motion.div>
-        </div>
-        
-        {/* Background particles */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[...Array(isMobile ? 6 : 10)].map((_, i) => (
-            <motion.div
-              key={`particle-${i}`}
-              className="absolute w-1 h-1 rounded-full bg-amber-200/40"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, -100, -200],
-                opacity: [0, 0.7, 0],
-              }}
-              transition={{
-                duration: 10 + Math.random() * 5,
-                repeat: Infinity,
-                repeatType: 'loop',
-                delay: Math.random() * 5,
-              }}
-            />
-          ))}
+          
+          <motion.div
+            className="absolute bottom-20 left-10 opacity-40 hidden md:block"
+            initial={{ opacity: 0, rotate: 10 }}
+            animate={{ opacity: 0.4, rotate: 0 }}
+            transition={{ duration: 1, delay: 1.8 }}
+          >
+            <Ship className="h-10 w-10 text-amber-800 dark:text-amber-500" />
+          </motion.div>
         </div>
       </div>
     </div>
