@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -13,6 +12,8 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [percentage, setPercentage] = useState(100);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const lastUpdateTimeRef = useRef<number>(Date.now());
   const hasCalledTimeUp = useRef(false);
 
   // Color based on remaining time percentage
@@ -22,48 +23,80 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
     return "bg-gradient-to-r from-red-600 to-rose-500";
   };
 
+  // Smooth animation update function
+  const updateTimerAnimation = (timestamp: number) => {
+    if (!isActive) return;
+    
+    const now = Date.now();
+    const elapsed = (now - lastUpdateTimeRef.current) / 1000;
+    
+    if (elapsed >= 0.05) { // Update roughly every 50ms for smooth animation
+      lastUpdateTimeRef.current = now;
+      
+      setTimeLeft((prevTime) => {
+        // Calculate new time with more precision
+        const newTime = Math.max(0, prevTime - elapsed);
+        
+        // Calculate exact percentage
+        const newPercentage = (newTime / duration) * 100;
+        setPercentage(newPercentage);
+        
+        // Check if timer is up
+        if (newTime <= 0 && !hasCalledTimeUp.current) {
+          hasCalledTimeUp.current = true;
+          setTimeout(onTimeUp, 0);
+          return 0;
+        }
+        
+        return newTime;
+      });
+    }
+    
+    // Continue the animation if active and time left
+    if (isActive && timeLeft > 0) {
+      animationFrameRef.current = requestAnimationFrame(updateTimerAnimation);
+    }
+  };
+
   useEffect(() => {
     // Reset timer when duration changes or becomes active again
     setTimeLeft(duration);
     setPercentage(100);
     hasCalledTimeUp.current = false;
+    lastUpdateTimeRef.current = Date.now();
     
-    // Clear any existing interval
+    // Clear any existing animation or interval
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
-    // Only set interval if timer is active
+    // Start animation if active
     if (isActive) {
+      animationFrameRef.current = requestAnimationFrame(updateTimerAnimation);
+      
+      // Keep a low-frequency interval for backup/secondary updates
       timerRef.current = setInterval(() => {
+        // This ensures the displayed seconds update even if animation is throttled
         setTimeLeft((prev) => {
-          const newTimeLeft = prev <= 1 ? 0 : prev - 1;
-          // Update percentage based on new time left
-          setPercentage((newTimeLeft / duration) * 100);
-          
-          if (newTimeLeft <= 0 && !hasCalledTimeUp.current) {
-            hasCalledTimeUp.current = true;
-            
-            // Use setTimeout to avoid state updates during render
-            setTimeout(() => {
-              onTimeUp();
-            }, 0);
-            
-            // Clear the interval
-            if (timerRef.current) {
-              clearInterval(timerRef.current);
-              timerRef.current = null;
-            }
-          }
-          
-          return newTimeLeft;
+          const secondsElapsed = Math.floor(prev) - Math.floor(prev - 1);
+          return secondsElapsed > 0 ? Math.floor(prev - secondsElapsed) : prev;
         });
       }, 1000);
     }
 
     // Cleanup on unmount or when dependencies change
     return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -74,7 +107,7 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
   return (
     <div className="relative mb-4" aria-label="Question timer">
       <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300 mb-1">
-        <span className="font-medium">{timeLeft}s</span>
+        <span className="font-medium">{Math.ceil(timeLeft)}s</span>
         <span className={cn(
           "font-medium",
           percentage > 60 ? "text-green-600 dark:text-green-400" : 
@@ -92,10 +125,13 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
         >
           <div 
             className={cn(
-              "h-full transition-all duration-1000 ease-linear",
+              "h-full transition-all ease-linear",
               getTimerColor()
             )}
-            style={{ width: `${percentage}%` }}
+            style={{ 
+              width: `${percentage}%`,
+              transition: isActive ? 'width 50ms linear' : 'width 300ms ease-out'
+            }}
           />
         </Progress>
         
