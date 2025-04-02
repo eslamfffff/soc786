@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Stage } from '@/data/questions/types';
 import { cn } from '@/lib/utils';
@@ -25,7 +24,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
   const mapRef = useRef<HTMLDivElement>(null);
   const pathControls = useAnimation();
   
-  // Initialize progress data if needed
   if (!progress.completedStages) {
     progress.completedStages = {};
   }
@@ -43,21 +41,17 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
   }
 
   useEffect(() => {
-    // Start with animation not complete
     setAnimationComplete(false);
     
-    // Animate the path first, then reveal the stages
     pathControls.start({
       pathLength: 1,
       transition: { duration: 1.5, ease: "easeInOut" }
     });
     
-    // Set animation complete after the path is drawn
     const timer = setTimeout(() => {
       setAnimationComplete(true);
     }, 800);
     
-    // Scroll to top when changing levels
     if (mapRef.current) {
       mapRef.current.scrollTop = 0;
     }
@@ -83,13 +77,10 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
     onStageSelect(stage.id);
   };
 
-  // Filter stages by the current level
   const currentLevelStages = stages.filter(stage => stage.id.startsWith(levelId));
   
-  // Limit to 10 stages per map as requested
   const limitedStages = currentLevelStages.slice(0, 10);
   
-  // Calculate completion statistics
   const totalCompletedStages = Object.values(progress.completedStages[category] || {})
     .filter(Boolean).length;
   
@@ -104,11 +95,9 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     levelId === 'intermediate' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200' : 
                     'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
 
-  // Get stage icon based on order
   const getStageIcon = (order: number, isCompleted: boolean) => {
     if (isCompleted) return <Check className="h-5 w-5 text-green-500" />;
     
-    // Special stages with treasure-map themed icons
     switch(order) {
       case 1: return <MapPin className="h-5 w-5 text-red-600" />;
       case 2: return <Anchor className="h-5 w-5 text-blue-600" />;
@@ -123,13 +112,12 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
       default: return <MapPin className="h-5 w-5 text-teal-600" />;
     }
   };
-  
-  // عرض النجوم بشكل أكثر احترافية
+
   const renderStars = (percentage: number) => {
     let starCount = 0;
-    if (percentage >= 90) starCount = 3; // ممتاز
-    else if (percentage >= 70) starCount = 2; // جيد
-    else if (percentage >= 50) starCount = 1; // مقبول
+    if (percentage >= 90) starCount = 3;
+    else if (percentage >= 70) starCount = 2;
+    else if (percentage >= 50) starCount = 1;
     
     return (
       <div className="flex mt-1">
@@ -188,24 +176,18 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
     );
   };
 
-  // Calculate paths for the treasure map
   const getPathCoordinates = (index: number, totalStages: number) => {
-    // Create a richer, more natural-looking path for the treasure map
-    const baseX = 160; // Center of the map
-    const startY = 550; // Bottom of the map
-    const endY = 50; // Top of the map
+    const baseX = 160;
+    const startY = 550;
+    const endY = 50;
     const totalHeight = startY - endY;
     const segmentHeight = totalHeight / (totalStages - 1);
     
-    // Make the path more natural looking with some randomness
-    // We use the same seed (index + stage ID) to ensure consistent positions
     const seedX = index * 5 + (index % 2 === 0 ? 13 : 7);
     const seedY = index * 3 + (index % 3 === 0 ? 17 : 11);
     
-    // Base position
     const y = startY - (index * segmentHeight);
     
-    // More natural curves for the path
     const xOffset = Math.sin(index * 0.7) * 80 + Math.cos(seedX) * 20; 
     const yOffset = Math.cos(seedY) * 10;
     
@@ -217,7 +199,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
 
   return (
     <div className="relative min-h-screen" ref={mapRef}>
-      {/* Treasure Map background */}
       <div 
         className="min-h-screen pb-20 pt-4 relative overflow-hidden"
         style={{
@@ -226,11 +207,9 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           backgroundPosition: 'center',
         }}
       >
-        {/* Enhanced lighting and atmosphere */}
         <div className="absolute inset-0 bg-gradient-to-b from-amber-950/30 to-amber-800/20 mix-blend-overlay"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-amber-950/10 to-transparent"></div>
         
-        {/* Light rays effect */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div 
             className="absolute -top-20 left-1/3 w-96 h-[800px] bg-amber-300/10 blur-3xl"
@@ -246,7 +225,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           />
         </div>
         
-        {/* Back button and level info */}
         <div className="relative z-20 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-amber-900/30 to-transparent">
           <motion.div
             initial={{ x: -50, opacity: 0 }}
@@ -299,24 +277,18 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           </motion.div>
         </div>
 
-        {/* Main treasure map path */}
         <div className="container mx-auto max-w-lg px-4 pt-10 z-10 relative">
-          {/* The treasure map path */}
           <div className="relative min-h-[600px] w-full">
-            {/* Improved path with glow and texture */}
             <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 320 600" preserveAspectRatio="none">
-              {/* Path glow effect */}
               <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="6" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
               </filter>
               
-              {/* Path textures */}
               <pattern id="pathPattern" patternUnits="userSpaceOnUse" width="30" height="30">
                 <image href="/lovable-uploads/ece5b219-22bb-496e-8cbb-2d07647c2edf.jpeg" width="30" height="30" opacity="0.3" />
               </pattern>
               
-              {/* Create improved dotted line path with better visual effects */}
               <motion.path
                 d={`M${getPathCoordinates(0, limitedStages.length).x},${getPathCoordinates(0, limitedStages.length).y} 
                    ${Array.from({length: limitedStages.length - 1}, (_, i) => 
@@ -333,11 +305,9 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                 style={{ filter: "drop-shadow(0 0 8px rgba(180, 83, 9, 0.6))" }}
               />
               
-              {/* Solid path underneath for completed stages */}
               <motion.path
                 d={`M${getPathCoordinates(0, limitedStages.length).x},${getPathCoordinates(0, limitedStages.length).y} 
                    ${Array.from({length: limitedStages.length - 1}, (_, i) => {
-                     // Only include stages that are completed in the solid path
                      const stageCompleted = progress.completedStages[category]?.[limitedStages[i]?.id] || false;
                      if (stageCompleted) {
                        return `L${getPathCoordinates(i + 1, limitedStages.length).x},${getPathCoordinates(i + 1, limitedStages.length).y}`;
@@ -353,7 +323,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                 transition={{ duration: 2.5, ease: "easeInOut", delay: 0.5 }}
               />
               
-              {/* Footprints along the path */}
               {Array.from({length: limitedStages.length - 1}, (_, i) => {
                 const startPoint = getPathCoordinates(i, limitedStages.length);
                 const endPoint = getPathCoordinates(i + 1, limitedStages.length);
@@ -376,13 +345,11 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
               })}
             </svg>
 
-            {/* Render stage nodes along the treasure path */}
             {limitedStages.map((stage, index) => {
               const isUnlocked = isStageUnlocked(category, stage.id, progress);
               const isCompleted = progress.completedStages[category]?.[stage.id] || false;
               const completionPercentage = progress.stageCompletion[category]?.[stage.id] || 0;
               
-              // Get position from our path calculation function
               const position = getPathCoordinates(index, limitedStages.length);
               
               return (
@@ -390,8 +357,8 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                   key={stage.id}
                   className="absolute"
                   style={{ 
-                    top: position.y - 30, // Center the icon
-                    left: position.x - 30, // Center the icon
+                    top: position.y - 30,
+                    left: position.x - 30,
                     zIndex: 30 - index
                   }}
                   initial={{ opacity: 0, scale: 0, rotate: -30 }}
@@ -424,16 +391,12 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                             "absolute inset-0 rounded-full overflow-hidden",
                             isUnlocked ? "" : "grayscale brightness-50"
                           )}>
-                            {/* Background texture for the stage markers with better effects */}
                             <div className="w-full h-full bg-gradient-to-br from-amber-300 to-amber-600"></div>
                             <div className="absolute inset-0 bg-[url('/lovable-uploads/ece5b219-22bb-496e-8cbb-2d07647c2edf.jpeg')] opacity-30 mix-blend-overlay"></div>
-                            {/* Overlay textures to create depth */}
                             <div className="absolute inset-0 bg-gradient-to-br from-transparent via-amber-400/10 to-amber-900/20"></div>
-                            {/* Inner shadow for depth */}
                             <div className="absolute inset-0 shadow-inner rounded-full"></div>
                           </div>
                           
-                          {/* Stage number */}
                           <div className="relative z-10 flex flex-col items-center justify-center">
                             <span className="text-2xl font-bold text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)]">{stage.order}</span>
                             <div className="mt-1">
@@ -441,7 +404,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                             </div>
                           </div>
                           
-                          {/* Lock overlay for locked stages */}
                           {!isUnlocked && (
                             <motion.div 
                               className="absolute inset-0 rounded-full flex items-center justify-center bg-black/50 z-20"
@@ -453,14 +415,12 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                             </motion.div>
                           )}
                           
-                          {/* Stars below the stage icon */}
                           {(isCompleted || (isUnlocked && completionPercentage > 0)) && (
                             <div className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 z-10">
                               {renderStars(completionPercentage)}
                             </div>
                           )}
                           
-                          {/* Enhanced glow effect for the next unlocked stage */}
                           {isUnlocked && !isCompleted && (
                             <motion.div 
                               className="absolute inset-0 rounded-full"
@@ -495,7 +455,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     </Tooltip>
                   </TooltipProvider>
                   
-                  {/* Stage title bubble with improved styling */}
                   <div className="absolute mt-8 left-1/2 -translate-x-1/2 min-w-[80px] text-center">
                     <motion.div
                       className="stage-bubble-text bg-amber-900/80 text-amber-50 font-cairo font-bold text-xs py-1 px-2 rounded-lg whitespace-nowrap border border-amber-600/50 shadow-md backdrop-blur-sm"
@@ -507,7 +466,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     </motion.div>
                   </div>
                   
-                  {/* Enhanced decorative elements around the map - more varied and thematic */}
                   {index % 2 === 0 && (
                     <motion.div 
                       className="absolute"
@@ -529,7 +487,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     </motion.div>
                   )}
                   
-                  {/* Add extra thematic decorations for milestone stages */}
                   {(stage.order === 5 || stage.order === 10) && (
                     <motion.div
                       className="absolute -right-10 -top-6 z-0"
@@ -540,7 +497,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                       {stage.order === 10 ? (
                         <div className="w-14 h-14 flex items-center justify-center">
                           <motion.div
-                            animate={{ rotate: [0, 5, -5, 0] }}
+                            animate={{ rotate: [0, 5, 0, -5, 0] }}
                             transition={{ duration: 2, repeat: Infinity }}
                           >
                             <Trophy className="h-14 w-14 text-yellow-500 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)]" />
@@ -562,7 +519,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
               );
             })}
             
-            {/* Enhanced decorative elements on the map with animations */}
             <motion.div
               className="absolute top-1/4 right-5 opacity-80 z-0"
               initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
@@ -591,7 +547,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
               </motion.div>
             </motion.div>
             
-            {/* Add water ripple effect near the bottom */}
             <motion.div
               className="absolute bottom-10 right-20 z-0"
               initial={{ opacity: 0 }}
@@ -617,7 +572,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           </div>
         </div>
         
-        {/* Improved footer messaging */}
         <div className="mt-16 text-center relative z-10">
           <motion.div
             initial={{ y: 50, opacity: 0 }}
@@ -630,7 +584,6 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           </motion.div>
         </div>
         
-        {/* Animated background particles for atmosphere */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {[...Array(10)].map((_, i) => (
             <motion.div
