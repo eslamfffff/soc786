@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Stage } from '@/data/questions/types';
 import { cn } from '@/lib/utils';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { loadProgress, isStageUnlocked } from '@/utils/progressUtils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface StageMapProps {
   stages: Stage[];
@@ -23,6 +25,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
   const [animationComplete, setAnimationComplete] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
   const pathControls = useAnimation();
+  const isMobile = useIsMobile();
   
   if (!progress.completedStages) {
     progress.completedStages = {};
@@ -95,21 +98,34 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     levelId === 'intermediate' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200' : 
                     'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
 
+  // Adjust node size based on device
+  const nodeSize = isMobile ? {
+    width: 60,
+    height: 60,
+    fontSize: 'text-lg',
+    iconSize: 'h-4 w-4'
+  } : {
+    width: 80,
+    height: 80,
+    fontSize: 'text-2xl',
+    iconSize: 'h-5 w-5'
+  };
+
   const getStageIcon = (order: number, isCompleted: boolean) => {
-    if (isCompleted) return <Check className="h-5 w-5 text-green-500" />;
+    if (isCompleted) return <Check className={cn("text-green-500", nodeSize.iconSize)} />;
     
     switch(order) {
-      case 1: return <MapPin className="h-5 w-5 text-red-600" />;
-      case 2: return <Anchor className="h-5 w-5 text-blue-600" />;
-      case 3: return <Ship className="h-5 w-5 text-indigo-600" />;
-      case 4: return <Compass className="h-5 w-5 text-cyan-600" />;
-      case 5: return <X className="h-5 w-5 text-purple-600" />;
-      case 6: return <Anchor className="h-5 w-5 text-amber-600" />;
-      case 7: return <Skull className="h-5 w-5 text-gray-600" />;
-      case 8: return <Ship className="h-5 w-5 text-emerald-600" />;
-      case 9: return <Compass className="h-5 w-5 text-orange-600" />;
-      case 10: return <Trophy className="h-5 w-5 text-yellow-500" />;
-      default: return <MapPin className="h-5 w-5 text-teal-600" />;
+      case 1: return <MapPin className={cn("text-red-600", nodeSize.iconSize)} />;
+      case 2: return <Anchor className={cn("text-blue-600", nodeSize.iconSize)} />;
+      case 3: return <Ship className={cn("text-indigo-600", nodeSize.iconSize)} />;
+      case 4: return <Compass className={cn("text-cyan-600", nodeSize.iconSize)} />;
+      case 5: return <X className={cn("text-purple-600", nodeSize.iconSize)} />;
+      case 6: return <Anchor className={cn("text-amber-600", nodeSize.iconSize)} />;
+      case 7: return <Skull className={cn("text-gray-600", nodeSize.iconSize)} />;
+      case 8: return <Ship className={cn("text-emerald-600", nodeSize.iconSize)} />;
+      case 9: return <Compass className={cn("text-orange-600", nodeSize.iconSize)} />;
+      case 10: return <Trophy className={cn("text-yellow-500", nodeSize.iconSize)} />;
+      default: return <MapPin className={cn("text-teal-600", nodeSize.iconSize)} />;
     }
   };
 
@@ -118,6 +134,8 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
     if (percentage >= 90) starCount = 3;
     else if (percentage >= 70) starCount = 2;
     else if (percentage >= 50) starCount = 1;
+    
+    const starSize = isMobile ? 'w-4 h-4' : 'w-5 h-5';
     
     return (
       <div className="flex mt-1">
@@ -138,7 +156,8 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             className="relative"
           >
             <div className={cn(
-              "w-5 h-5 mx-[-2px]",
+              starSize,
+              "mx-[-2px]",
               i < starCount ? "text-yellow-400" : "text-gray-400 opacity-40"
             )}>
               <svg viewBox="0 0 24 24" fill={i < starCount ? "url(#starGradient)" : "#808080"} xmlns="http://www.w3.org/2000/svg">
@@ -177,19 +196,23 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
   };
 
   const getPathCoordinates = (index: number, totalStages: number) => {
-    const baseX = 160;
-    const startY = 550;
-    const endY = 50;
+    // Adjust path base values for mobile
+    const baseX = isMobile ? 120 : 160;
+    const startY = isMobile ? 450 : 550;
+    const endY = isMobile ? 40 : 50;
     const totalHeight = startY - endY;
     const segmentHeight = totalHeight / (totalStages - 1);
     
-    const seedX = index * 5 + (index % 2 === 0 ? 13 : 7);
-    const seedY = index * 3 + (index % 3 === 0 ? 17 : 11);
+    // Reduce randomness for mobile for more predictable layout
+    const seedX = index * (isMobile ? 3 : 5) + (index % 2 === 0 ? 13 : 7);
+    const seedY = index * (isMobile ? 2 : 3) + (index % 3 === 0 ? 17 : 11);
     
     const y = startY - (index * segmentHeight);
     
-    const xOffset = Math.sin(index * 0.7) * 80 + Math.cos(seedX) * 20; 
-    const yOffset = Math.cos(seedY) * 10;
+    // Reduce the wave amplitude on mobile
+    const xAmplitude = isMobile ? 50 : 80;
+    const xOffset = Math.sin(index * 0.7) * xAmplitude + Math.cos(seedX) * (isMobile ? 10 : 20); 
+    const yOffset = Math.cos(seedY) * (isMobile ? 5 : 10);
     
     return { 
       x: baseX + xOffset, 
@@ -225,7 +248,11 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           />
         </div>
         
-        <div className="relative z-20 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-amber-900/30 to-transparent">
+        {/* Header - Simplified for mobile */}
+        <div className={cn(
+          "relative z-20 flex justify-between items-center px-2 sm:px-6 py-2 sm:py-4 bg-gradient-to-b from-amber-900/30 to-transparent",
+          isMobile ? "flex-col gap-2" : "flex-row"
+        )}>
           <motion.div
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -233,10 +260,11 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           >
             <Button 
               variant="outline" 
+              size={isMobile ? "sm" : "default"}
               className="bg-amber-50/90 hover:bg-amber-50 text-amber-900 font-cairo flex items-center gap-2 border-amber-700 shadow-md backdrop-blur-sm"
               onClick={onBackToLevels}
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={isMobile ? 14 : 18} />
               <span dir="rtl">العودة للمستويات</span>
             </Button>
           </motion.div>
@@ -245,10 +273,13 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-            className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-4 py-2 shadow-md border-2 border-amber-700 backdrop-blur-sm"
+            className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow-md border-2 border-amber-700 backdrop-blur-sm"
           >
-            <h2 className="text-xl font-bold text-center flex items-center gap-2 justify-center text-amber-900 dark:text-amber-50">
-              <Badge className={cn("text-sm", levelColor)}>
+            <h2 className={cn(
+              "font-bold text-center flex items-center gap-2 justify-center text-amber-900 dark:text-amber-50",
+              isMobile ? "text-base" : "text-xl"
+            )}>
+              <Badge className={cn("text-xs sm:text-sm", levelColor)}>
                 {levelLabel}
               </Badge>
               <span>المستوى {limitedStages.length > 0 ? limitedStages[0].order : 1} - {limitedStages.length > 0 ? limitedStages[limitedStages.length-1].order : 10}</span>
@@ -259,10 +290,13 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
             initial={{ x: 50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-4 py-2 shadow-md border-2 border-amber-700 backdrop-blur-sm"
+            className="bg-amber-50/90 dark:bg-amber-900/90 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow-md border-2 border-amber-700 backdrop-blur-sm"
           >
             <div className="flex flex-col items-center">
-              <span className="font-bold text-amber-900 dark:text-amber-50">
+              <span className={cn(
+                "font-bold text-amber-900 dark:text-amber-50",
+                isMobile ? "text-sm" : "text-base"
+              )}>
                 {totalCompletedStages} / {limitedStages.length} مرحلة
               </span>
               <div className="w-full h-2 bg-amber-200/50 dark:bg-amber-800/50 rounded-full mt-1 overflow-hidden">
@@ -277,8 +311,12 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
           </motion.div>
         </div>
 
-        <div className="container mx-auto max-w-lg px-4 pt-10 z-10 relative">
-          <div className="relative min-h-[600px] w-full">
+        {/* Map container - Adjusted for mobile */}
+        <div className="container mx-auto max-w-lg px-2 sm:px-4 pt-6 sm:pt-10 z-10 relative">
+          <div className={cn(
+            "relative w-full",
+            isMobile ? "min-h-[500px]" : "min-h-[600px]"
+          )}>
             <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 320 600" preserveAspectRatio="none">
               <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="6" result="blur" />
@@ -296,7 +334,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                    ).join(' ')}`}
                 fill="none"
                 stroke="url(#pathPattern)"
-                strokeWidth="8"
+                strokeWidth={isMobile ? "6" : "8"}
                 strokeLinecap="round"
                 strokeDasharray="1, 15"
                 filter="url(#glow)"
@@ -316,7 +354,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                    }).join(' ')}`}
                 fill="none"
                 stroke="#A0522D"
-                strokeWidth="12"
+                strokeWidth={isMobile ? "10" : "12"}
                 strokeLinecap="round"
                 initial={{ pathLength: 0, opacity: 0 }}
                 animate={{ pathLength: 1, opacity: 1 }}
@@ -335,7 +373,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     key={`footprint-${i}`}
                     cx={midX + (Math.random() * 10 - 5)} 
                     cy={midY + (Math.random() * 10 - 5)} 
-                    r="3"
+                    r={isMobile ? "2" : "3"}
                     fill="#8B4513"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.7 }}
@@ -357,8 +395,8 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                   key={stage.id}
                   className="absolute"
                   style={{ 
-                    top: position.y - 30,
-                    left: position.x - 30,
+                    top: position.y - (isMobile ? 20 : 30),
+                    left: position.x - (isMobile ? 20 : 30),
                     zIndex: 30 - index
                   }}
                   initial={{ opacity: 0, scale: 0, rotate: -30 }}
@@ -378,7 +416,8 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                       <TooltipTrigger asChild>
                         <motion.div
                           className={cn(
-                            "w-16 h-16 rounded-full flex items-center justify-center relative cursor-pointer",
+                            "rounded-full flex items-center justify-center relative cursor-pointer",
+                            isMobile ? "w-12 h-12" : "w-16 h-16",
                             isCompleted ? "bg-yellow-500 border-4 border-amber-700 shadow-[0_0_15px_rgba(245,158,11,0.6)]" : 
                             isUnlocked ? "bg-amber-400 border-4 border-amber-700 shadow-lg" : 
                             "bg-slate-600 border-4 border-slate-800 opacity-80"
@@ -398,7 +437,10 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                           </div>
                           
                           <div className="relative z-10 flex flex-col items-center justify-center">
-                            <span className="text-2xl font-bold text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)]">{stage.order}</span>
+                            <span className={cn(
+                              "font-bold text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)]",
+                              isMobile ? "text-lg" : "text-2xl"
+                            )}>{stage.order}</span>
                             <div className="mt-1">
                               {getStageIcon(stage.order, isCompleted)}
                             </div>
@@ -411,12 +453,18 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                               animate={{ opacity: 1 }}
                               transition={{ delay: 1 + (index * 0.1) }}
                             >
-                              <Lock className="h-7 w-7 text-white drop-shadow-lg" />
+                              <Lock className={cn(
+                                "text-white drop-shadow-lg",
+                                isMobile ? "h-5 w-5" : "h-7 w-7"
+                              )} />
                             </motion.div>
                           )}
                           
                           {(isCompleted || (isUnlocked && completionPercentage > 0)) && (
-                            <div className="absolute -bottom-7 left-1/2 transform -translate-x-1/2 z-10">
+                            <div className={cn(
+                              "absolute left-1/2 transform -translate-x-1/2 z-10", 
+                              isMobile ? "-bottom-5" : "-bottom-7"
+                            )}>
                               {renderStars(completionPercentage)}
                             </div>
                           )}
@@ -442,7 +490,10 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                         side="top"
                       >
                         <div className="text-center text-amber-50 font-cairo p-1" dir="rtl">
-                          <p className="font-bold text-lg">{stage.title}</p>
+                          <p className={cn(
+                            "font-bold",
+                            isMobile ? "text-base" : "text-lg"
+                          )}>{stage.title}</p>
                           {isCompleted ? (
                             <p className="text-green-300">تم الإكمال! {completionPercentage}%</p>
                           ) : isUnlocked ? (
@@ -455,9 +506,16 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     </Tooltip>
                   </TooltipProvider>
                   
-                  <div className="absolute mt-8 left-1/2 -translate-x-1/2 min-w-[80px] text-center">
+                  {/* Stage title - Adjust for mobile */}
+                  <div className={cn(
+                    "absolute left-1/2 -translate-x-1/2 min-w-[80px] text-center",
+                    isMobile ? "mt-6" : "mt-8"
+                  )}>
                     <motion.div
-                      className="stage-bubble-text bg-amber-900/80 text-amber-50 font-cairo font-bold text-xs py-1 px-2 rounded-lg whitespace-nowrap border border-amber-600/50 shadow-md backdrop-blur-sm"
+                      className={cn(
+                        "stage-bubble-text bg-amber-900/80 text-amber-50 font-cairo font-bold py-1 px-2 rounded-lg whitespace-nowrap border border-amber-600/50 shadow-md backdrop-blur-sm",
+                        isMobile ? "text-[0.65rem]" : "text-xs"
+                      )}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: animationComplete ? 1 : 0, y: animationComplete ? 0 : 10 }}
                       transition={{ delay: 0.8 + (index * 0.15) }}
@@ -466,7 +524,8 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     </motion.div>
                   </div>
                   
-                  {index % 2 === 0 && (
+                  {/* Decorative elements - conditionally render based on mobile */}
+                  {!isMobile && index % 2 === 0 && (
                     <motion.div 
                       className="absolute"
                       style={{ 
@@ -487,7 +546,7 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
                     </motion.div>
                   )}
                   
-                  {(stage.order === 5 || stage.order === 10) && (
+                  {!isMobile && (stage.order === 5 || stage.order === 10) && (
                     <motion.div
                       className="absolute -right-10 -top-6 z-0"
                       initial={{ opacity: 0, scale: 0, rotate: -10 }}
@@ -519,73 +578,100 @@ const StageMap: React.FC<StageMapProps> = ({ stages, category, onStageSelect, on
               );
             })}
             
-            <motion.div
-              className="absolute top-1/4 right-5 opacity-80 z-0"
-              initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
-              animate={{ opacity: 0.8, rotate: 0, scale: 1 }}
-              transition={{ delay: 1, duration: 1 }}
-            >
+            {/* Compass - Only show on larger screens */}
+            {!isMobile && (
               <motion.div
-                animate={{ rotate: [0, 5, 0, -5, 0] }}
-                transition={{ duration: 6, repeat: Infinity }}
+                className="absolute top-1/4 right-5 opacity-80 z-0"
+                initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
+                animate={{ opacity: 0.8, rotate: 0, scale: 1 }}
+                transition={{ delay: 1, duration: 1 }}
               >
-                <Compass className="h-14 w-14 text-amber-800 drop-shadow-lg" />
+                <motion.div
+                  animate={{ rotate: [0, 5, 0, -5, 0] }}
+                  transition={{ duration: 6, repeat: Infinity }}
+                >
+                  <Compass className="h-14 w-14 text-amber-800 drop-shadow-lg" />
+                </motion.div>
               </motion.div>
-            </motion.div>
+            )}
             
-            <motion.div
-              className="absolute bottom-1/4 left-5 opacity-70 z-0"
-              initial={{ opacity: 0, rotate: 20, scale: 0.8 }}
-              animate={{ opacity: 0.7, rotate: 0, scale: 1 }}
-              transition={{ delay: 1.2, duration: 1 }}
-            >
+            {/* Ship - Only show on larger screens */}
+            {!isMobile && (
               <motion.div
-                animate={{ y: [0, -5, 0, 5, 0], rotate: [0, -3, 0, 3, 0] }}
-                transition={{ duration: 8, repeat: Infinity }}
+                className="absolute bottom-1/4 left-5 opacity-70 z-0"
+                initial={{ opacity: 0, rotate: 20, scale: 0.8 }}
+                animate={{ opacity: 0.7, rotate: 0, scale: 1 }}
+                transition={{ delay: 1.2, duration: 1 }}
               >
-                <Ship className="h-12 w-12 text-amber-800 drop-shadow-lg" />
+                <motion.div
+                  animate={{ y: [0, -5, 0, 5, 0], rotate: [0, -3, 0, 3, 0] }}
+                  transition={{ duration: 8, repeat: Infinity }}
+                >
+                  <Ship className="h-12 w-12 text-amber-800 drop-shadow-lg" />
+                </motion.div>
               </motion.div>
-            </motion.div>
+            )}
             
+            {/* Anchor - Use smaller size on mobile */}
             <motion.div
-              className="absolute bottom-10 right-20 z-0"
+              className={cn(
+                "absolute z-0",
+                isMobile ? "bottom-5 right-10" : "bottom-10 right-20"
+              )}
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.8 }}
               transition={{ delay: 2, duration: 1 }}
             >
               <motion.div
-                className="w-28 h-28 rounded-full border-2 border-blue-500/20 absolute"
+                className={cn(
+                  "rounded-full border-2 border-blue-500/20 absolute",
+                  isMobile ? "w-20 h-20" : "w-28 h-28"
+                )}
                 initial={{ scale: 0, opacity: 0.8 }}
                 animate={{ scale: 3, opacity: 0 }}
                 transition={{ duration: 6, repeat: Infinity, repeatDelay: 2 }}
               />
               <motion.div
-                className="w-28 h-28 rounded-full border-2 border-blue-500/30 absolute"
+                className={cn(
+                  "rounded-full border-2 border-blue-500/30 absolute",
+                  isMobile ? "w-20 h-20" : "w-28 h-28"
+                )}
                 initial={{ scale: 0, opacity: 0.8 }}
                 animate={{ scale: 2, opacity: 0 }}
                 transition={{ duration: 4, repeat: Infinity, delay: 1, repeatDelay: 2 }}
               />
-              <div className="w-8 h-8 absolute top-10 left-10">
-                <Anchor className="h-8 w-8 text-blue-500/60" />
+              <div className={cn(
+                "absolute",
+                isMobile ? "top-7 left-7" : "top-10 left-10"
+              )}>
+                <Anchor className={cn(
+                  "text-blue-500/60",
+                  isMobile ? "h-6 w-6" : "h-8 w-8"
+                )} />
               </div>
             </motion.div>
           </div>
         </div>
         
-        <div className="mt-16 text-center relative z-10">
+        {/* Footer text - Adjust for mobile */}
+        <div className="mt-10 sm:mt-16 text-center relative z-10">
           <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 1, duration: 0.7 }}
           >
-            <p className="text-amber-50 font-cairo text-lg bg-amber-900/60 mx-auto max-w-md rounded-lg p-3 backdrop-blur-sm border border-amber-600/50 shadow-lg" dir="rtl">
+            <p className={cn(
+              "text-amber-50 font-cairo bg-amber-900/60 mx-auto rounded-lg p-2 sm:p-3 backdrop-blur-sm border border-amber-600/50 shadow-lg",
+              isMobile ? "text-sm max-w-xs" : "text-lg max-w-md"
+            )} dir="rtl">
               اتبع مسار الكنز وأكمل كل مرحلة للوصول إلى الجائزة النهائية!
             </p>
           </motion.div>
         </div>
         
+        {/* Background particles */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[...Array(10)].map((_, i) => (
+          {[...Array(isMobile ? 6 : 10)].map((_, i) => (
             <motion.div
               key={`particle-${i}`}
               className="absolute w-1 h-1 rounded-full bg-amber-200/40"
