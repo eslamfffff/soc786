@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { getQuestionsByCategoryAndLevel } from "@/data/questions";
 import categories from "@/data/categories";
@@ -10,7 +9,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 import { loadProgress, isLevelUnlocked, getUniqueQuestions } from "@/utils/progressUtils";
 import { useToast } from "@/hooks/use-toast";
-import StageMap from "@/components/StageMap";
+import StageSelection from "@/components/StageSelection";
 import StageQuiz from "@/components/StageQuiz";
 import StageComplete from "@/components/StageComplete";
 import { Stage } from "@/data/questions/types";
@@ -255,15 +254,13 @@ export default function Index() {
       )}
       
       {viewMode === ViewMode.STAGES && selectedCategory && selectedLevel && (
-        <div className="container mx-auto pt-2">
-          <StageMap 
-            stages={STAGES[selectedCategory] || []} 
-            category={selectedCategory}
-            onStageSelect={handleStageSelect}
-            onBackToLevels={handleBackToLevels}
-            levelId={selectedLevel}
-          />
-        </div>
+        <StageSelection 
+          stages={STAGES[selectedCategory] || []} 
+          category={selectedCategory}
+          onStageSelect={handleStageSelect}
+          onBackToLevels={handleBackToLevels}
+          levelId={selectedLevel}
+        />
       )}
       
       {viewMode === ViewMode.QUIZ && selectedCategory && selectedLevel && (
