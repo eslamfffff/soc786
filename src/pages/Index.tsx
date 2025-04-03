@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { getQuestionsByCategoryAndLevel } from "@/data/questions";
 import categories from "@/data/categories";
@@ -17,8 +18,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Function to generate stages for each level - modified to have 10 stages per level
-const generateStages = (level: string, count: number = 10): Stage[] => {
+// Function to generate stages for each level - modified to have exactly 10 stages per level
+const generateStages = (level: string): Stage[] => {
   const stages: Stage[] = [];
   
   // Difficulty level based on selected level
@@ -34,7 +35,8 @@ const generateStages = (level: string, count: number = 10): Stage[] => {
     10: 'النهائي'
   };
   
-  for (let i = 1; i <= count; i++) {
+  // Create exactly 10 stages for each level
+  for (let i = 1; i <= 10; i++) {
     stages.push({
       id: `${level}-${i}`,
       title: specialTitles[i] || `المرحلة ${i}`,
@@ -51,7 +53,7 @@ const generateStages = (level: string, count: number = 10): Stage[] => {
   return stages;
 };
 
-// Generate stages for all levels - modified to have only 10 stages per level
+// Generate stages for all levels - exactly 10 stages per level
 const STAGES: Record<string, Stage[]> = {
   "football": [
     ...generateStages('beginner'),
@@ -133,19 +135,19 @@ export default function Index() {
     setSelectedStage(stage);
     setViewMode(ViewMode.STAGE_QUIZ);
     
-    // Get questions for this stage using the improved getUniqueQuestions function
+    // Get questions for this stage - always 10 questions per stage
     const allLevelQuestions = getQuestionsByCategoryAndLevel(selectedCategory, selectedLevel);
     
-    // Always 10 questions per stage
+    // Always exactly 10 questions per stage
     const questionsPerStage = 10;
     
-    // Use the stageId directly to ensure deterministic but different questions for each stage
+    // Use the stageId directly to ensure each stage has different questions
     const uniqueQuestions = getUniqueQuestions(
       allLevelQuestions,
       selectedCategory,
       selectedLevel,
       questionsPerStage,
-      stageId // Pass the full stageId for better uniqueness
+      stageId
     );
     
     setCurrentQuestions(uniqueQuestions);

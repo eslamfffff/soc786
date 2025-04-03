@@ -1,4 +1,3 @@
-
 // Function to load user progress from localStorage
 export const loadProgress = () => {
   try {
@@ -128,7 +127,7 @@ export const loadUploadedQuestions = () => {
   }
 };
 
-// Improved function to ensure unique questions for each stage
+// Improved function to ensure unique questions for each stage - always returning exactly 10 questions
 export const getUniqueQuestions = (
   allQuestions: any[], 
   categoryId: string, 
@@ -159,8 +158,7 @@ export const getUniqueQuestions = (
   
   if (filteredQuestions.length === 0) return [];
   
-  // Create a more deterministic but different shuffle for each stage
-  // Use a consistent seeded random approach
+  // Create a deterministic but different shuffle for each stage using a seeded random approach
   const seedRandom = (seed: number) => {
     let state = seed;
     return () => {
@@ -170,7 +168,16 @@ export const getUniqueQuestions = (
   };
   
   // Use stage number as part of the seed for consistent but different questions per stage
-  const random = seedRandom(stageNumber * 100 + (levelId === 'beginner' ? 1 : levelId === 'intermediate' ? 2 : 3) * 1000);
+  // Multiply by different factors for different categories to ensure diversity
+  let seedMultiplier = 100;
+  if (categoryId === 'islam') seedMultiplier = 200;
+  if (categoryId === 'science') seedMultiplier = 300;
+  
+  // Add level modifier to ensure different questions across levels
+  const levelModifier = levelId === 'beginner' ? 1000 : 
+                        levelId === 'intermediate' ? 2000 : 3000;
+  
+  const random = seedRandom(stageNumber * seedMultiplier + levelModifier);
   
   // Make a copy of questions to shuffle
   const shuffled = [...filteredQuestions];
@@ -181,69 +188,13 @@ export const getUniqueQuestions = (
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   
-  // Get difficulty-based questions
-  let easyQuestions = shuffled.filter(q => q.difficulty === 1);
-  let mediumQuestions = shuffled.filter(q => q.difficulty === 2);
-  let hardQuestions = shuffled.filter(q => q.difficulty === 3);
-  
-  // If difficulty isn't specified, create balanced pools
-  if (easyQuestions.length + mediumQuestions.length + hardQuestions.length === 0) {
-    const chunkSize = Math.floor(shuffled.length / 3);
-    easyQuestions = shuffled.slice(0, chunkSize);
-    mediumQuestions = shuffled.slice(chunkSize, chunkSize * 2);
-    hardQuestions = shuffled.slice(chunkSize * 2);
+  // If we don't have enough questions, duplicate some to reach the desired count
+  if (shuffled.length < count) {
+    const multiplier = Math.ceil(count / shuffled.length);
+    const expanded = Array(multiplier).fill(shuffled).flat();
+    return expanded.slice(0, count);
   }
   
-  // Modify selection based on stage number to ensure progression
-  // Earlier stages get more easy questions, later stages get more hard questions
-  const stagePosition = Math.min(stageNumber / 10, 1); // 0 to 1 based on stage position
-  
-  let easyRatio, mediumRatio, hardRatio;
-  
-  if (levelId === 'beginner') {
-    // Beginner level: gradually decrease easy questions, increase medium and hard
-    easyRatio = 0.7 - stagePosition * 0.4; // 0.7 → 0.3
-    mediumRatio = 0.2 + stagePosition * 0.3; // 0.2 → 0.5
-    hardRatio = 0.1 + stagePosition * 0.1; // 0.1 → 0.2
-  } else if (levelId === 'intermediate') {
-    // Intermediate level: balance between all types with progression
-    easyRatio = 0.4 - stagePosition * 0.3; // 0.4 → 0.1
-    mediumRatio = 0.4; // Stay constant
-    hardRatio = 0.2 + stagePosition * 0.3; // 0.2 → 0.5
-  } else {
-    // Advanced level: mostly medium and hard with progression
-    easyRatio = 0.2 - stagePosition * 0.1; // 0.2 → 0.1
-    mediumRatio = 0.5 - stagePosition * 0.2; // 0.5 → 0.3
-    hardRatio = 0.3 + stagePosition * 0.3; // 0.3 → 0.6
-  }
-  
-  // Calculate counts for each difficulty
-  const easyCount = Math.max(1, Math.min(Math.round(count * easyRatio), easyQuestions.length));
-  const hardCount = Math.max(1, Math.min(Math.round(count * hardRatio), hardQuestions.length));
-  const mediumCount = Math.min(count - easyCount - hardCount, mediumQuestions.length);
-  
-  // Select questions based on calculated counts
-  const result = [
-    ...easyQuestions.slice(0, easyCount),
-    ...mediumQuestions.slice(0, mediumCount),
-    ...hardQuestions.slice(0, hardCount)
-  ];
-  
-  // If we don't have enough questions, add more from any difficulty
-  if (result.length < count) {
-    // Remaining shuffled questions not already selected
-    const usedIds = new Set(result.map(q => q.id));
-    const remainingQuestions = shuffled.filter(q => !usedIds.has(q.id));
-    
-    // Add remaining questions up to count
-    result.push(...remainingQuestions.slice(0, count - result.length));
-  }
-  
-  // Final shuffle of the result for better question order
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  
-  return result.slice(0, count);
+  // Return exactly 10 questions
+  return shuffled.slice(0, count);
 };

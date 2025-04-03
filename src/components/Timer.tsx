@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -23,14 +24,14 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
     return "bg-gradient-to-r from-red-600 to-rose-500";
   };
 
-  // Smooth animation update function
+  // Smooth animation update function with requestAnimationFrame
   const updateTimerAnimation = (timestamp: number) => {
     if (!isActive) return;
     
     const now = Date.now();
     const elapsed = (now - lastUpdateTimeRef.current) / 1000;
     
-    if (elapsed >= 0.05) { // Update roughly every 50ms for smooth animation
+    if (elapsed >= 0.03) { // Update more frequently for smoother animation (30ms)
       lastUpdateTimeRef.current = now;
       
       setTimeLeft((prevTime) => {
@@ -44,7 +45,7 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
         // Check if timer is up
         if (newTime <= 0 && !hasCalledTimeUp.current) {
           hasCalledTimeUp.current = true;
-          setTimeout(onTimeUp, 0);
+          onTimeUp();
           return 0;
         }
         
@@ -79,15 +80,6 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
     // Start animation if active
     if (isActive) {
       animationFrameRef.current = requestAnimationFrame(updateTimerAnimation);
-      
-      // Keep a low-frequency interval for backup/secondary updates
-      timerRef.current = setInterval(() => {
-        // This ensures the displayed seconds update even if animation is throttled
-        setTimeLeft((prev) => {
-          const secondsElapsed = Math.floor(prev) - Math.floor(prev - 1);
-          return secondsElapsed > 0 ? Math.floor(prev - secondsElapsed) : prev;
-        });
-      }, 1000);
     }
 
     // Cleanup on unmount or when dependencies change
@@ -125,12 +117,12 @@ const Timer: React.FC<TimerProps> = ({ duration, onTimeUp, isActive }) => {
         >
           <div 
             className={cn(
-              "h-full transition-all ease-linear",
+              "h-full",
               getTimerColor()
             )}
             style={{ 
               width: `${percentage}%`,
-              transition: isActive ? 'width 50ms linear' : 'width 300ms ease-out'
+              transition: isActive ? 'width 30ms linear' : 'width 300ms ease-out'
             }}
           />
         </Progress>
