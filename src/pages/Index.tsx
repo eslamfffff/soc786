@@ -290,9 +290,8 @@ export default function Index() {
               correctAnswers={quizStats.correctAnswers}
               totalQuestions={quizStats.totalQuestions}
               onBackToStages={handleBackToStages}
-              // Disable automatic progress to next stage
-              onNextStage={undefined}
-              hasNextStage={false}
+              onNextStage={hasNextStage() ? handleNextStage : undefined}
+              hasNextStage={hasNextStage()}
             />
           </div>
         </div>
