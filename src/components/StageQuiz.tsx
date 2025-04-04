@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Question } from '@/data/questions/types';
 import { Button } from '@/components/ui/button';
@@ -27,20 +26,19 @@ const StageQuiz: React.FC<StageQuizProps> = ({
   onComplete 
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const totalQuestions = questions.length;
   
   const currentQuestion = questions[currentQuestionIndex];
   
-  const handleAnswerSelect = (answerIndex: number) => {
-    if (selectedAnswer !== null) return;
-    setSelectedAnswer(answerIndex);
+  const handleAnswerSelect = (answer: string) => {
+    setSelectedAnswer(answer);
   };
   
   const handleNextQuestion = () => {
-    if (selectedAnswer === null) return;
+    if (!selectedAnswer) return;
     
     if (selectedAnswer === currentQuestion.correctAnswer) {
       setScore(score + 10);
@@ -106,20 +104,20 @@ const StageQuiz: React.FC<StageQuizProps> = ({
         
         <div className="quiz-content">
           <p className="text-lg font-cairo mb-6 text-center" dir="rtl">
-            {currentQuestion.question}
+            {currentQuestion.text}
           </p>
           
           <div className="space-y-4">
-            {currentQuestion.options.map((option, index) => (
+            {currentQuestion.options.map((option) => (
               <button
-                key={index}
+                key={option}
                 className={cn(
                   "w-full py-3 px-4 rounded-md text-lg font-cairo text-right",
                   "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600",
                   "focus:outline-none focus:ring-2 focus:ring-primary",
-                  selectedAnswer === index ? "ring-2 ring-primary" : ""
+                  selectedAnswer === option ? "ring-2 ring-primary" : ""
                 )}
-                onClick={() => handleAnswerSelect(index)}
+                onClick={() => handleAnswerSelect(option)}
                 disabled={selectedAnswer !== null}
                 dir="rtl"
               >
@@ -129,17 +127,10 @@ const StageQuiz: React.FC<StageQuizProps> = ({
           </div>
         </div>
         
-        <div className="quiz-footer mt-4">
-          <div className="progress-bar mb-4 bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary"
-              style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-            ></div>
-          </div>
-          
+        <div className="quiz-footer">
           <Button 
             onClick={handleNextQuestion} 
-            disabled={selectedAnswer === null}
+            disabled={!selectedAnswer}
             className="w-full font-cairo text-lg"
           >
             {currentQuestionIndex === questions.length - 1 ? 'إنهاء الاختبار' : 'السؤال التالي'}
