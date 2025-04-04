@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Question } from '@/data/questions/types';
 import { Button } from '@/components/ui/button';
@@ -26,19 +27,19 @@ const StageQuiz: React.FC<StageQuizProps> = ({
   onComplete 
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const totalQuestions = questions.length;
   
   const currentQuestion = questions[currentQuestionIndex];
   
-  const handleAnswerSelect = (answer: string) => {
-    setSelectedAnswer(answer);
+  const handleAnswerSelect = (answerIndex: number) => {
+    setSelectedAnswer(answerIndex);
   };
   
   const handleNextQuestion = () => {
-    if (!selectedAnswer) return;
+    if (selectedAnswer === null) return;
     
     if (selectedAnswer === currentQuestion.correctAnswer) {
       setScore(score + 10);
@@ -104,20 +105,20 @@ const StageQuiz: React.FC<StageQuizProps> = ({
         
         <div className="quiz-content">
           <p className="text-lg font-cairo mb-6 text-center" dir="rtl">
-            {currentQuestion.text}
+            {currentQuestion.question}
           </p>
           
           <div className="space-y-4">
-            {currentQuestion.options.map((option) => (
+            {currentQuestion.options.map((option, index) => (
               <button
                 key={option}
                 className={cn(
                   "w-full py-3 px-4 rounded-md text-lg font-cairo text-right",
                   "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600",
                   "focus:outline-none focus:ring-2 focus:ring-primary",
-                  selectedAnswer === option ? "ring-2 ring-primary" : ""
+                  selectedAnswer === index ? "ring-2 ring-primary" : ""
                 )}
-                onClick={() => handleAnswerSelect(option)}
+                onClick={() => handleAnswerSelect(index)}
                 disabled={selectedAnswer !== null}
                 dir="rtl"
               >
@@ -130,7 +131,7 @@ const StageQuiz: React.FC<StageQuizProps> = ({
         <div className="quiz-footer">
           <Button 
             onClick={handleNextQuestion} 
-            disabled={!selectedAnswer}
+            disabled={selectedAnswer === null}
             className="w-full font-cairo text-lg"
           >
             {currentQuestionIndex === questions.length - 1 ? 'إنهاء الاختبار' : 'السؤال التالي'}
