@@ -92,15 +92,8 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
       setIsTimerActive(false);
       setIsRevealed(true);
       setShowNextButton(true);
-      
-      // Show time up message
-      toast({
-        title: "انتهى الوقت!",
-        description: "الإجابة الصحيحة هي: " + question.options[question.correctAnswer],
-        variant: "destructive",
-      });
     }
-  }, [selectedAnswer, question, toast]);
+  }, [selectedAnswer, question]);
 
   const handleAnswerSelect = (index: number) => {
     if (selectedAnswer !== null || !isTimerActive || !question) return;
@@ -120,21 +113,6 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
     
     if (pointsEarned > 0) {
       setScore((prevScore) => prevScore + pointsEarned);
-    }
-    
-    // Show feedback toast for incorrect answers
-    if (!isCorrect) {
-      toast({
-        title: "إجابة خاطئة",
-        description: question.explanation || "الإجابة الصحيحة هي: " + question.options[question.correctAnswer],
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "إجابة صحيحة!",
-        description: question.explanation || "أحسنت!",
-        variant: "default",
-      });
     }
     
     // Reveal correct answer
@@ -211,12 +189,6 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
             categoryId={categoryId}
             levelId={question?.level}
           />
-          
-          <footer className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
-            <p className="text-slate-600 dark:text-slate-400 text-sm">
-              Engineered by Islam Farid Ahmed
-            </p>
-          </footer>
         </div>
       </div>
     );
@@ -392,12 +364,6 @@ const QuizCard: React.FC<QuizCardProps> = ({ questions, categoryId, onBackToCate
             </Button>
           </div>
         )}
-        
-        <footer className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
-          <p className="text-slate-600 dark:text-slate-400 text-sm">
-            Engineered by Islam Farid Ahmed
-          </p>
-        </footer>
       </div>
     </div>
   );

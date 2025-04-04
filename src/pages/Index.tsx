@@ -95,12 +95,6 @@ export default function Index() {
     totalQuestions: 10
   });
 
-  // Log developer signature on load
-  useEffect(() => {
-    console.log("🧠 Engineered by Islam Farid Ahmed - Progressive Quiz System");
-    console.log("Version 4.0 - Game-Based Question Engine");
-  }, []);
-
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
     setViewMode(ViewMode.LEVELS);
@@ -298,12 +292,6 @@ export default function Index() {
           </div>
         </div>
       )}
-      
-      <div className="hidden md:block fixed bottom-0 left-0 right-0 bg-black/10 dark:bg-black/40 backdrop-blur-sm py-2 text-center">
-        <p className="text-sm text-slate-700 dark:text-slate-300">
-          Engineered by Islam Farid Ahmed
-        </p>
-      </div>
     </div>
   );
 }
