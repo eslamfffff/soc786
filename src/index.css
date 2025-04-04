@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,7 +94,7 @@
 }
 
 .quiz-card {
-  @apply bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200;
+  @apply bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden border border-gray-200 dark:border-slate-700;
 }
 
 .stage-card {
@@ -164,6 +165,37 @@
   @apply bg-green-50 dark:bg-green-900/30 dark:border-green-800;
 }
 
+/* Star rating styles */
+.star-rating {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.star-gold {
+  @apply text-amber-400 fill-amber-400;
+  filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));
+  animation: star-pulse 2s infinite;
+}
+
+.star-red {
+  @apply text-red-400 fill-red-400;
+  filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5));
+}
+
+.star-gray {
+  @apply text-gray-400 fill-gray-400;
+}
+
+@keyframes star-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.8));
+  }
+}
+
 /* Animations */
 @keyframes pulse-glow {
   0%, 100% {
@@ -188,6 +220,49 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   transform: rotate(-5deg);
   z-index: 20;
+}
+
+/* Glow effects for completed stages */
+.glow-gold {
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+  animation: gold-pulse 3s infinite;
+}
+
+.glow-red {
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  animation: red-pulse 3s infinite;
+}
+
+.glow-gray {
+  box-shadow: 0 0 10px rgba(156, 163, 175, 0.4);
+  animation: gray-pulse 3s infinite;
+}
+
+@keyframes gold-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+  }
+}
+
+@keyframes red-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.7);
+  }
+}
+
+@keyframes gray-pulse {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(156, 163, 175, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(156, 163, 175, 0.6);
+  }
 }
 
 /* Popover animations */
@@ -386,6 +461,22 @@
   background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);
 }
 
+/* Rating colors for completed stages */
+.stage-rating-gold {
+  background: linear-gradient(135deg, #ffd700 0%, #ffcc33 100%);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.stage-rating-red {
+  background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+}
+
+.stage-rating-gray {
+  background: linear-gradient(135deg, #808080 0%, #a9a9a9 100%);
+  box-shadow: 0 0 10px rgba(156, 163, 175, 0.4);
+}
+
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .stage-grid {
@@ -481,144 +572,13 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* Enhanced Map Styles - Start */
-.map-container {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+/* Fix for Admin page dark mode issue */
+.dark body {
+  background-color: hsl(222.2 84% 4.9%);
+  color: hsl(210 40% 98%);
 }
 
-.map-background {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  transition: transform 0.5s ease-out;
+body.dark {
+  background-color: hsl(222.2 84% 4.9%);
+  color: hsl(210 40% 98%);
 }
-
-.map-background:hover {
-  transform: scale(1.03);
-}
-
-.map-path {
-  stroke-dasharray: 5, 15;
-  stroke-width: 8;
-  filter: drop-shadow(0 0 5px rgba(255, 180, 0, 0.5));
-}
-
-.map-node {
-  position: relative;
-  transition: all 0.3s ease;
-  transform-origin: center;
-}
-
-.map-node:hover {
-  transform: scale(1.15) rotate(-5deg);
-}
-
-.map-node-pulse {
-  animation: map-node-pulse 2s infinite;
-}
-
-@keyframes map-node-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 15px rgba(255, 204, 0, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
-  }
-}
-
-.map-tooltip {
-  position: absolute;
-  padding: 8px 12px;
-  background: rgba(30, 30, 30, 0.9);
-  border-radius: 6px;
-  color: white;
-  font-size: 14px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s;
-  z-index: 100;
-  white-space: nowrap;
-}
-
-.map-texture-overlay {
-  position: absolute;
-  inset: 0;
-  background-image: url('/path/to/paper-texture.jpg');
-  opacity: 0.1;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-}
-
-.map-glow {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,204,0,0.2) 0%, rgba(255,204,0,0) 70%);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 10;
-}
-
-.treasure-icon {
-  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
-  transition: all 0.3s ease;
-}
-
-.treasure-icon:hover {
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
-  transform: scale(1.1) rotate(5deg);
-}
-
-.compass-rose {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 80px;
-  height: 80px;
-  opacity: 0.7;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-.compass-rose:hover {
-  opacity: 1;
-}
-
-/* Aged paper textures */
-.aged-paper {
-  background-color: #e9e0d1;
-  background-image: 
-    linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
-  background-size: 20px 20px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1) inset;
-}
-
-.paper-fold {
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(0,0,0,0.1) 20%, 
-    rgba(0,0,0,0.1) 80%, 
-    transparent
-  );
-}
-
-.map-title {
-  font-family: 'Pirata One', cursive;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  color: #5d4037;
-  letter-spacing: 0.1em;
-}
-
-/* Enhanced Map Styles - End */

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { getQuestionsByCategoryAndLevel } from "@/data/questions";
 import categories from "@/data/categories";
@@ -18,15 +17,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Function to generate stages for each level - modified to have exactly 10 stages per level
 const generateStages = (level: string): Stage[] => {
   const stages: Stage[] = [];
   
-  // Difficulty level based on selected level
   const stageDifficulty = level === 'beginner' ? 'easy' : 
                          level === 'intermediate' ? 'medium' : 'hard';
   
-  // Special titles for some stages
   const specialTitles: Record<number, string> = {
     1: 'البداية',
     3: 'المرحلة الوسطى',
@@ -35,7 +31,6 @@ const generateStages = (level: string): Stage[] => {
     10: 'النهائي'
   };
   
-  // Create exactly 10 stages for each level
   for (let i = 1; i <= 10; i++) {
     stages.push({
       id: `${level}-${i}`,
@@ -53,7 +48,6 @@ const generateStages = (level: string): Stage[] => {
   return stages;
 };
 
-// Generate stages for all levels - exactly 10 stages per level
 const STAGES: Record<string, Stage[]> = {
   "football": [
     ...generateStages('beginner'),
@@ -95,13 +89,31 @@ export default function Index() {
     totalQuestions: 10
   });
 
+  useEffect(() => {
+    const isDarkMode = theme === 'dark';
+    
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
+
+    return () => {
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      }
+    };
+  }, [theme]);
+
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
     setViewMode(ViewMode.LEVELS);
   };
 
   const handleLevelSelect = (categoryId: string, levelId: string) => {
-    // Check if level is unlocked
     const progress = loadProgress();
     if (!isLevelUnlocked(categoryId, levelId, progress)) {
       toast({
@@ -119,7 +131,6 @@ export default function Index() {
   const handleStageSelect = (stageId: string) => {
     if (!selectedCategory || !selectedLevel) return;
     
-    // Filter stages by selected category and level
     const categoryStages = STAGES[selectedCategory];
     const levelStages = categoryStages.filter(stage => stage.id.startsWith(selectedLevel));
     
@@ -129,13 +140,10 @@ export default function Index() {
     setSelectedStage(stage);
     setViewMode(ViewMode.STAGE_QUIZ);
     
-    // Get questions for this stage - always 10 questions per stage
     const allLevelQuestions = getQuestionsByCategoryAndLevel(selectedCategory, selectedLevel);
     
-    // Always exactly 10 questions per stage
     const questionsPerStage = 10;
     
-    // Use the stageId directly to ensure each stage has different questions
     const uniqueQuestions = getUniqueQuestions(
       allLevelQuestions,
       selectedCategory,
@@ -170,17 +178,13 @@ export default function Index() {
     correctAnswers: number,
     totalQuestions: number 
   }) => {
-    // Save the stats for display in the completion screen
     setQuizStats(stats);
-    
-    // Set the view mode to show completion screen
     setViewMode(ViewMode.STAGE_COMPLETE);
   };
 
   const handleNextStage = () => {
     if (!selectedCategory || !selectedLevel || !selectedStage) return;
     
-    // Find next stage in the current level
     const categoryStages = STAGES[selectedCategory];
     const levelStages = categoryStages.filter(stage => stage.id.startsWith(selectedLevel));
     
@@ -188,13 +192,11 @@ export default function Index() {
     
     if (currentStageIndex >= 0 && currentStageIndex < levelStages.length - 1) {
       const nextStage = levelStages[currentStageIndex + 1];
-      setSelectedStage(null); // Reset current stage
-      // Use a small timeout to ensure state updates correctly
+      setSelectedStage(null);
       setTimeout(() => {
-        handleStageSelect(nextStage.id); // Select next stage
+        handleStageSelect(nextStage.id);
       }, 100);
     } else {
-      // No next stage, go back to stage map
       handleBackToStages();
     }
   };
@@ -213,7 +215,6 @@ export default function Index() {
     return categories.find(cat => cat.id === selectedCategory) || null;
   };
 
-  // Check if there's a next stage
   const hasNextStage = (): boolean => {
     if (!selectedCategory || !selectedLevel || !selectedStage) return false;
     
@@ -279,7 +280,7 @@ export default function Index() {
       
       {viewMode === ViewMode.STAGE_COMPLETE && selectedStage && (
         <div className="quiz-container">
-          <div className="quiz-card dark:bg-slate-800 dark:border-slate-700">
+          <div className="quiz-card">
             <StageComplete
               stage={selectedStage}
               score={quizStats.score}

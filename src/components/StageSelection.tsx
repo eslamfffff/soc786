@@ -55,6 +55,43 @@ const StageSelection: React.FC<StageSelectionProps> = ({
   const handleStageClick = (stageId: string) => {
     onStageSelect(stageId);
   };
+
+  // Animation variants for staggered children
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+      }
+    }
+  };
+  
+  // Animate path for progress bar
+  const pathVariants = {
+    hidden: { pathLength: 0 },
+    visible: { 
+      pathLength: completionPercentage / 100,
+      transition: { 
+        duration: 1.5,
+        ease: "easeInOut"
+      }
+    }
+  };
   
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -81,62 +118,137 @@ const StageSelection: React.FC<StageSelectionProps> = ({
         </div>
       </motion.div>
       
-      <div className={cn(
-        "rounded-xl p-4 mb-6",
-        levelBgColor
-      )}>
+      <motion.div 
+        className={cn(
+          "rounded-xl p-4 mb-6",
+          levelBgColor
+        )}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ 
+          duration: 0.5,
+          delay: 0.2
+        }}
+      >
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-bold" dir="rtl">التقدم</h2>
           <span className="text-lg font-bold">{completionPercentage}%</span>
         </div>
         
-        <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden relative">
+          {/* Animated progress track */}
           <motion.div 
             className={cn(
-              "h-full",
+              "absolute top-0 left-0 h-full rounded-full",
               levelId === 'beginner' ? 'bg-emerald-500' :
               levelId === 'intermediate' ? 'bg-blue-500' :
               'bg-red-500'
             )}
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
           />
+          
+          {/* Animated glowing effect */}
+          {completionPercentage > 0 && (
+            <motion.div 
+              className="absolute top-0 left-0 h-full rounded-full bg-white opacity-40"
+              initial={{ width: 0 }}
+              animate={{
+                width: [`${completionPercentage}%`, `${completionPercentage}%`],
+                opacity: [0.4, 0.1, 0.4]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          )}
+          
+          {/* Stars above progress bar for achievements */}
+          {completionPercentage >= 30 && (
+            <motion.div 
+              className="absolute -top-3 left-[30%] transform -translate-x-1/2"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.5, duration: 0.3 }}
+            >
+              <div className="bg-amber-400 rounded-full p-1 shadow-glow">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </div>
+            </motion.div>
+          )}
+          
+          {completionPercentage >= 70 && (
+            <motion.div 
+              className="absolute -top-3 left-[70%] transform -translate-x-1/2"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.8, duration: 0.3 }}
+            >
+              <div className="bg-amber-400 rounded-full p-1 shadow-glow">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </div>
+            </motion.div>
+          )}
+          
+          {completionPercentage >= 100 && (
+            <motion.div 
+              className="absolute -top-3 left-[100%] transform -translate-x-1/2"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 2.1, duration: 0.3 }}
+            >
+              <div className="bg-amber-400 rounded-full p-1 shadow-glow">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </div>
+            </motion.div>
+          )}
         </div>
-      </div>
+      </motion.div>
       
       <motion.div 
         className={cn(
           "grid gap-4",
           isMobile ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
         )}
-        variants={{
-          hidden: { opacity: 0 },
-          show: {
-            opacity: 1,
-            transition: {
-              staggerChildren: 0.1
-            }
-          }
-        }}
+        variants={containerVariants}
         initial="hidden"
         animate="show"
       >
         {limitedStages.map((stage, index) => (
-          <StageCard
+          <motion.div
             key={stage.id}
-            stage={stage}
-            categoryId={category}
-            progress={progress}
-            onClick={() => handleStageClick(stage.id)}
-            index={index}
-          />
+            variants={itemVariants}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <StageCard
+              stage={stage}
+              categoryId={category}
+              progress={progress}
+              onClick={() => handleStageClick(stage.id)}
+              index={index}
+            />
+          </motion.div>
         ))}
       </motion.div>
       
-      <div className="text-center mt-10 text-gray-500 dark:text-gray-400 text-sm">
+      <motion.div 
+        className="text-center mt-10 text-gray-500 dark:text-gray-400 text-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 0.5 }}
+      >
         <p dir="rtl">استكشف رحلتك المعرفية وأكمل كل المراحل للحصول على الجوائز!</p>
-      </div>
+      </motion.div>
     </div>
   );
 };
