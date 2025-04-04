@@ -6,8 +6,6 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { saveStageCompletion } from '@/utils/progressUtils';
-import AnswerOption from './AnswerOption';
-import ProgressBar from './ProgressBar';
 
 interface StageQuizProps {
   questions: Question[];
@@ -32,28 +30,24 @@ const StageQuiz: React.FC<StageQuizProps> = ({
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [isRevealed, setIsRevealed] = useState(false);
   const totalQuestions = questions.length;
   
   const currentQuestion = questions[currentQuestionIndex];
   
   const handleAnswerSelect = (answerIndex: number) => {
-    if (selectedAnswer !== null) return; // Prevent multiple selections
-    
+    if (selectedAnswer !== null) return;
     setSelectedAnswer(answerIndex);
-    setIsRevealed(true);
-    
-    if (answerIndex === currentQuestion.correctAnswer) {
-      setScore(score + 10);
-      setCorrectAnswers(correctAnswers + 1);
-    }
   };
   
   const handleNextQuestion = () => {
     if (selectedAnswer === null) return;
     
+    if (selectedAnswer === currentQuestion.correctAnswer) {
+      setScore(score + 10);
+      setCorrectAnswers(correctAnswers + 1);
+    }
+    
     setSelectedAnswer(null);
-    setIsRevealed(false);
     
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -80,10 +74,6 @@ const StageQuiz: React.FC<StageQuizProps> = ({
       correctAnswers,
       totalQuestions
     });
-  };
-  
-  const getOptionLetter = (index: number) => {
-    return String.fromCharCode(65 + index); // A, B, C, D
   };
   
   return (
@@ -121,31 +111,39 @@ const StageQuiz: React.FC<StageQuizProps> = ({
           
           <div className="space-y-4">
             {currentQuestion.options.map((option, index) => (
-              <AnswerOption
+              <button
                 key={index}
-                letter={getOptionLetter(index)}
-                text={option}
-                isSelected={selectedAnswer === index}
-                isCorrect={isRevealed ? index === currentQuestion.correctAnswer : null}
-                isRevealed={isRevealed}
+                className={cn(
+                  "w-full py-3 px-4 rounded-md text-lg font-cairo text-right",
+                  "bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600",
+                  "focus:outline-none focus:ring-2 focus:ring-primary",
+                  selectedAnswer === index ? "ring-2 ring-primary" : ""
+                )}
                 onClick={() => handleAnswerSelect(index)}
                 disabled={selectedAnswer !== null}
-              />
+                dir="rtl"
+              >
+                {option}
+              </button>
             ))}
           </div>
         </div>
         
-        <div className="quiz-footer mt-6">
-          <ProgressBar current={currentQuestionIndex + 1} total={questions.length} />
+        <div className="quiz-footer mt-4">
+          <div className="progress-bar mb-4 bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary"
+              style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
+            ></div>
+          </div>
           
-          {selectedAnswer !== null && (
-            <Button 
-              onClick={handleNextQuestion} 
-              className="w-full font-cairo text-lg mt-4"
-            >
-              {currentQuestionIndex === questions.length - 1 ? 'إنهاء الاختبار' : 'السؤال التالي'}
-            </Button>
-          )}
+          <Button 
+            onClick={handleNextQuestion} 
+            disabled={selectedAnswer === null}
+            className="w-full font-cairo text-lg"
+          >
+            {currentQuestionIndex === questions.length - 1 ? 'إنهاء الاختبار' : 'السؤال التالي'}
+          </Button>
         </div>
       </div>
     </div>
