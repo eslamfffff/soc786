@@ -27,7 +27,6 @@ const StageQuiz: React.FC<StageQuizProps> = ({
   onComplete 
 }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  // Change type from string | null to number | null
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
