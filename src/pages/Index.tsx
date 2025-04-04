@@ -94,6 +94,10 @@ export default function Index() {
     correctAnswers: 0,
     totalQuestions: 10
   });
+  const [completedStage, setCompletedStage] = useState<{
+    stageId: string;
+    stars: number;
+  } | null>(null);
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -151,16 +155,20 @@ export default function Index() {
     setSelectedCategory(null);
     setSelectedLevel(null);
     setSelectedStage(null);
+    setCompletedStage(null);
     setViewMode(ViewMode.CATEGORIES);
   };
 
   const handleBackToLevels = () => {
     setSelectedLevel(null);
     setSelectedStage(null);
+    setCompletedStage(null);
     setViewMode(ViewMode.LEVELS);
   };
 
   const handleBackToStages = () => {
+    // Don't clear completedStage when going back to stages
+    // so the animation can play
     setSelectedStage(null);
     setViewMode(ViewMode.STAGES);
   };
@@ -172,6 +180,20 @@ export default function Index() {
   }) => {
     // Save the stats for display in the completion screen
     setQuizStats(stats);
+    
+    // Calculate star count
+    let stars = 0;
+    if (percentage >= 90) stars = 3;
+    else if (percentage >= 70) stars = 2;
+    else if (percentage >= 50) stars = 1;
+    
+    // Save completed stage for animation when returning to stages
+    if (selectedStage) {
+      setCompletedStage({
+        stageId: selectedStage.id,
+        stars: stars
+      });
+    }
     
     // Set the view mode to show completion screen
     setViewMode(ViewMode.STAGE_COMPLETE);
@@ -256,6 +278,7 @@ export default function Index() {
           onStageSelect={handleStageSelect}
           onBackToLevels={handleBackToLevels}
           levelId={selectedLevel}
+          completedStage={completedStage}
         />
       )}
       

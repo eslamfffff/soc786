@@ -64,6 +64,14 @@ export const saveStageCompletion = (categoryId: string, stageId: string, complet
     
   progress.stageCompletion[categoryId][stageId] = percentage;
   saveProgress(progress);
+  
+  // Return star count for animations
+  let stars = 0;
+  if (percentage >= 90) stars = 3;
+  else if (percentage >= 70) stars = 2;
+  else if (percentage >= 50) stars = 1;
+  
+  return { completed, percentage, stars };
 };
 
 // Function to check if a level is unlocked
