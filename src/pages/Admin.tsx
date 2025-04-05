@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, Plus } from "lucide-react";
@@ -25,7 +24,6 @@ import { Separator } from "@/components/ui/separator";
 import categories from "@/data/categories";
 import { STAGES } from "@/pages/Index";
 
-// Create a schema for single question
 const QuestionSchema = z.object({
   question: z.string().min(3, { message: "يجب أن يكون السؤال أكثر من 3 أحرف" }),
   option1: z.string().min(1, { message: "يجب إدخال الخيار الأول" }),
@@ -39,7 +37,6 @@ const QuestionSchema = z.object({
   explanation: z.string().optional(),
 });
 
-// Create a schema for JSON upload
 const QuestionUploadSchema = z.object({
   questionsJson: z.string()
     .min(1, { message: "يجب إدخال الأسئلة" })
@@ -52,7 +49,6 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("single");
   const [availableStages, setAvailableStages] = useState<Stage[]>([]);
   
-  // Create forms
   const singleQuestionForm = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
@@ -76,7 +72,6 @@ export default function Admin() {
     }
   });
 
-  // Watch for category and level changes to update available stages
   const selectedCategory = singleQuestionForm.watch("category");
   const selectedLevel = singleQuestionForm.watch("level");
   
@@ -86,7 +81,6 @@ export default function Admin() {
         stage => stage.id.startsWith(selectedLevel)
       );
       setAvailableStages(filteredStages);
-      // Reset stage selection when category or level changes
       singleQuestionForm.setValue("stageId", "");
     } else {
       setAvailableStages([]);
@@ -95,19 +89,17 @@ export default function Admin() {
   
   const handleAddQuestion = async (values: z.infer<typeof QuestionSchema>) => {
     try {
-      // Map form values to Question format
       const newQuestion: Question = {
-        id: Date.now(), // Generate unique ID based on timestamp
+        id: Date.now(),
         question: values.question,
         options: [values.option1, values.option2, values.option3, values.option4],
-        correctAnswer: parseInt(values.correctAnswer) - 1, // Convert to zero-based index
+        correctAnswer: parseInt(values.correctAnswer) - 1,
         category: values.category,
         level: values.level,
         stageId: values.stageId || undefined,
         explanation: values.explanation || undefined,
       };
       
-      // Load existing questions or create empty array
       const existingQuestions = localStorage.getItem('uploadedQuestions');
       const allQuestions = existingQuestions 
         ? [...JSON.parse(existingQuestions), newQuestion]
@@ -120,7 +112,6 @@ export default function Admin() {
         description: "تم إضافة السؤال الجديد إلى قاعدة البيانات",
       });
       
-      // Reset the form
       singleQuestionForm.reset();
     } catch (error) {
       toast({
@@ -135,14 +126,12 @@ export default function Admin() {
     setIsUploading(true);
     
     try {
-      // Parse JSON
       const questions = JSON.parse(values.questionsJson) as Question[];
       
       if (!Array.isArray(questions)) {
         throw new Error("يجب أن تكون الأسئلة على شكل مصفوفة");
       }
       
-      // Validate each question has the required fields
       const requiredFields = ["id", "question", "options", "correctAnswer", "category", "level"];
       
       for (const question of questions) {
@@ -157,7 +146,6 @@ export default function Admin() {
         }
       }
       
-      // Save questions to localStorage for persistence
       const existingQuestions = localStorage.getItem('uploadedQuestions');
       const allQuestions = existingQuestions 
         ? [...JSON.parse(existingQuestions), ...questions]
@@ -170,7 +158,6 @@ export default function Admin() {
         description: `تم إضافة ${questions.length} سؤال جديد`,
       });
       
-      // Reset the form
       jsonUploadForm.reset();
     } catch (error) {
       toast({
@@ -210,7 +197,6 @@ export default function Admin() {
               
               <Form {...singleQuestionForm}>
                 <form onSubmit={singleQuestionForm.handleSubmit(handleAddQuestion)} className="space-y-6">
-                  {/* السؤال */}
                   <FormField
                     control={singleQuestionForm.control}
                     name="question"
@@ -230,7 +216,6 @@ export default function Admin() {
                     )}
                   />
                   
-                  {/* الخيارات */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={singleQuestionForm.control}
@@ -289,7 +274,6 @@ export default function Admin() {
                     />
                   </div>
                   
-                  {/* الإجابة الصحيحة */}
                   <FormField
                     control={singleQuestionForm.control}
                     name="correctAnswer"
@@ -317,7 +301,6 @@ export default function Admin() {
                     )}
                   />
                   
-                  {/* التصنيف والمستوى والمرحلة */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={singleQuestionForm.control}
@@ -389,7 +372,7 @@ export default function Admin() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">بدون تعيين مرحلة</SelectItem>
+                              <SelectItem value="none">بدون تعيين مرحلة</SelectItem>
                               {availableStages.map(stage => (
                                 <SelectItem key={stage.id} value={stage.id}>
                                   {stage.title} (مرحلة {stage.order})
@@ -403,7 +386,6 @@ export default function Admin() {
                     />
                   </div>
                   
-                  {/* الشرح (اختياري) */}
                   <FormField
                     control={singleQuestionForm.control}
                     name="explanation"
