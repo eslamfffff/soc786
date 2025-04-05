@@ -146,8 +146,8 @@ const categories: Category[] = [
     name: "التاريخ",
     icon: "📜",
     description: "اختبر معلوماتك في التاريخ العالمي والعربي!",
-    backgroundColor: "bg-amber-50",
-    darkBackgroundColor: "bg-amber-900/20",
+    backgroundColor: "history-bg-light",
+    darkBackgroundColor: "history-bg-dark",
     levels: [
       {
         id: "beginner",
@@ -166,7 +166,7 @@ const categories: Category[] = [
         icon: "🥈",
         color: "bg-blue-100 dark:bg-blue-900/30",
         darkColor: "dark:bg-blue-900/30",
-        questionCount: 0,
+        questionCount: 5,
         isLocked: true
       },
       {
@@ -176,7 +176,7 @@ const categories: Category[] = [
         icon: "🥇",
         color: "bg-red-100 dark:bg-red-900/30",
         darkColor: "dark:bg-red-900/30",
-        questionCount: 0,
+        questionCount: 3,
         isLocked: true
       }
     ]
@@ -186,8 +186,8 @@ const categories: Category[] = [
     name: "الجغرافيا",
     icon: "🌍",
     description: "اختبر معلوماتك في جغرافيا العالم!",
-    backgroundColor: "bg-emerald-50",
-    darkBackgroundColor: "bg-emerald-900/20",
+    backgroundColor: "geography-bg-light",
+    darkBackgroundColor: "geography-bg-dark",
     levels: [
       {
         id: "beginner",
@@ -206,7 +206,7 @@ const categories: Category[] = [
         icon: "🥈",
         color: "bg-blue-100 dark:bg-blue-900/30",
         darkColor: "dark:bg-blue-900/30",
-        questionCount: 0,
+        questionCount: 5,
         isLocked: true
       },
       {
@@ -216,7 +216,7 @@ const categories: Category[] = [
         icon: "🥇",
         color: "bg-red-100 dark:bg-red-900/30",
         darkColor: "dark:bg-red-900/30",
-        questionCount: 0,
+        questionCount: 3,
         isLocked: true
       }
     ]

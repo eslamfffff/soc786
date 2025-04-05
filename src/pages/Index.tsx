@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { getQuestionsByCategoryAndLevel } from "@/data/questions";
 import categories from "@/data/categories";
@@ -60,6 +61,16 @@ const STAGES: Record<string, Stage[]> = {
     ...generateStages('advanced')
   ],
   "science": [
+    ...generateStages('beginner'),
+    ...generateStages('intermediate'),
+    ...generateStages('advanced')
+  ],
+  "history": [
+    ...generateStages('beginner'),
+    ...generateStages('intermediate'),
+    ...generateStages('advanced')
+  ],
+  "geography": [
     ...generateStages('beginner'),
     ...generateStages('intermediate'),
     ...generateStages('advanced')

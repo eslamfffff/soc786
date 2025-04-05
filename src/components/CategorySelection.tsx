@@ -68,12 +68,6 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
           كل جولة تحتوي على 10 أسئلة متنوعة. جاوب بشكل صحيح واحصل على أعلى النقاط!
         </p>
       </div>
-
-      <footer className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700 text-center">
-        <p className="text-slate-600 dark:text-slate-400 text-sm">
-          Developed by Islam Farid Ahmed
-        </p>
-      </footer>
     </div>
   );
 };
