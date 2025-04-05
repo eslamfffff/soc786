@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, Plus } from "lucide-react";
@@ -364,7 +365,7 @@ export default function Admin() {
                           <FormLabel>المرحلة</FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value}
+                            value={field.value || "none"}
                           >
                             <FormControl>
                               <SelectTrigger>
