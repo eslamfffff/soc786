@@ -9,7 +9,8 @@ const intermediateHistoryQuestions: Question[] = [
     correctAnswer: 1,
     category: "history",
     level: "intermediate",
-    difficulty: 2.0
+    difficulty: 2.0,
+    stageId: "intermediate-1"
   },
   {
     id: 1012,
@@ -18,7 +19,8 @@ const intermediateHistoryQuestions: Question[] = [
     correctAnswer: 0,
     category: "history",
     level: "intermediate",
-    difficulty: 2.1
+    difficulty: 2.1,
+    stageId: "intermediate-2"
   },
   {
     id: 1013,
@@ -27,7 +29,8 @@ const intermediateHistoryQuestions: Question[] = [
     correctAnswer: 2,
     category: "history",
     level: "intermediate",
-    difficulty: 1.9
+    difficulty: 1.9,
+    stageId: "intermediate-3"
   },
   {
     id: 1014,
@@ -36,7 +39,8 @@ const intermediateHistoryQuestions: Question[] = [
     correctAnswer: 2,
     category: "history",
     level: "intermediate",
-    difficulty: 2.3
+    difficulty: 2.3,
+    stageId: "intermediate-4"
   },
   {
     id: 1015,
@@ -45,7 +49,8 @@ const intermediateHistoryQuestions: Question[] = [
     correctAnswer: 2,
     category: "history",
     level: "intermediate",
-    difficulty: 2.2
+    difficulty: 2.2,
+    stageId: "intermediate-5"
   }
 ];
 

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,12 @@ import {
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Question } from "@/data/questions/types";
+import { Question, Stage } from "@/data/questions/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import categories from "@/data/categories";
+import { STAGES } from "@/pages/Index";
 
 // Create a schema for single question
 const QuestionSchema = z.object({
@@ -34,6 +35,7 @@ const QuestionSchema = z.object({
   correctAnswer: z.string().min(1, { message: "يجب تحديد الإجابة الصحيحة" }),
   category: z.string().min(1, { message: "يجب اختيار التصنيف" }),
   level: z.string().min(1, { message: "يجب اختيار المستوى" }),
+  stageId: z.string().optional(),
   explanation: z.string().optional(),
 });
 
@@ -48,6 +50,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("single");
+  const [availableStages, setAvailableStages] = useState<Stage[]>([]);
   
   // Create forms
   const singleQuestionForm = useForm<z.infer<typeof QuestionSchema>>({
@@ -61,6 +64,7 @@ export default function Admin() {
       correctAnswer: "1",
       category: "football",
       level: "beginner",
+      stageId: "",
       explanation: "",
     }
   });
@@ -71,6 +75,23 @@ export default function Admin() {
       questionsJson: ""
     }
   });
+
+  // Watch for category and level changes to update available stages
+  const selectedCategory = singleQuestionForm.watch("category");
+  const selectedLevel = singleQuestionForm.watch("level");
+  
+  useEffect(() => {
+    if (selectedCategory && selectedLevel && STAGES[selectedCategory]) {
+      const filteredStages = STAGES[selectedCategory].filter(
+        stage => stage.id.startsWith(selectedLevel)
+      );
+      setAvailableStages(filteredStages);
+      // Reset stage selection when category or level changes
+      singleQuestionForm.setValue("stageId", "");
+    } else {
+      setAvailableStages([]);
+    }
+  }, [selectedCategory, selectedLevel, singleQuestionForm]);
   
   const handleAddQuestion = async (values: z.infer<typeof QuestionSchema>) => {
     try {
@@ -82,6 +103,7 @@ export default function Admin() {
         correctAnswer: parseInt(values.correctAnswer) - 1, // Convert to zero-based index
         category: values.category,
         level: values.level,
+        stageId: values.stageId || undefined,
         explanation: values.explanation || undefined,
       };
       
@@ -295,8 +317,8 @@ export default function Admin() {
                     )}
                   />
                   
-                  {/* التصنيف والمستوى */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* التصنيف والمستوى والمرحلة */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={singleQuestionForm.control}
                       name="category"
@@ -344,6 +366,35 @@ export default function Admin() {
                               <SelectItem value="beginner">مبتدئ</SelectItem>
                               <SelectItem value="intermediate">متوسط</SelectItem>
                               <SelectItem value="advanced">متقدم</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={singleQuestionForm.control}
+                      name="stageId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>المرحلة</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر المرحلة (اختياري)" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="">بدون تعيين مرحلة</SelectItem>
+                              {availableStages.map(stage => (
+                                <SelectItem key={stage.id} value={stage.id}>
+                                  {stage.title} (مرحلة {stage.order})
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -433,6 +484,7 @@ export default function Admin() {
     "correctAnswer": 1,
     "category": "football",
     "level": "intermediate",
+    "stageId": "intermediate-3",
     "explanation": "كيليان مبابي كان هداف كأس العالم 2022 برصيد 8 أهداف"
   }
 ]`}

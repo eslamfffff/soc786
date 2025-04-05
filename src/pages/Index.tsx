@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { getQuestionsByCategoryAndLevel } from "@/data/questions";
 import categories from "@/data/categories";
@@ -49,7 +48,7 @@ const generateStages = (level: string): Stage[] => {
   return stages;
 };
 
-const STAGES: Record<string, Stage[]> = {
+export const STAGES: Record<string, Stage[]> = {
   "football": [
     ...generateStages('beginner'),
     ...generateStages('intermediate'),
