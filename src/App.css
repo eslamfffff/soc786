@@ -59,14 +59,14 @@
 /* Category-specific backgrounds */
 .islam-bg-light {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(240, 240, 240, 0.8)),
-              url('/lovable-uploads/ec8cd495-3af6-42fc-b3e6-9ded02bc9945.png') center/cover no-repeat;
+              url('/lovable-uploads/f2608b3b-a1de-4949-992d-0ac74ac87a55.png') center/cover no-repeat;
   background-blend-mode: overlay;
   background-attachment: fixed;
 }
 
 .islam-bg-dark {
   background: linear-gradient(135deg, rgba(30, 30, 40, 0.7), rgba(20, 20, 30, 0.8)),
-              url('/lovable-uploads/ec8cd495-3af6-42fc-b3e6-9ded02bc9945.png') center/cover no-repeat;
+              url('/lovable-uploads/f2608b3b-a1de-4949-992d-0ac74ac87a55.png') center/cover no-repeat;
   background-blend-mode: overlay;
   background-attachment: fixed;
 }

@@ -59,7 +59,7 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
         };
       case 'islam':
         return {
-          backgroundImage: `url('/islam-bg.png')`,
+          backgroundImage: `url('/lovable-uploads/f2608b3b-a1de-4949-992d-0ac74ac87a55.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundBlendMode: 'soft-light'
