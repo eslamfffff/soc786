@@ -151,7 +151,11 @@ export default {
 				'gradient-green': 'linear-gradient(90deg, hsla(139, 70%, 75%, 1) 0%, hsla(63, 90%, 76%, 1) 100%)',
 				'gradient-gold': 'linear-gradient(135deg, #ffd700 0%, #ffcc33 100%)',
 				'gradient-red': 'linear-gradient(135deg, #ff4e50 0%, #f9d423 100%)',
-				'gradient-gray': 'linear-gradient(135deg, #808080 0%, #a9a9a9 100%)'
+				'gradient-gray': 'linear-gradient(135deg, #808080 0%, #a9a9a9 100%)',
+				'history-bg-light': 'linear-gradient(135deg, #ffecc7 0%, #d0b978 100%)',
+				'history-bg-dark': 'linear-gradient(135deg, #3d3114 0%, #5e4a1c 100%)',
+				'geography-bg-light': 'linear-gradient(135deg, #e0f7fa 0%, #80cbc4 100%)',
+				'geography-bg-dark': 'linear-gradient(135deg, #0d3331 0%, #164e4a 100%)'
 			}
 		}
 	},

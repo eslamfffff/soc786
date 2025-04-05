@@ -3,12 +3,16 @@ import { Question } from './types';
 import footballQuestions from './football';
 import islamicQuestions from './islam';
 import scienceQuestions from './science';
+import historyQuestions from './history';
+import geographyQuestions from './geography';
 
 // Combine all questions into a single array
 const questions: Question[] = [
   ...footballQuestions,
   ...islamicQuestions,
-  ...scienceQuestions
+  ...scienceQuestions,
+  ...historyQuestions,
+  ...geographyQuestions
 ];
 
 // Get questions by category

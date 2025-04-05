@@ -140,6 +140,86 @@ const categories: Category[] = [
         isLocked: true
       }
     ]
+  },
+  {
+    id: "history",
+    name: "التاريخ",
+    icon: "📜",
+    description: "اختبر معلوماتك في التاريخ العالمي والعربي!",
+    backgroundColor: "bg-amber-50",
+    darkBackgroundColor: "bg-amber-900/20",
+    levels: [
+      {
+        id: "beginner",
+        name: "المبتدئ",
+        description: "أسئلة تاريخية سهلة للمبتدئين",
+        icon: "🥉",
+        color: "bg-green-100 dark:bg-green-900/30",
+        darkColor: "dark:bg-green-900/30",
+        questionCount: 10,
+        isLocked: false
+      },
+      {
+        id: "intermediate",
+        name: "المتوسط",
+        description: "أسئلة تاريخية متوسطة الصعوبة",
+        icon: "🥈",
+        color: "bg-blue-100 dark:bg-blue-900/30",
+        darkColor: "dark:bg-blue-900/30",
+        questionCount: 0,
+        isLocked: true
+      },
+      {
+        id: "advanced",
+        name: "المتقدم",
+        description: "أسئلة تاريخية متقدمة للخبراء",
+        icon: "🥇",
+        color: "bg-red-100 dark:bg-red-900/30",
+        darkColor: "dark:bg-red-900/30",
+        questionCount: 0,
+        isLocked: true
+      }
+    ]
+  },
+  {
+    id: "geography",
+    name: "الجغرافيا",
+    icon: "🌍",
+    description: "اختبر معلوماتك في جغرافيا العالم!",
+    backgroundColor: "bg-emerald-50",
+    darkBackgroundColor: "bg-emerald-900/20",
+    levels: [
+      {
+        id: "beginner",
+        name: "المبتدئ",
+        description: "أسئلة جغرافية سهلة للمبتدئين",
+        icon: "🥉",
+        color: "bg-green-100 dark:bg-green-900/30",
+        darkColor: "dark:bg-green-900/30",
+        questionCount: 10,
+        isLocked: false
+      },
+      {
+        id: "intermediate",
+        name: "المتوسط",
+        description: "أسئلة جغرافية متوسطة الصعوبة",
+        icon: "🥈",
+        color: "bg-blue-100 dark:bg-blue-900/30",
+        darkColor: "dark:bg-blue-900/30",
+        questionCount: 0,
+        isLocked: true
+      },
+      {
+        id: "advanced",
+        name: "المتقدم",
+        description: "أسئلة جغرافية متقدمة للخبراء",
+        icon: "🥇",
+        color: "bg-red-100 dark:bg-red-900/30",
+        darkColor: "dark:bg-red-900/30",
+        questionCount: 0,
+        isLocked: true
+      }
+    ]
   }
 ];
 
