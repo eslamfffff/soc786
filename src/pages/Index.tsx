@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { getQuestionsByCategoryAndLevel } from "@/data/questions";
+import { getQuestionsByCategoryAndLevel, getQuestionsByStageId } from "@/data/questions";
 import categories from "@/data/categories";
 import QuizCard from "@/components/QuizCard";
 import CategorySelection from "@/components/CategorySelection";
 import LevelSelection from "@/components/LevelSelection";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
-import { loadProgress, isLevelUnlocked, getUniqueQuestions } from "@/utils/progressUtils";
+import { loadProgress, isLevelUnlocked, getQuestionsByStage } from "@/utils/progressUtils";
 import { useToast } from "@/hooks/use-toast";
 import StageSelection from "@/components/StageSelection";
 import StageQuiz from "@/components/StageQuiz";
@@ -152,17 +151,9 @@ export default function Index() {
     
     const allLevelQuestions = getQuestionsByCategoryAndLevel(selectedCategory, selectedLevel);
     
-    const questionsPerStage = 10;
+    const stageQuestions = getQuestionsByStage(allLevelQuestions, selectedCategory, stageId);
     
-    const uniqueQuestions = getUniqueQuestions(
-      allLevelQuestions,
-      selectedCategory,
-      selectedLevel,
-      questionsPerStage,
-      stageId
-    );
-    
-    setCurrentQuestions(uniqueQuestions);
+    setCurrentQuestions(stageQuestions);
   };
 
   const handleBackToCategories = () => {

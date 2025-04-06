@@ -8,7 +8,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["Au", "Ag", "Fe", "Zn"],
     correctAnswer: 0,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-1"
   },
   {
     id: 2,
@@ -16,7 +17,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["المجرة المثلثية", "مجرة أندروميدا", "مجرة العين السوداء", "مجرة العجلة"],
     correctAnswer: 1,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-2"
   },
   {
     id: 3,
@@ -24,7 +26,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["الكبد", "الدماغ", "القلب", "الجلد"],
     correctAnswer: 3,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-3"
   },
   {
     id: 4,
@@ -32,7 +35,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["الزهرة", "المريخ", "الأرض", "عطارد"],
     correctAnswer: 3,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-4"
   },
   {
     id: 5,
@@ -40,7 +44,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["واط", "جول", "نيوتن", "أمبير"],
     correctAnswer: 2,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-5"
   },
   {
     id: 6,
@@ -48,7 +53,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["ألبرت أينشتاين", "إسحاق نيوتن", "غاليليو غاليلي", "نيلز بور"],
     correctAnswer: 1,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-6"
   },
   {
     id: 7,
@@ -56,7 +62,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["CO2", "H2O", "O2", "NaCl"],
     correctAnswer: 1,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-7"
   },
   {
     id: 8,
@@ -64,7 +71,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["الأكسجين", "الكربون", "الهيدروجين", "النيتروجين"],
     correctAnswer: 2,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-8"
   },
   {
     id: 9,
@@ -72,7 +80,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["300,000 كم/ثانية", "150,000 كم/ثانية", "200,000 كم/ثانية", "250,000 كم/ثانية"],
     correctAnswer: 0,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-9"
   },
   {
     id: 10,
@@ -80,7 +89,8 @@ const beginnerScienceQuestions: Question[] = [
     options: ["علم النبات", "علم الأحياء", "علم الحيوان", "علم البيئة"],
     correctAnswer: 2,
     category: "science",
-    level: "beginner"
+    level: "beginner",
+    stageId: "beginner-10"
   }
 ];
 

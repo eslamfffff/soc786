@@ -9,7 +9,8 @@ const advancedGeographyQuestions: Question[] = [
     correctAnswer: 0,
     category: "geography",
     level: "advanced",
-    difficulty: 2.6
+    difficulty: 2.6,
+    stageId: "advanced-1"
   },
   {
     id: 2017,
@@ -18,7 +19,8 @@ const advancedGeographyQuestions: Question[] = [
     correctAnswer: 1,
     category: "geography",
     level: "advanced",
-    difficulty: 3.0
+    difficulty: 3.0,
+    stageId: "advanced-2"
   },
   {
     id: 2018,
@@ -27,7 +29,8 @@ const advancedGeographyQuestions: Question[] = [
     correctAnswer: 3,
     category: "geography",
     level: "advanced",
-    difficulty: 2.9
+    difficulty: 2.9,
+    stageId: "advanced-3"
   }
 ];
 

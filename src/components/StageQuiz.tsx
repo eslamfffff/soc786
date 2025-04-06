@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import AnswerOption from './AnswerOption';
 import Timer from './Timer';
@@ -46,7 +45,6 @@ const StageQuiz: React.FC<StageQuizProps> = ({
   const [hasError, setHasError] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
 
-  // Get question time based on level
   const getQuestionTime = (level?: string) => {
     if (!level) return 15; // default
     switch (level) {
@@ -62,7 +60,6 @@ const StageQuiz: React.FC<StageQuizProps> = ({
       setIsLoading(true);
       setHasError(false);
       
-      // Simulate trying to load questions
       const timer = setTimeout(() => {
         if (questions.length === 0) {
           setHasError(true);
@@ -81,23 +78,21 @@ const StageQuiz: React.FC<StageQuizProps> = ({
       setIsLoading(false);
       setHasError(false);
       
-      // Set timer based on difficulty level
       const questionTime = getQuestionTime(stage.level);
       setTimeLeft(questionTime);
+      
+      console.log(`Loaded ${questions.length} questions for stage ${stage.id}`);
     }
-  }, [questions, stage.level, toast]);
+  }, [questions, stage.level, toast, stage.id]);
 
-  // Get the current question safely
   const question = questions.length > 0 && currentQuestion < questions.length 
     ? questions[currentQuestion] 
     : null;
     
   const category = categories.find(cat => cat.id === categoryId);
   
-  // Calculate time per question based on level
   const QUESTION_TIME = getQuestionTime(stage.level);
 
-  // Memoize handleTimeUp to prevent unnecessary re-renders
   const handleTimeUp = useCallback(() => {
     if (selectedAnswer === null && question) {
       setIsTimerActive(false);
@@ -112,14 +107,12 @@ const StageQuiz: React.FC<StageQuizProps> = ({
     setSelectedAnswer(index);
     setIsTimerActive(false);
     
-    // Calculate score based on remaining time and level
     const isCorrect = index === question.correctAnswer;
     
     if (isCorrect) {
       setCorrectAnswers(prev => prev + 1);
     }
 
-    // Base points by difficulty level
     let basePoints = 100; // default
     if (stage.level === 'medium') basePoints = 150;
     if (stage.level === 'hard') basePoints = 200;
@@ -130,10 +123,8 @@ const StageQuiz: React.FC<StageQuizProps> = ({
       setScore((prevScore) => prevScore + pointsEarned);
     }
     
-    // Reveal correct answer
     setIsRevealed(true);
     
-    // Show next button immediately for better user experience
     setShowNextButton(true);
   };
 
@@ -142,9 +133,8 @@ const StageQuiz: React.FC<StageQuizProps> = ({
     
     setTimeout(() => {
       if (currentQuestion + 1 >= questions.length) {
-        // Calculate completion percentage
         const completionPercentage = Math.round((correctAnswers / questions.length) * 100);
-        const stageCompleted = completionPercentage >= 70; // Need 70% to complete a stage
+        const stageCompleted = completionPercentage >= 70;
         
         const quizStats = {
           score,
@@ -153,14 +143,10 @@ const StageQuiz: React.FC<StageQuizProps> = ({
         };
         
         try {
-          // Save stage completion
           saveStageCompletion(categoryId, stage.id, stageCompleted, completionPercentage);
-          
-          // Pass completion status and stats back to parent
           onComplete(stageCompleted, completionPercentage, quizStats);
         } catch (error) {
           console.error("Error saving stage completion:", error);
-          // Still try to show the completion screen even if saving failed
           onComplete(stageCompleted, completionPercentage, quizStats);
         }
       } else {
@@ -230,7 +216,6 @@ const StageQuiz: React.FC<StageQuizProps> = ({
     );
   }
 
-  // If we have questions but the current question is null (safety check)
   if (!question) {
     return (
       <div className="quiz-container">

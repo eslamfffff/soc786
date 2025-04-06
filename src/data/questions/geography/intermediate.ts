@@ -9,7 +9,8 @@ const intermediateGeographyQuestions: Question[] = [
     correctAnswer: 1,
     category: "geography",
     level: "intermediate",
-    difficulty: 2.0
+    difficulty: 2.0,
+    stageId: "intermediate-1"
   },
   {
     id: 2012,
@@ -18,7 +19,8 @@ const intermediateGeographyQuestions: Question[] = [
     correctAnswer: 2,
     category: "geography",
     level: "intermediate",
-    difficulty: 2.1
+    difficulty: 2.1,
+    stageId: "intermediate-2"
   },
   {
     id: 2013,
@@ -27,7 +29,8 @@ const intermediateGeographyQuestions: Question[] = [
     correctAnswer: 3,
     category: "geography",
     level: "intermediate",
-    difficulty: 2.3
+    difficulty: 2.3,
+    stageId: "intermediate-3"
   },
   {
     id: 2014,
@@ -36,7 +39,8 @@ const intermediateGeographyQuestions: Question[] = [
     correctAnswer: 2,
     category: "geography",
     level: "intermediate",
-    difficulty: 1.9
+    difficulty: 1.9,
+    stageId: "intermediate-4"
   },
   {
     id: 2015,
@@ -45,7 +49,8 @@ const intermediateGeographyQuestions: Question[] = [
     correctAnswer: 2,
     category: "geography",
     level: "intermediate",
-    difficulty: 1.8
+    difficulty: 1.8,
+    stageId: "intermediate-5"
   }
 ];
 
