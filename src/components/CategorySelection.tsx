@@ -23,7 +23,7 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
   useEffect(() => {
     const bgImages = {
       football: '/football-bg.png',
-      islam: '/lovable-uploads/f2608b3b-a1de-4949-992d-0ac74ac87a55.png',
+      islam: '/lovable-uploads/e0c99835-dfd2-4e13-9342-5287970e42ef.png',
       science: '/science-bg.png',
       history: '/history-bg.png',
       geography: '/world-map-bg.png'
@@ -109,7 +109,8 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
               className={cn(
                 "category-card relative overflow-hidden rounded-xl border-2 cursor-pointer min-h-[280px]",
                 "dark:border-slate-700",
-                hoveredCategory === category.id ? "ring-2 ring-offset-2 ring-primary" : ""
+                hoveredCategory === category.id ? "ring-2 ring-offset-2 ring-primary" : "",
+                category.id === 'islam' ? "islamic-category" : ""
               )}
               data-category={category.id}
             >
@@ -121,11 +122,12 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
                 )}
                 style={{
                   backgroundImage: isImageLoaded ? 
-                    `url('${category.id === 'islam' ? '/lovable-uploads/f2608b3b-a1de-4949-992d-0ac74ac87a55.png' : `/${category.id}-bg.png`}')` : 
+                    `url('${category.id === 'islam' ? '/lovable-uploads/e0c99835-dfd2-4e13-9342-5287970e42ef.png' : `/${category.id}-bg.png`}')` : 
                     'none',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  opacity: 0.35
+                  opacity: category.id === 'islam' ? 0.8 : 0.35,
+                  backgroundBlendMode: 'overlay'
                 }}
                 aria-hidden="true"
               >
@@ -141,7 +143,7 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
                 className={cn(
                   "absolute inset-0 z-0",
                   category.id === 'football' ? "bg-gradient-to-br from-emerald-900/70 to-emerald-600/50" :
-                  category.id === 'islam' ? "bg-gradient-to-br from-blue-900/70 to-indigo-600/50" :
+                  category.id === 'islam' ? "bg-gradient-to-br from-slate-900/70 to-slate-700/60" :
                   category.id === 'science' ? "bg-gradient-to-br from-green-900/70 to-teal-600/50" :
                   category.id === 'history' ? "bg-gradient-to-br from-amber-900/70 to-amber-600/50" :
                   "bg-gradient-to-br from-blue-900/70 to-blue-600/50"
@@ -152,14 +154,23 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
               {/* Content Layer */}
               <div className="relative z-10 flex flex-col h-full p-6">
                 <div className="flex flex-col items-center justify-center flex-grow">
-                  <div className="text-5xl mb-3 text-center text-white">{category.icon}</div>
+                  <div className={cn(
+                    "text-5xl mb-3 text-center",
+                    category.id === 'islam' ? "text-[#D4AF37]" : "text-white"
+                  )}>{category.icon}</div>
                   
-                  <h3 className="text-center font-cairo text-2xl font-bold text-white mb-2">
+                  <h3 className={cn(
+                    "text-center font-cairo text-2xl font-bold mb-2",
+                    category.id === 'islam' ? "text-[#F5F5F5] islamic-title" : "text-white"
+                  )}>
                     {category.name}
                   </h3>
                   
                   <div className="mt-2 text-center">
-                    <p className="text-center font-cairo text-white text-opacity-90 text-lg mb-4" dir="rtl">
+                    <p className={cn(
+                      "text-center font-cairo text-lg mb-4",
+                      category.id === 'islam' ? "text-[#F5F5F5] text-opacity-90" : "text-white text-opacity-90"
+                    )} dir="rtl">
                       {category.description}
                     </p>
                   </div>
@@ -175,12 +186,15 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
                       {completionPercentage}% اكتمال
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 bg-opacity-30">
+                  <div className={cn(
+                    "w-full bg-gray-200 rounded-full h-2.5",
+                    category.id === 'islam' ? "bg-white bg-opacity-30" : "bg-opacity-30"
+                  )}>
                     <motion.div 
                       className={cn(
                         "h-2.5 rounded-full",
                         category.id === 'football' ? "bg-emerald-500" :
-                        category.id === 'islam' ? "bg-indigo-500" :
+                        category.id === 'islam' ? "bg-[#D4AF37]" :
                         category.id === 'science' ? "bg-teal-500" :
                         category.id === 'history' ? "bg-amber-500" :
                         "bg-blue-500"
