@@ -22,7 +22,7 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
   useEffect(() => {
     const bgImages = {
       football: '/football-bg.png',
-      islam: '/mosque-dark.jpg',
+      islam: '/islamic-bg-main.jpg',
       science: '/science-bg.png',
       history: '/history-bg.png',
       geography: '/world-map-bg.png'
@@ -121,7 +121,7 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
                 )}
                 style={{
                   backgroundImage: isImageLoaded ? 
-                    `url('${category.id === 'islam' ? '/mosque-dark.jpg' : `/${category.id}-bg.png`}')` : 
+                    `url('${category.id === 'islam' ? '/islamic-bg-main.jpg' : `/${category.id}-bg.png`}')` : 
                     'none',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
