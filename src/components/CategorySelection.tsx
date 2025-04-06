@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import categories, { Category } from '@/data/categories';
@@ -23,7 +22,7 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
   useEffect(() => {
     const bgImages = {
       football: '/football-bg.png',
-      islam: '/lovable-uploads/e0c99835-dfd2-4e13-9342-5287970e42ef.png',
+      islam: '/mosque-dark.jpg',
       science: '/science-bg.png',
       history: '/history-bg.png',
       geography: '/world-map-bg.png'
@@ -122,7 +121,7 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
                 )}
                 style={{
                   backgroundImage: isImageLoaded ? 
-                    `url('${category.id === 'islam' ? '/lovable-uploads/e0c99835-dfd2-4e13-9342-5287970e42ef.png' : `/${category.id}-bg.png`}')` : 
+                    `url('${category.id === 'islam' ? '/mosque-dark.jpg' : `/${category.id}-bg.png`}')` : 
                     'none',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
