@@ -1,17 +1,46 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import categories, { Category } from '@/data/categories';
 import { cn } from '@/lib/utils';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
-import { Home, Globe, MapPin, Book, GraduationCap } from 'lucide-react';
+import { Home, Globe, MapPin, Book, GraduationCap, Award } from 'lucide-react';
 import { getQuestionsByCategory } from '@/data/questions';
+import { loadProgress } from '@/utils/progressUtils';
+import { motion } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CategorySelectionProps {
   onCategorySelect: (categoryId: string) => void;
 }
 
 const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect }) => {
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const progress = loadProgress();
+  
+  // Preload background images
+  useEffect(() => {
+    const bgImages = {
+      football: '/football-bg.png',
+      islam: '/lovable-uploads/f2608b3b-a1de-4949-992d-0ac74ac87a55.png',
+      science: '/science-bg.png',
+      history: '/history-bg.png',
+      geography: '/world-map-bg.png'
+    };
+    
+    Object.entries(bgImages).forEach(([category, url]) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        setLoadedImages(prev => ({
+          ...prev,
+          [category]: true
+        }));
+      };
+    });
+  }, []);
+  
   // Function to get icon component based on category
   const getCategoryIcon = (categoryId: string) => {
     switch (categoryId) {
@@ -21,52 +50,21 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
         return <Book className="h-10 w-10 mb-2 text-amber-600" />;
       case 'science':
         return <GraduationCap className="h-10 w-10 mb-2 text-green-500" />;
+      case 'football':
+        return <Award className="h-10 w-10 mb-2 text-emerald-500" />;
       default:
         return null;
     }
   };
   
-  // Function to get background style for each category
-  const getCategoryBackground = (category: Category) => {
-    switch (category.id) {
-      case 'geography':
-        return {
-          backgroundImage: `url('/world-map-bg.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'soft-light'
-        };
-      case 'history':
-        return {
-          backgroundImage: `url('/history-bg.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'soft-light'
-        };
-      case 'science':
-        return {
-          backgroundImage: `url('/science-bg.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'soft-light'
-        };
-      case 'football':
-        return {
-          backgroundImage: `url('/football-bg.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'soft-light'
-        };
-      case 'islam':
-        return {
-          backgroundImage: `url('/lovable-uploads/f2608b3b-a1de-4949-992d-0ac74ac87a55.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'soft-light'
-        };
-      default:
-        return {};
-    }
+  // Calculate completion percentage for each category
+  const getCategoryCompletion = (categoryId: string): number => {
+    const categoryStages = progress.completedStages?.[categoryId] || {};
+    const completedCount = Object.values(categoryStages).filter(Boolean).length;
+    const totalQuestions = getQuestionsByCategory(categoryId).length;
+    const stageCount = Math.min(30, totalQuestions / 10); // Assuming 10 questions per stage
+    
+    return stageCount > 0 ? Math.round((completedCount / stageCount) * 100) : 0;
   };
 
   return (
@@ -89,41 +87,112 @@ const CategorySelection: React.FC<CategorySelectionProps> = ({ onCategorySelect 
         اختر فئة الأسئلة
       </h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => {
           const questionCount = getQuestionsByCategory(category.id).length;
+          const completionPercentage = getCategoryCompletion(category.id);
+          const isImageLoaded = loadedImages[category.id];
           
           return (
-            <Card 
+            <motion.div
               key={category.id}
-              className={cn(
-                "overflow-hidden border-2 transition-all duration-300",
-                "hover:shadow-xl hover:scale-105 cursor-pointer min-h-[200px]",
-                "dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100",
-                "relative"
-              )}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)"
+              }}
+              onMouseEnter={() => setHoveredCategory(category.id)}
+              onMouseLeave={() => setHoveredCategory(null)}
               onClick={() => onCategorySelect(category.id)}
+              className={cn(
+                "category-card relative overflow-hidden rounded-xl border-2 cursor-pointer min-h-[280px]",
+                "dark:border-slate-700",
+                hoveredCategory === category.id ? "ring-2 ring-offset-2 ring-primary" : ""
+              )}
+              data-category={category.id}
             >
+              {/* Background Image Layer */}
               <div 
-                className="absolute inset-0 opacity-20 z-0" 
-                style={getCategoryBackground(category)}
-              ></div>
-              <CardHeader className="pb-2 relative z-10">
-                <div className="flex flex-col items-center">
-                  <div className="text-5xl mb-3 text-center">{category.icon}</div>
-                  {getCategoryIcon(category.id)}
-                  <CardTitle className="text-center font-cairo text-2xl">{category.name}</CardTitle>
+                className={cn(
+                  "absolute inset-0 w-full h-full z-0 transition-all duration-300",
+                  hoveredCategory === category.id ? "scale-105 blur-[1px]" : "scale-100"
+                )}
+                style={{
+                  backgroundImage: isImageLoaded ? 
+                    `url('${category.id === 'islam' ? '/lovable-uploads/f2608b3b-a1de-4949-992d-0ac74ac87a55.png' : `/${category.id}-bg.png`}')` : 
+                    'none',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  opacity: 0.35
+                }}
+                aria-hidden="true"
+              >
+                {!isImageLoaded && (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Skeleton className="w-full h-full" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Overlay Gradient */}
+              <div 
+                className={cn(
+                  "absolute inset-0 z-0",
+                  category.id === 'football' ? "bg-gradient-to-br from-emerald-900/70 to-emerald-600/50" :
+                  category.id === 'islam' ? "bg-gradient-to-br from-blue-900/70 to-indigo-600/50" :
+                  category.id === 'science' ? "bg-gradient-to-br from-green-900/70 to-teal-600/50" :
+                  category.id === 'history' ? "bg-gradient-to-br from-amber-900/70 to-amber-600/50" :
+                  "bg-gradient-to-br from-blue-900/70 to-blue-600/50"
+                )}
+                aria-hidden="true"
+              />
+              
+              {/* Content Layer */}
+              <div className="relative z-10 flex flex-col h-full p-6">
+                <div className="flex flex-col items-center justify-center flex-grow">
+                  <div className="text-5xl mb-3 text-center text-white">{category.icon}</div>
+                  
+                  <h3 className="text-center font-cairo text-2xl font-bold text-white mb-2">
+                    {category.name}
+                  </h3>
+                  
+                  <div className="mt-2 text-center">
+                    <p className="text-center font-cairo text-white text-opacity-90 text-lg mb-4" dir="rtl">
+                      {category.description}
+                    </p>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                <CardDescription className="text-center font-cairo dark:text-slate-300 text-lg" dir="rtl">
-                  {category.description}
-                </CardDescription>
-                <div className="mt-3 text-sm font-medium text-center text-slate-600 dark:text-slate-400">
-                  {questionCount} سؤال
+                
+                {/* Progress Bar */}
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-medium text-white text-opacity-90" dir="rtl">
+                      {questionCount} سؤال
+                    </span>
+                    <span className="text-xs font-medium text-white text-opacity-90" dir="rtl">
+                      {completionPercentage}% اكتمال
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 bg-opacity-30">
+                    <motion.div 
+                      className={cn(
+                        "h-2.5 rounded-full",
+                        category.id === 'football' ? "bg-emerald-500" :
+                        category.id === 'islam' ? "bg-indigo-500" :
+                        category.id === 'science' ? "bg-teal-500" :
+                        category.id === 'history' ? "bg-amber-500" :
+                        "bg-blue-500"
+                      )}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${completionPercentage}%` }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                    />
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </motion.div>
           );
         })}
       </div>
