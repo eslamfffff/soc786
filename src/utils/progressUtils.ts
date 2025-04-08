@@ -1,4 +1,3 @@
-
 // Function to load user progress from localStorage
 export const loadProgress = () => {
   try {
@@ -128,39 +127,6 @@ export const loadUploadedQuestions = () => {
   }
 };
 
-// Get questions for a specific stage
-export const getQuestionsByStage = (allQuestions: any[], categoryId: string, stageId: string, count: number = 10) => {
-  // Filter questions specifically assigned to this stage
-  const stageQuestions = allQuestions.filter(
-    q => q.category === categoryId && q.stageId === stageId
-  );
-  
-  // Include custom uploaded questions that match the category and stage
-  const uploadedQuestions = loadUploadedQuestions().filter(
-    (q: any) => q.category === categoryId && q.stageId === stageId
-  );
-  
-  // Combine default questions with uploaded questions
-  const combinedQuestions = [
-    ...stageQuestions,
-    ...uploadedQuestions
-  ];
-  
-  if (combinedQuestions.length === 0) {
-    // Fallback for stages without explicitly assigned questions
-    return getUniqueQuestions(allQuestions, categoryId, stageId.split('-')[0], count, stageId);
-  }
-  
-  // If we don't have enough questions, duplicate some to reach the desired count
-  if (combinedQuestions.length < count) {
-    const multiplier = Math.ceil(count / combinedQuestions.length);
-    const expanded = Array(multiplier).fill(combinedQuestions).flat();
-    return expanded.slice(0, count);
-  }
-  
-  return combinedQuestions.slice(0, count);
-};
-
 // Improved function to ensure unique questions for each stage - always returning exactly 10 questions
 export const getUniqueQuestions = (
   allQuestions: any[], 
@@ -170,22 +136,6 @@ export const getUniqueQuestions = (
   stageId?: string
 ) => {
   if (allQuestions.length === 0) return [];
-  
-  // If stageId is provided, try to get questions specifically for that stage first
-  if (stageId) {
-    const stageSpecificQuestions = allQuestions.filter(
-      q => q.category === categoryId && q.stageId === stageId
-    );
-    
-    if (stageSpecificQuestions.length > 0) {
-      if (stageSpecificQuestions.length >= count) {
-        return stageSpecificQuestions.slice(0, count);
-      } else {
-        // If not enough stage-specific questions, we'll use them all and won't get duplicates
-        console.log(`Found ${stageSpecificQuestions.length} questions for stage ${stageId}, but need ${count}`);
-      }
-    }
-  }
   
   // Parse stage number from stageId
   const stageNumber = stageId ? parseInt(stageId.split('-')[1]) || 1 : 1;
@@ -201,56 +151,14 @@ export const getUniqueQuestions = (
     ...uploadedQuestions
   ];
   
-  // Step 1: Get all level-specific questions
-  const levelQuestions = combinedQuestions.filter(
+  // Filter questions for this category and level
+  const filteredQuestions = combinedQuestions.filter(
     q => q.category === categoryId && q.level === levelId
   );
   
-  if (levelQuestions.length === 0) return [];
+  if (filteredQuestions.length === 0) return [];
   
-  // Step 2: Split questions by stage
-  const questionsByStage: Record<string, any[]> = {};
-  
-  // Group questions by stage
-  levelQuestions.forEach(q => {
-    if (q.stageId) {
-      if (!questionsByStage[q.stageId]) {
-        questionsByStage[q.stageId] = [];
-      }
-      questionsByStage[q.stageId].push(q);
-    }
-  });
-  
-  // If we have explicit questions for this stage, use them
-  if (stageId && questionsByStage[stageId] && questionsByStage[stageId].length >= count) {
-    return questionsByStage[stageId].slice(0, count);
-  }
-  
-  // Step 3: If we don't have stage-specific questions, distribute level questions evenly
-  const totalStages = 10; // Assuming 10 stages per level
-  const questionsPerStage = Math.floor(levelQuestions.length / totalStages);
-  
-  if (questionsPerStage > 0 && stageId) {
-    const stageIndex = parseInt(stageId.split('-')[1]) - 1;
-    const startIdx = stageIndex * questionsPerStage;
-    const endIdx = Math.min(startIdx + questionsPerStage, levelQuestions.length);
-    
-    // If we have enough questions for this distribution method
-    if (startIdx < levelQuestions.length) {
-      const stageQuestions = levelQuestions.slice(startIdx, endIdx);
-      
-      // If we still need more questions, duplicate what we have
-      if (stageQuestions.length < count) {
-        const multiplier = Math.ceil(count / stageQuestions.length);
-        const expanded = Array(multiplier).fill(stageQuestions).flat();
-        return expanded.slice(0, count);
-      }
-      
-      return stageQuestions.slice(0, count);
-    }
-  }
-  
-  // Step 4: Deterministic but unique shuffling as last resort
+  // Create a deterministic but different shuffle for each stage using a seeded random approach
   const seedRandom = (seed: number) => {
     let state = seed;
     return () => {
@@ -259,17 +167,20 @@ export const getUniqueQuestions = (
     };
   };
   
+  // Use stage number as part of the seed for consistent but different questions per stage
+  // Multiply by different factors for different categories to ensure diversity
   let seedMultiplier = 100;
   if (categoryId === 'islam') seedMultiplier = 200;
   if (categoryId === 'science') seedMultiplier = 300;
   
+  // Add level modifier to ensure different questions across levels
   const levelModifier = levelId === 'beginner' ? 1000 : 
                         levelId === 'intermediate' ? 2000 : 3000;
   
   const random = seedRandom(stageNumber * seedMultiplier + levelModifier);
   
   // Make a copy of questions to shuffle
-  const shuffled = [...levelQuestions];
+  const shuffled = [...filteredQuestions];
   
   // Fisher-Yates shuffle with seeded random
   for (let i = shuffled.length - 1; i > 0; i--) {

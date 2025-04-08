@@ -9,8 +9,7 @@ const advancedHistoryQuestions: Question[] = [
     correctAnswer: 2,
     category: "history",
     level: "advanced",
-    difficulty: 3.0,
-    stageId: "advanced-1"
+    difficulty: 3.0
   },
   {
     id: 1017,
@@ -19,8 +18,7 @@ const advancedHistoryQuestions: Question[] = [
     correctAnswer: 0,
     category: "history",
     level: "advanced",
-    difficulty: 2.8,
-    stageId: "advanced-2"
+    difficulty: 2.8
   },
   {
     id: 1018,
@@ -29,8 +27,7 @@ const advancedHistoryQuestions: Question[] = [
     correctAnswer: 2,
     category: "history",
     level: "advanced",
-    difficulty: 2.7,
-    stageId: "advanced-3"
+    difficulty: 2.7
   }
 ];
 

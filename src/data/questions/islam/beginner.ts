@@ -8,8 +8,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["110", "114", "120", "116"],
     correctAnswer: 1,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-1"
+    level: "beginner"
   },
   {
     id: 2,
@@ -17,8 +16,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["عمر بن الخطاب", "عثمان بن عفان", "علي بن أبي طالب", "أبو بكر الصديق"],
     correctAnswer: 3,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-2"
+    level: "beginner"
   },
   {
     id: 3,
@@ -26,8 +24,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["4", "5", "6", "7"],
     correctAnswer: 1,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-3"
+    level: "beginner"
   },
   {
     id: 4,
@@ -35,8 +32,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["المدينة المنورة", "الطائف", "مكة المكرمة", "القدس"],
     correctAnswer: 2,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-4"
+    level: "beginner"
   },
   {
     id: 5,
@@ -44,8 +40,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["الفاتحة", "البقرة", "العلق", "يس"],
     correctAnswer: 2,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-5"
+    level: "beginner"
   },
   {
     id: 6,
@@ -53,8 +48,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["نوح عليه السلام", "إبراهيم عليه السلام", "موسى عليه السلام", "عيسى عليه السلام"],
     correctAnswer: 1,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-6"
+    level: "beginner"
   },
   {
     id: 7,
@@ -62,8 +56,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["2", "3", "4", "5"],
     correctAnswer: 2,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-7"
+    level: "beginner"
   },
   {
     id: 8,
@@ -71,8 +64,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["رجب", "شعبان", "رمضان", "محرم"],
     correctAnswer: 2,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-8"
+    level: "beginner"
   },
   {
     id: 9,
@@ -80,8 +72,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["إبراهيم عليه السلام", "عيسى عليه السلام", "محمد صلى الله عليه وسلم", "موسى عليه السلام"],
     correctAnswer: 2,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-9"
+    level: "beginner"
   },
   {
     id: 10,
@@ -89,8 +80,7 @@ const beginnerIslamicQuestions: Question[] = [
     options: ["مرة واحدة", "4 مرات", "7 مرات", "10 مرات"],
     correctAnswer: 1,
     category: "islam",
-    level: "beginner",
-    stageId: "beginner-10"
+    level: "beginner"
   }
 ];
 
